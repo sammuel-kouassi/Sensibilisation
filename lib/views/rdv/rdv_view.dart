@@ -56,27 +56,46 @@ class _RdvViewState extends State<RdvView> {
               const SizedBox(height: 20),
 
               // --- En-tête : Titre + Bouton Planifier ---
+              // --- En-tête : Bouton Retour + Titre + Bouton Planifier ---
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Rendez-vous',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
+                  // Bloc de gauche : Bouton retour et Titre
+                  Row(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade200),
+                        ),
+                        child: IconButton(
+                          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87, size: 18),
+                          onPressed: () {
+                            Navigator.pop(context); // Action de retour
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Rendez-vous',
+                        style: TextStyle(
+                          fontSize: 22, // Légèrement réduit pour faire de la place
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
                   ),
 
+                  // Bloc de droite : Bouton Planifier
                   ElevatedButton(
                     onPressed: () {
-
                       print("Ouvrir le formulaire de planification");
-                      // C'est ici que la magie opère !
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const ParticipantForm(), // Le nom de votre classe formulaire
+                          builder: (context) => const ParticipantForm(), // Assure-toi que l'import est correct
                         ),
                       );
                     },
@@ -88,7 +107,6 @@ class _RdvViewState extends State<RdvView> {
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     ),
-                      // ... le reste du style
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -104,9 +122,9 @@ class _RdvViewState extends State<RdvView> {
                         ),
                       ],
                     ),
-        ),
-        ],
-      ),
+                  ),
+                ],
+              ),
       const SizedBox(height: 24),// ... le contenu du bouton (Icône + Texte)
 
               // --- Liste des Rendez-vous ---

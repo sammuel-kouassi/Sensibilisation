@@ -1,14 +1,9 @@
-import 'package:cie_services/views/formulaire/prisecontact_form.dart';
 import 'package:cie_services/views/inscriptions/inscriptions_view.dart';
 import 'package:cie_services/views/param/param_view.dart';
-import 'package:cie_services/views/rdv/rdv_view.dart';
 import 'package:flutter/material.dart';
 
 import '../accueil/accueil_view.dart';
 import '../campagnes/campagnes_view.dart';
-import '../formulaire/campagne_form.dart';
-import '../formulaire/inscrt_form.dart';
-import '../formulaire/rendez-vous_form.dart';
 import '../statistiques/statistiques_view.dart';
 
 class BottomNavigationBarWidget extends StatefulWidget {
@@ -23,12 +18,7 @@ class _BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = const [
-     AccueilView(),
-     //RdvView(),
-     //InscrtForm(),
-    //ParticipantForm(),
-    //PrisedeContactForm(),
-    // CampagneForm(),
+    AccueilView(),
     CampagnesView(),
     InscriptionsView(),
     StatistiquesView(),
@@ -51,6 +41,54 @@ class _BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
     return false;
   }
 
+  // ====== MÉTHODE POUR CRÉER UN BOUTON PERSONNALISÉ ======
+  Widget _buildNavItem(int index, IconData icon, String label) {
+    final isSelected = _selectedIndex == index;
+    // Couleurs exactes
+    final color = isSelected ? const Color(0xFFFF8000) : Colors.grey.shade600;
+
+    return GestureDetector(
+      onTap: () => _onItemTapped(index),
+      behavior: HitTestBehavior.opaque, // Rend toute la zone cliquable
+      child: SizedBox(
+        width: 70, // Garde les icônes bien espacées
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: color,
+              size: 26,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 4),
+            // === LE PETIT POINT ORANGE ANIMÉ ===
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 4,
+              height: 4,
+              decoration: BoxDecoration(
+                color: isSelected ? const Color(0xFFFF8000) : Colors.transparent,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -70,81 +108,29 @@ class _BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 8,
-                offset: const Offset(0, -2),
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 16,
+                offset: const Offset(0, -4),
               ),
             ],
           ),
-          child: NavigationBar(
-            height: 70,
-            elevation: 0,
-            backgroundColor: Colors.transparent,
-            indicatorColor: const Color(0xFFFF9500).withOpacity(0.15),
-            selectedIndex: _selectedIndex,
-            onDestinationSelected: _onItemTapped,
-            labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-            destinations: [
-              NavigationDestination(
-                icon: Icon(
-                  Icons.dashboard_outlined,
-                  color: _selectedIndex == 0 ? const Color(0xFFFF9500) : Colors.grey,
-                  size: 26
-                ),
-                selectedIcon: Icon(
-                  Icons.dashboard,
-                  color: const Color(0xFFFF9500),
-                  size: 26,
-                ),
-                label: 'Accueil',
+          // === LE SAFE AREA EST LA SOLUTION AU PROBLEME D'AFFICHAGE ===
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 12, bottom: 8), // Espace intérieur
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Icônes modifiées pour correspondre parfaitement à l'image :
+                  _buildNavItem(0, Icons.space_dashboard_outlined, 'Accueil'), // Les 4 blocs
+                  _buildNavItem(1, Icons.track_changes, 'Campagnes'), // La cible / bullseye
+                  _buildNavItem(2, Icons.people_outline, 'Participants'), // Les 2 personnes
+                  _buildNavItem(3, Icons.insert_chart_outlined, 'Stats'), // Les barres de stats avec l'axe
+                  _buildNavItem(4, Icons.settings_outlined, 'Plus'), // La roue crantée
+                ],
               ),
-              NavigationDestination(
-                icon: Icon(Icons.campaign_outlined,
-                color: _selectedIndex == 1 ? const Color(0xFFFF9500) : Colors.grey,
-                size: 26,
-                ),
-                label: 'Campagnes',
-              ),
-              NavigationDestination(
-                icon: Icon(
-                  Icons.people_outline,
-                  color: _selectedIndex == 2 ? const Color(0xFFFF9500) : Colors.grey,
-                  size: 26,
-                ),
-                selectedIcon: Icon(
-                  Icons.people,
-                  color: const Color(0xFFFF9500),
-                  size: 26,
-                ),
-                label: 'Participants',
-              ),
-              NavigationDestination(
-                icon: Icon(
-                  Icons.bar_chart_outlined,
-                  color: _selectedIndex == 3 ? const Color(0xFFFF9500) : Colors.grey,
-                  size: 26,
-                ),
-                selectedIcon: Icon(
-                  Icons.bar_chart,
-                  color: const Color(0xFFFF9500),
-                  size: 26,
-                ),
-                label: 'Stats',
-              ),
-              NavigationDestination(
-                icon: Icon(
-                  Icons.settings_outlined,
-                  color: _selectedIndex == 4 ? const Color(0xFFFF9500) : Colors.grey,
-                  size: 26,
-                ),
-                selectedIcon: Icon(
-                  Icons.settings,
-                  color: const Color(0xFFFF9500),
-                  size: 26,
-                ),
-                label: 'Plus',
-              ),
-            ],
+            ),
           ),
         ),
       ),

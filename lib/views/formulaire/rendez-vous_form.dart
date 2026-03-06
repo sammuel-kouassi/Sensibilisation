@@ -125,6 +125,11 @@ class _ParticipantFormState extends State<ParticipantForm> {
     }
   }
 
+  void _onBackPressed() {
+    Navigator.pop(context);
+    debugPrint('← Retour cliqué');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -133,6 +138,7 @@ class _ParticipantFormState extends State<ParticipantForm> {
         backgroundColor: Colors.white,
         elevation: 0,
         leadingWidth: 64,
+        // Correction : On retire le onTap du Padding
         leading: Padding(
           padding: const EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
           child: Container(
@@ -142,7 +148,8 @@ class _ParticipantFormState extends State<ParticipantForm> {
             ),
             child: IconButton(
               icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87, size: 18),
-              onPressed: () => Navigator.pop(context),
+              // L'action se met ici sur le bouton :
+              onPressed: _onBackPressed,
             ),
           ),
         ),

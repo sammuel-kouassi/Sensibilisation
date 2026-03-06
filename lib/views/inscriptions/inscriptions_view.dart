@@ -1,3 +1,4 @@
+import 'package:cie_services/views/formulaire/inscrt_form.dart';
 import 'package:cie_services/views/inscriptions/widgets/participant_card.dart';
 import 'package:flutter/material.dart';
 
@@ -69,9 +70,6 @@ class _InscriptionsViewState extends State<InscriptionsView> {
     },
   ];
 
-  void _onAddParticipantPressed() {
-    debugPrint('✅ Bouton + Ajouter cliqué - Ajouter un participant');
-  }
 
   void _onSearchChanged(String value) {
     debugPrint('🔍 Recherche: $value');
@@ -107,7 +105,8 @@ class _InscriptionsViewState extends State<InscriptionsView> {
                   ),
 
                   GestureDetector(
-                    onTap: _onAddParticipantPressed,
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const InscrtForm())),
+
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 21,
