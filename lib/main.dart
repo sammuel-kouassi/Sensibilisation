@@ -1,4 +1,6 @@
+import 'package:cie_services/views/widgets/bottomNavigationBarWidgets.dart';
 import 'package:flutter/material.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -11,9 +13,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
+      title: 'CIE Sensibilisation',
       theme: ThemeData(
-        colorScheme: .fromSeed(seedColor: Colors.orange),
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
       ),
       home: const MyHomePage(),
     );
@@ -30,8 +33,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-
-    );
+    return const BottomNavigationBarWidget();
   }
 }
