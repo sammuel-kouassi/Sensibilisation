@@ -28,7 +28,7 @@ class _ParamViewState extends State<ParamView> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // ============ HEADER PARAMÈTRES ============
+
             Container(
               color: Colors.white,
               padding: const EdgeInsets.fromLTRB(24, 20, 214, 20),
@@ -46,13 +46,12 @@ class _ParamViewState extends State<ParamView> {
                 ],
               ),
             ),
-            // ============ LIGNE DE SÉPARATION ============
+
             Container(
               height: 1,
               color: Colors.grey.withOpacity(0.2),
             ),
 
-            // ============ CARTE PROFIL UTILISATEUR ============
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
               child: GestureDetector(
@@ -77,10 +76,10 @@ class _ParamViewState extends State<ParamView> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Avatar + Infos
+
                       Row(
                         children: [
-                          // Avatar orange avec icône
+
                           Container(
                             width: 60,
                             height: 60,
@@ -97,7 +96,7 @@ class _ParamViewState extends State<ParamView> {
                             ),
                           ),
                           const SizedBox(width: 16),
-                          // Nom, email, rôle
+
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -146,14 +145,14 @@ class _ParamViewState extends State<ParamView> {
               ),
             ),
 
-            // ============ SECTION COMPTE ============
+
             const SizedBox(height: 24),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Titre "COMPTE"
+
                   Text(
                     'COMPTE',
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -165,7 +164,7 @@ class _ParamViewState extends State<ParamView> {
                   ),
                   const SizedBox(height: 12),
 
-                  // ============ CARTE COMPTE ============
+
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -184,7 +183,7 @@ class _ParamViewState extends State<ParamView> {
                     ),
                     child: Column(
                       children: [
-                        // Profil utilisateur
+
                         _SettingItemClickable(
                           icon: Icons.person_outline,
                           title: 'Profil utilisateur',
@@ -192,7 +191,7 @@ class _ParamViewState extends State<ParamView> {
                           onTap: _onProfileTap,
                           showDivider: true,
                         ),
-                        // Notifications
+
                         _SettingItemToggle(
                           icon: Icons.notifications_outlined,
                           title: 'Notifications',
@@ -208,14 +207,14 @@ class _ParamViewState extends State<ParamView> {
               ),
             ),
 
-            // ============ SECTION APPLICATION ============
+
             const SizedBox(height: 32),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Titre "APPLICATION"
+
                   Text(
                     'APPLICATION',
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -227,7 +226,7 @@ class _ParamViewState extends State<ParamView> {
                   ),
                   const SizedBox(height: 12),
 
-                  // ============ CARTE APPLICATION ============
+
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -246,7 +245,7 @@ class _ParamViewState extends State<ParamView> {
                     ),
                     child: Column(
                       children: [
-                        // Apparence
+
                         _SettingItemClickable(
                           icon: Icons.palette_outlined,
                           title: 'Apparence',
@@ -254,7 +253,7 @@ class _ParamViewState extends State<ParamView> {
                           onTap: () => debugPrint('🎨 Apparence cliqué'),
                           showDivider: true,
                         ),
-                        // Données & confidentialité
+
                         _SettingItemClickable(
                           icon: Icons.storage_outlined,
                           title: 'Données & confidentialité',
@@ -277,14 +276,14 @@ class _ParamViewState extends State<ParamView> {
               ),
             ),
 
-            // ============ SECTION INFORMATIONS ============
+
             const SizedBox(height: 32),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Titre "INFORMATIONS"
+
                   Text(
                     'INFORMATIONS',
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -296,7 +295,7 @@ class _ParamViewState extends State<ParamView> {
                   ),
                   const SizedBox(height: 12),
 
-                  // ============ CARTE INFORMATIONS ============
+
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -315,7 +314,7 @@ class _ParamViewState extends State<ParamView> {
                     ),
                     child: Column(
                       children: [
-                        // À propos
+
                         _SettingItemClickable(
                           icon: Icons.info_outlined,
                           title: 'À propos',
@@ -323,7 +322,7 @@ class _ParamViewState extends State<ParamView> {
                           onTap: () => debugPrint('ℹ️ À propos cliqué'),
                           showDivider: true,
                         ),
-                        // Déconnexion
+
                         _SettingItemLogout(
                           icon: Icons.logout,
                           title: 'Déconnexion',
@@ -338,7 +337,6 @@ class _ParamViewState extends State<ParamView> {
 
             const SizedBox(height: 105),
 
-            // ============ FOOTER ============
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Text(
@@ -360,9 +358,7 @@ class _ParamViewState extends State<ParamView> {
   }
 }
 
-// ============ WIDGETS RÉUTILISABLES ============
 
-/// Élément de paramètre clickable (avec flèche)
 class _SettingItemClickable extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -389,10 +385,10 @@ class _SettingItemClickable extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Avatar + Infos
+
                 Row(
                   children: [
-                    // Avatar gris
+
                     Container(
                       width: 50,
                       height: 50,
@@ -409,7 +405,7 @@ class _SettingItemClickable extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 14),
-                    // Titre + Subtitle
+
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -437,7 +433,7 @@ class _SettingItemClickable extends StatelessWidget {
                     ),
                   ],
                 ),
-                // Flèche
+
                 Icon(
                   Icons.chevron_right,
                   color: Colors.grey[400],
@@ -458,7 +454,7 @@ class _SettingItemClickable extends StatelessWidget {
   }
 }
 
-/// Élément de paramètre avec toggle
+
 class _SettingItemToggle extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -485,10 +481,10 @@ class _SettingItemToggle extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Avatar + Infos
+
               Row(
                 children: [
-                  // Avatar gris
+
                   Container(
                     width: 50,
                     height: 50,
@@ -505,7 +501,7 @@ class _SettingItemToggle extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 14),
-                  // Titre + Subtitle
+
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -533,7 +529,7 @@ class _SettingItemToggle extends StatelessWidget {
                   ),
                 ],
               ),
-              // Toggle Switch Orange
+
               Transform.scale(
                 scale: 0.85,
                 child: Switch(
@@ -559,7 +555,7 @@ class _SettingItemToggle extends StatelessWidget {
   }
 }
 
-/// Élément de paramètre logout (rouge)
+
 class _SettingItemLogout extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -580,10 +576,10 @@ class _SettingItemLogout extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Avatar + Titre
+
             Row(
               children: [
-                // Avatar rose/rouge clair
+
                 Container(
                   width: 50,
                   height: 50,
@@ -600,7 +596,7 @@ class _SettingItemLogout extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 14),
-                // Titre rouge
+
                 Text(
                   title,
                   style: Theme.of(context)
@@ -614,7 +610,7 @@ class _SettingItemLogout extends StatelessWidget {
                 ),
               ],
             ),
-            // Flèche
+
             Icon(
               Icons.chevron_right,
               color: Colors.grey[400],

@@ -1,48 +1,41 @@
 import 'package:flutter/material.dart';
 
-class QuickAccessItem extends StatelessWidget {
-  final IconData icon;
-  final Color iconColor;
-  final Color backgroundColor;
-  final String label;
-  final VoidCallback onTap;
+import '../../../models/quickAccessItem_models.dart';
 
-  const QuickAccessItem({
-    Key? key,
-    required this.icon,
-    required this.iconColor,
-    required this.backgroundColor,
-    required this.label,
-    required this.onTap,
-  }) : super(key: key);
+class QuickAccess extends StatelessWidget {
+  final QuickAccessModel quickAccessModel;
+
+  const QuickAccess({
+    super.key,
+    required this.quickAccessModel,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: quickAccessModel.onTap,
       behavior: HitTestBehavior.opaque,
       child: Column(
-        mainAxisSize: MainAxisSize.min, // S'adapte au contenu
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: backgroundColor,
+              color: quickAccessModel.backgroundColor,
               borderRadius: BorderRadius.circular(18),
             ),
             child: Center(
               child: Icon(
-                icon,
+                quickAccessModel.icon,
                 size: 28,
-                color: iconColor,
+                color: quickAccessModel.iconColor,
               ),
             ),
           ),
           const SizedBox(height: 12),
-          // ❌ ON A RETIRÉ LE SizedBox(width: 700) QUI ÉTAIT TROP GRAND
           Text(
-            label,
+            quickAccessModel.label,
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: Colors.black,

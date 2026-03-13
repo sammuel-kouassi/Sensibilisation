@@ -9,14 +9,14 @@ class CampagneForm extends StatefulWidget {
 }
 
 class _CampagneFormState extends State<CampagneForm> {
-  // ============ CONTROLLERS ============
+
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _objectifsController = TextEditingController();
   final TextEditingController _participantsController = TextEditingController();
   final TextEditingController _supervisorController = TextEditingController();
   final TextEditingController _logisticsController = TextEditingController();
 
-  // ============ VARIABLES ============
+
   String? _selectedZone;
   DateTime? _startDate;
   DateTime? _endDate;
@@ -31,7 +31,7 @@ class _CampagneFormState extends State<CampagneForm> {
     'Attécoubé',
   ];
 
-  // ============ MÉTHODES ============
+
   void _onBackPressed() {
     Navigator.pop(context);
     debugPrint('← Retour cliqué');
@@ -68,7 +68,7 @@ class _CampagneFormState extends State<CampagneForm> {
   }
 
   void _onSave() {
-    // ============ VALIDATION ============
+
     if (_nameController.text.isEmpty) {
       _showError('Veuillez entrer le nom de la campagne');
       return;
@@ -91,7 +91,7 @@ class _CampagneFormState extends State<CampagneForm> {
     }
 
     void _onSave() {
-      // ============ VALIDATION ============
+
       if (_nameController.text.isEmpty) {
         _showError('Veuillez entrer le nom de la campagne');
         return;
@@ -113,26 +113,24 @@ class _CampagneFormState extends State<CampagneForm> {
         return;
       }
 
-      // ============ CRÉATION DE L'OBJET ============
-      // On formate les données pour qu'elles correspondent exactement
-      // à ce que votre CampaignCard attend dans CampagnesView
+
       final newCampaignData = {
         'title': _nameController.text,
         'location': _selectedZone,
-        'participants': '0/${_participantsController.text} participants', // 0 au début
+        'participants': '0/${_participantsController.text} participants',
         'dates': '${DateFormat('yyyy-MM-dd').format(_startDate!)} → ${DateFormat('yyyy-MM-dd').format(_endDate!)}',
         'supervisor': _supervisorController.text.isNotEmpty ? _supervisorController.text : 'N/A',
-        'status': 'En cours', // Statut par défaut
+        'status': 'En cours',
         'statusColor': const Color(0xFFFFE4CC),
         'statusTextColor': const Color(0xFFFF9500),
         'progress': 0.0, // Progression à zéro
       };
 
-      // On ferme la page et on renvoie les données à CampagnesView
+
       Navigator.pop(context, newCampaignData);
     }
 
-    // ============ LOGS ============
+
     debugPrint('💾 Campagne créée avec succès');
     debugPrint('   - Nom: ${_nameController.text}');
     debugPrint('   - Zone: $_selectedZone');
@@ -193,7 +191,7 @@ class _CampagneFormState extends State<CampagneForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ============ SECTION INFORMATIONS ============
+
               _buildSection(
                 title: 'Informations',
                 children: [
@@ -227,11 +225,11 @@ class _CampagneFormState extends State<CampagneForm> {
 
               const SizedBox(height: 24),
 
-              // ============ SECTION PLANIFICATION ============
+
               _buildSection(
                 title: 'Planification',
                 children: [
-                  // ROW DATES - VERSION CORRIGÉE
+
                   LayoutBuilder(
                     builder: (context, constraints) {
                       return Row(
@@ -307,7 +305,7 @@ class _CampagneFormState extends State<CampagneForm> {
 
               const SizedBox(height: 24),
 
-              // ============ SECTION BESOINS LOGISTIQUES ============
+
               _buildSection(
                 title: 'Besoins logistiques',
                 children: [
@@ -322,7 +320,7 @@ class _CampagneFormState extends State<CampagneForm> {
 
               const SizedBox(height: 32),
 
-              // ============ BOUTON CRÉER LA CAMPAGNE ============
+
               GestureDetector(
                 onTap: _onSave,
                 child: Container(
@@ -361,9 +359,9 @@ class _CampagneFormState extends State<CampagneForm> {
     );
   }
 
-  // ============ WIDGETS HELPER ============
 
-  /// Widget pour construire une section
+
+
   Widget _buildSection({
     required String title,
     required List<Widget> children,
@@ -403,7 +401,6 @@ class _CampagneFormState extends State<CampagneForm> {
     );
   }
 
-  /// Widget pour construire un champ texte
   Widget _buildTextField({
     required String label,
     required TextEditingController controller,
@@ -469,7 +466,7 @@ class _CampagneFormState extends State<CampagneForm> {
     );
   }
 
-  /// Widget pour construire un dropdown
+
   Widget _buildDropdown({
     required String label,
     required String hint,
@@ -542,7 +539,7 @@ class _CampagneFormState extends State<CampagneForm> {
     );
   }
 
-  /// Widget pour construire un date picker
+
   Widget _buildDatePicker({
     required VoidCallback onTap,
     required DateTime? date,

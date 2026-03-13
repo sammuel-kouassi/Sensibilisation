@@ -8,10 +8,10 @@ class InscrtForm extends StatefulWidget {
 }
 
 class _InscrtFormState extends State<InscrtForm> {
-  // 1. Clé pour la validation du formulaire
+
   final _formKey = GlobalKey<FormState>();
 
-  // 2. Contrôleurs pour les champs texte
+
   final TextEditingController _nomController = TextEditingController();
   final TextEditingController _prenomController = TextEditingController();
   final TextEditingController _telephoneController = TextEditingController();
@@ -19,7 +19,7 @@ class _InscrtFormState extends State<InscrtForm> {
   final TextEditingController _quartierController = TextEditingController();
   final TextEditingController _campagneController = TextEditingController();
 
-  // 3. État pour les "Besoins exprimés" (sélection multiple)
+
   final List<String> _besoinsDisponibles = [
     'Nouveau compteur',
     'Changement compteur',
@@ -30,9 +30,13 @@ class _InscrtFormState extends State<InscrtForm> {
   ];
   final Set<String> _besoinsSelectionnes = {};
 
-  // 4. État pour la case à cocher de consentement
+
   bool _consentementCIE = false;
-  bool _showConsentError = false; // Pour afficher une erreur si non coché
+  bool _showConsentError = false;
+
+
+  bool _hasPhoto = false;
+  bool _hasSignature = false;
 
   @override
   void dispose() {
@@ -45,14 +49,13 @@ class _InscrtFormState extends State<InscrtForm> {
     super.dispose();
   }
 
-  // Fonction de soumission
+
   void _submitForm() {
     setState(() {
       _showConsentError = !_consentementCIE;
     });
 
     if (_formKey.currentState!.validate() && _consentementCIE) {
-      // Regroupement des données du participant
       final participantData = {
         'nom': _nomController.text,
         'prenom': _prenomController.text,
@@ -62,9 +65,11 @@ class _InscrtFormState extends State<InscrtForm> {
         'campagne': _campagneController.text,
         'besoins': _besoinsSelectionnes.toList(),
         'consentement': _consentementCIE,
+        'photo': _hasPhoto,
+        'signature': _hasSignature,
       };
 
-      // TODO: Envoyer 'participantData' à votre base de données WampServer
+
 
       print("Participant enregistré : $participantData");
 
@@ -112,7 +117,7 @@ class _InscrtFormState extends State<InscrtForm> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Nom et Prénom sur la même ligne
+
                 Row(
                   children: [
                     Expanded(
@@ -144,7 +149,7 @@ class _InscrtFormState extends State<InscrtForm> {
                   controller: _telephoneController,
                   validator: (v) => v!.isEmpty ? 'Veuillez entrer le téléphone' : null,
                 ),
-                // Localité et Quartier sur la même ligne
+
                 Row(
                   children: [
                     Expanded(
@@ -177,7 +182,7 @@ class _InscrtFormState extends State<InscrtForm> {
                 ),
                 const SizedBox(height: 12),
 
-                // Puces de sélection pour les besoins
+
                 Wrap(
                   spacing: 8.0,
                   runSpacing: 8.0,
@@ -205,15 +210,110 @@ class _InscrtFormState extends State<InscrtForm> {
                         borderRadius: BorderRadius.circular(18),
                         side: BorderSide.none,
                       ),
-                      showCheckmark: false, // Masque la coche par défaut pour coller au design
+                      showCheckmark: false,
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                     );
                   }).toList(),
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 32),
 
-                // Encadré de consentement
+
+                const Text(
+                  'Photo du participant',
+                  style: TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 12),
+                GestureDetector(
+                  onTap: () {
+                    print("Ouvrir la sélection de photo (Caméra / Galerie)");
+
+                  },
+                  child: Container(
+                    height: 120,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF5F5F5),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Colors.grey.withOpacity(0.3),
+                        width: 1.5,
+
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(Icons.camera_alt_outlined, color: Color(0xFFFF8000), size: 24),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Prendre une photo ou importer',
+                          style: TextStyle(color: Colors.black54, fontSize: 13, fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Signature électronique',
+                      style: TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.w500),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        print("Effacer la signature");
+
+                      },
+                      child: const Text(
+                        'Effacer',
+                        style: TextStyle(color: Colors.red, fontSize: 13, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  height: 160,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF9F9F9), // Un fond très légèrement gris pour délimiter
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.grey.withOpacity(0.3),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'Signez ici\n(Zone réservée pour le pad de signature)',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey, fontSize: 14, fontStyle: FontStyle.italic),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+
+
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -269,7 +369,7 @@ class _InscrtFormState extends State<InscrtForm> {
 
                 const SizedBox(height: 32),
 
-                // Bouton d'inscription
+
                 SizedBox(
                   width: double.infinity,
                   height: 56,
@@ -297,7 +397,7 @@ class _InscrtFormState extends State<InscrtForm> {
     );
   }
 
-  // Widget utilitaire pour les champs de texte
+
   Widget _buildInputGroup({
     required String label,
     required String hint,

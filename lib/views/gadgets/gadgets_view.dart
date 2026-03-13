@@ -8,10 +8,10 @@ class GadgetsView extends StatefulWidget {
 }
 
 class _GadgetsViewState extends State<GadgetsView> {
-  // ============ CONTROLLERS ============
+
   final TextEditingController _searchController = TextEditingController();
 
-  // ============ DATA ============
+
   final List<Map<String, dynamic>> _allGadgets = [
     {
       'id': 1,
@@ -84,7 +84,7 @@ class _GadgetsViewState extends State<GadgetsView> {
     _searchController.addListener(_filterGadgets);
   }
 
-  // ============ MÉTHODES ============
+
   void _filterGadgets() {
     final query = _searchController.text.toLowerCase();
     setState(() {
@@ -103,12 +103,12 @@ class _GadgetsViewState extends State<GadgetsView> {
 
   void _onScannerPressed() {
     debugPrint('📱 Scanner QR - Lancer scan');
-    // TODO: Implémenter le scanner QR
+
   }
 
   void _onGadgetTapped(Map<String, dynamic> gadget) {
     debugPrint('📦 Gadget sélectionné: ${gadget['name']}');
-    // TODO: Ouvrir détails du gadget
+
   }
 
   double _calculateStockPercentage(int enStock, int total) {
@@ -127,7 +127,7 @@ class _GadgetsViewState extends State<GadgetsView> {
       backgroundColor: Colors.grey[50],
       body: CustomScrollView(
         slivers: [
-          // ============ APP BAR PERSONNALISÉ ============
+
           SliverAppBar(
             backgroundColor: Colors.white,
             elevation: 0,
@@ -159,7 +159,7 @@ class _GadgetsViewState extends State<GadgetsView> {
                           borderRadius: BorderRadius.circular(24),
                         ),
                         child: Row(
-                          mainAxisSize: MainAxisSize.min, // <-- CRUCIAL POUR LE BOUTON SCANNER
+                          mainAxisSize: MainAxisSize.min,
                           children: const [
                             Icon(
                               Icons.qr_code,
@@ -187,7 +187,7 @@ class _GadgetsViewState extends State<GadgetsView> {
             ),
           ),
 
-          // ============ BARRE DE RECHERCHE ============
+
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
@@ -224,7 +224,7 @@ class _GadgetsViewState extends State<GadgetsView> {
             ),
           ),
 
-          // ============ LISTE DES GADGETS ============
+
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
             sliver: SliverList(
@@ -258,11 +258,11 @@ class _GadgetsViewState extends State<GadgetsView> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // ============ HEADER: ICON + NOM + BADGE ============
+
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Icon
+
                                 Container(
                                   width: 56,
                                   height: 56,
@@ -277,7 +277,7 @@ class _GadgetsViewState extends State<GadgetsView> {
                                   ),
                                 ),
                                 const SizedBox(width: 16),
-                                // Nom + Catégorie
+
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -305,7 +305,7 @@ class _GadgetsViewState extends State<GadgetsView> {
                                     ],
                                   ),
                                 ),
-                                // Badge Status
+
                                 if (gadget['statusBadge'] != null)
                                   Container(
                                     padding: const EdgeInsets.symmetric(
@@ -341,7 +341,7 @@ class _GadgetsViewState extends State<GadgetsView> {
 
                             const SizedBox(height: 16),
 
-                            // ============ EN STOCK + DISTRIBUÉS ============
+
                             Row(
                               children: [
                                 Expanded(
@@ -416,7 +416,7 @@ class _GadgetsViewState extends State<GadgetsView> {
 
                             const SizedBox(height: 12),
 
-                            // ============ BARRE DE PROGRESS ============
+
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [

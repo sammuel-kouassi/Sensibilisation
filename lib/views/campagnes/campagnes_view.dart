@@ -58,13 +58,13 @@ class _CampagnesViewState extends State<CampagnesView> {
       ),
     );
 
-    // Si on a reçu les données d'une nouvelle campagne, on met à jour la liste
+
     if (nouvelleCampagne != null) {
       setState(() {
-        _campaigns.insert(0, nouvelleCampagne); // Ajoute en haut de la liste
+        _campaigns.insert(0, nouvelleCampagne);
       });
 
-      // Petit message de confirmation
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Campagne ajoutée avec succès !'),
@@ -108,7 +108,7 @@ class _CampagnesViewState extends State<CampagnesView> {
                   ),
 
                   GestureDetector(
-                    onTap: _onAddCampaignPressed, // Appelle la fonction de navigation
+                    onTap: _onAddCampaignPressed,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 21,

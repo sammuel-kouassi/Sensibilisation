@@ -8,10 +8,10 @@ class ParticipantForm extends StatefulWidget {
 }
 
 class _ParticipantFormState extends State<ParticipantForm> {
-  // 1. Clé globale pour identifier et valider le formulaire
+
   final _formKey = GlobalKey<FormState>();
 
-  // 2. Contrôleurs pour récupérer les valeurs des champs texte
+
   final TextEditingController _titreController = TextEditingController();
   final TextEditingController _lieuController = TextEditingController();
   final TextEditingController _contactController = TextEditingController();
@@ -19,14 +19,14 @@ class _ParticipantFormState extends State<ParticipantForm> {
   final TextEditingController _campagneController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
 
-  // Contrôleurs spécifiques pour afficher la date et l'heure sélectionnées
+
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
 
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
 
-  // Libérer la mémoire quand le widget est détruit
+
   @override
   void dispose() {
     _titreController.dispose();
@@ -40,18 +40,18 @@ class _ParticipantFormState extends State<ParticipantForm> {
     super.dispose();
   }
 
-  // Fonction pour afficher le calendrier
+
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate ?? DateTime.now(),
-      firstDate: DateTime.now(), // Empêche de choisir une date passée
+      firstDate: DateTime.now(),
       lastDate: DateTime(2030),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: Color(0xFFF97316), // Couleur orange pour le calendrier
+              primary: Color(0xFFF97316),
             ),
           ),
           child: child!,
@@ -62,13 +62,13 @@ class _ParticipantFormState extends State<ParticipantForm> {
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
-        // Formatage simple (JJ/MM/AAAA)
+
         _dateController.text = "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
       });
     }
   }
 
-  // Fonction pour afficher l'horloge
+
   Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
@@ -93,11 +93,11 @@ class _ParticipantFormState extends State<ParticipantForm> {
     }
   }
 
-  // Fonction exécutée lors du clic sur "Planifier le RDV"
+
   void _submitForm() {
-    // Valide tous les champs qui ont un 'validator'
+
     if (_formKey.currentState!.validate()) {
-      // Récupération de toutes les données prêtes à être envoyées à une API
+
       final formData = {
         'titre': _titreController.text,
         'date': _selectedDate?.toIso8601String(),
@@ -109,10 +109,10 @@ class _ParticipantFormState extends State<ParticipantForm> {
         'notes': _notesController.text,
       };
 
-      // Affiche les données dans la console (pour tester)
+
       print("Données du formulaire : $formData");
 
-      // Afficher un message de succès à l'utilisateur
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Rendez-vous planifié avec succès !'),
@@ -121,7 +121,7 @@ class _ParticipantFormState extends State<ParticipantForm> {
         ),
       );
 
-      // Ici, vous pourrez appeler votre fonction http.post() vers votre backend
+
     }
   }
 
@@ -138,7 +138,7 @@ class _ParticipantFormState extends State<ParticipantForm> {
         backgroundColor: Colors.white,
         elevation: 0,
         leadingWidth: 64,
-        // Correction : On retire le onTap du Padding
+
         leading: Padding(
           padding: const EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
           child: Container(
@@ -148,7 +148,7 @@ class _ParticipantFormState extends State<ParticipantForm> {
             ),
             child: IconButton(
               icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87, size: 18),
-              // L'action se met ici sur le bouton :
+
               onPressed: _onBackPressed,
             ),
           ),
@@ -161,7 +161,7 @@ class _ParticipantFormState extends State<ParticipantForm> {
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
-          // 3. Ajout du widget Form
+
           child: Form(
             key: _formKey,
             child: Column(
@@ -236,7 +236,7 @@ class _ParticipantFormState extends State<ParticipantForm> {
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: _submitForm, // Appelle la fonction de validation
+                    onPressed: _submitForm,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFF8000),
                       elevation: 0,
@@ -259,7 +259,7 @@ class _ParticipantFormState extends State<ParticipantForm> {
     );
   }
 
-  // Widget réutilisable mis à jour pour supporter les contrôleurs et la validation
+
   Widget _buildInputGroup({
     required String label,
     required String hint,
@@ -293,7 +293,7 @@ class _ParticipantFormState extends State<ParticipantForm> {
             maxLines: maxLines,
             keyboardType: keyboardType,
             readOnly: isDropdown,
-            onTap: onTap, // Exécute l'action (comme ouvrir le calendrier)
+            onTap: onTap,
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: const TextStyle(color: Colors.black38, fontSize: 15),
@@ -304,7 +304,7 @@ class _ParticipantFormState extends State<ParticipantForm> {
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
               ),
-              // Ajout d'une bordure rouge si le champ est invalide
+
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: Colors.red, width: 1),

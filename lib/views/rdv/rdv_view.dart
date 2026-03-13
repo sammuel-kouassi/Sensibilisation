@@ -60,7 +60,7 @@ class _RdvViewState extends State<RdvView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Bloc de gauche : Bouton retour et Titre
+
                   Row(
                     children: [
                       Container(

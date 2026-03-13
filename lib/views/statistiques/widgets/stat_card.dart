@@ -1,79 +1,55 @@
-
+import 'package:cie_services/models/carte_models.dart';
 import 'package:flutter/material.dart';
 
 class StatCard extends StatelessWidget {
-  final IconData icon;
-  final Color iconColor;
-  final String number;
-  final String label;
-
-  const StatCard({
-    required this.icon,
-    required this.iconColor,
-    required this.number,
-    required this.label,
-  });
+  final CarteModels carte;
+  const StatCard({super.key, required this.carte});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.grey.withOpacity(0.15),
-          width: 1.5,
-        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.15)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
         ],
       ),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: const Color(0xFF4CAF50),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Center(
-              child: Icon(
-                icon,
-                color: Colors.white,
-                size: 24,
-              ),
-            ),
+          Icon(
+            carte.icon,
+            color: carte.iconColor,
+            size: 32,
           ),
-          const SizedBox(height: 16),
-
+          const SizedBox(height: 12),
           Text(
-            number,
+            carte.number,
             style: const TextStyle(
-              color: Colors.black,
-              fontSize: 28,
+              fontSize: 22,
               fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
           ),
           const SizedBox(height: 8),
-
           Text(
-            label,
+            carte.label,
             style: TextStyle(
-              color: Colors.grey[600],
               fontSize: 13,
+              color: Colors.grey[600],
               fontWeight: FontWeight.w500,
             ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
     );
   }
+
 }

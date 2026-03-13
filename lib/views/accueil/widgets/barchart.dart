@@ -1,14 +1,15 @@
 
 import 'package:flutter/material.dart';
 
-class BarChart extends StatelessWidget {
-  final double height;
-  final String label;
+import '../../../models/barchart_models.dart';
 
-  const BarChart({
-    required this.height,
-    required this.label,
-  });
+
+class BarChart extends StatelessWidget {
+
+  final BarchartModels barchartModels;
+
+  const BarChart({super.key,
+   required this.barchartModels});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +18,7 @@ class BarChart extends StatelessWidget {
       children: [
         Container(
           width: 40,
-          height: height,
+          height:barchartModels.height,
           decoration: BoxDecoration(
             color: const Color(0xFFFF9500),
             borderRadius: const BorderRadius.only(
@@ -28,7 +29,7 @@ class BarChart extends StatelessWidget {
         ),
         const SizedBox(height: 5),
         Text(
-          label,
+          barchartModels.label,
           style: TextStyle(
             color: Colors.grey[600],
             fontSize: 12,

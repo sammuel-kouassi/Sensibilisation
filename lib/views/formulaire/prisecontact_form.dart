@@ -9,7 +9,7 @@ class PrisedeContactForm extends StatefulWidget {
 }
 
 class _PrisedeContactFormState extends State<PrisedeContactForm> {
-  // ============ CONTROLLERS ============
+
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _objectController = TextEditingController();
@@ -18,11 +18,11 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
   final TextEditingController _siteController = TextEditingController();
   final TextEditingController _observationsController = TextEditingController();
 
-  // ============ VARIABLES ============
+
   DateTime? _contactDate;
   String? _selectedDirection;
 
-  // ✅ CORRIGÉ: Map<String, bool> au lieu de Map<String, List<String>>
+
   late Map<String, bool> _pointsAbordables;
 
   final List<String> _directions = [
@@ -46,7 +46,7 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
     };
   }
 
-  // ============ MÉTHODES ============
+
   void _onBackPressed() {
     Navigator.pop(context);
     debugPrint('← Retour cliqué');
@@ -75,7 +75,7 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
   }
 
   void _onSave() {
-    // ============ VALIDATION ============
+
     if (_nameController.text.isEmpty) {
       _showError('Veuillez entrer un nom complet');
       return;
@@ -97,7 +97,7 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
       return;
     }
 
-    // ============ LOGS ============
+
     debugPrint('💾 Contact enregistré avec succès');
     debugPrint('   - Nom: ${_nameController.text}');
     debugPrint('   - Téléphone: ${_phoneController.text}');
@@ -167,7 +167,7 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ============ SECTION INFORMATIONS GÉNÉRALES ============
+
               _buildSection(
                 title: 'Informations générales',
                 children: [
@@ -196,7 +196,7 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
 
               const SizedBox(height: 24),
 
-              // ============ SECTION LOCALISATION ============
+
               _buildSection(
                 title: 'Localisation',
                 icon: Icons.location_on,
@@ -244,7 +244,7 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
 
               const SizedBox(height: 24),
 
-              // ============ SECTION POINTS ABORDÉS ============
+
               _buildSection(
                 title: 'Points abordés',
                 children: [
@@ -306,7 +306,7 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
 
               const SizedBox(height: 24),
 
-              // ============ SECTION SIGNATURE ============
+
               _buildSection(
                 title: 'Signature',
                 children: [
@@ -337,7 +337,7 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
 
               const SizedBox(height: 24),
 
-              // ============ SECTION OBSERVATIONS ============
+
               _buildSection(
                 title: 'Observations',
                 children: [
@@ -352,7 +352,7 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
 
               const SizedBox(height: 32),
 
-              // ============ BOUTON ENREGISTRER ============
+
               GestureDetector(
                 onTap: _onSave,
                 child: Container(
@@ -391,9 +391,9 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
     );
   }
 
-  // ============ WIDGETS HELPER ============
 
-  /// Widget pour construire une section
+
+
   Widget _buildSection({
     required String title,
     required List<Widget> children,
@@ -446,7 +446,7 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
     );
   }
 
-  /// Widget pour construire un champ texte
+
   Widget _buildTextField({
     required String label,
     required TextEditingController controller,
@@ -512,7 +512,7 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
     );
   }
 
-  /// Widget pour construire un dropdown
+
   Widget _buildDropdown({
     required String label,
     required String hint,
@@ -585,7 +585,7 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
     );
   }
 
-  /// Widget pour construire un date picker
+
   Widget _buildDateField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
