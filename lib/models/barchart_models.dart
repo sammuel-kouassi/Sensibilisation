@@ -1,5 +1,3 @@
-
-
 class BarchartModels {
   final double height;
   final String label;
@@ -7,6 +5,5 @@ class BarchartModels {
   BarchartModels({
     required this.height,
     required this.label,
-});
+  });
 }
-

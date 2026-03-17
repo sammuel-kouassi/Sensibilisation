@@ -6,32 +6,31 @@ class PeriodOption extends StatelessWidget {
   final VoidCallback onTap;
 
   const PeriodOption({
+    super.key,
     required this.title,
     required this.isSelected,
     required this.onTap,
   });
 
-
-
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: PeriodModels.onTap,
+      onTap: onTap,
       child: Container(
-        color: PeriodModels.isSelected ? const Color(0xFFFFE4CC) : Colors.transparent,
+        color: isSelected ? const Color(0xFFFFE4CC) : Colors.transparent,
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              PeriodModels.title,
+              title,
               style: TextStyle(
-                color: PeriodModels.isSelected ? const Color(0xFFFF9500) : Colors.black,
+                color: isSelected ? const Color(0xFFFF9500) : Colors.black,
                 fontSize: 14,
-                fontWeight: PeriodModels.isSelected ? FontWeight.w600 : FontWeight.w500,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               ),
             ),
-            if (PeriodModels.isSelected)
+            if (isSelected)
               const Icon(
                 Icons.check,
                 color: Color(0xFFFF9500),

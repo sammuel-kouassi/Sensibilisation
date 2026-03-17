@@ -1,5 +1,7 @@
-import 'package:cie_services/models/carte_models.dart';
 import 'package:flutter/material.dart';
+
+import '../../../models/carte_models.dart';
+
 
 class StatCard extends StatelessWidget {
   final CarteModels carte;
@@ -22,34 +24,22 @@ class StatCard extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            carte.icon,
-            color: carte.iconColor,
-            size: 32,
-          ),
+          Icon(carte.icon, color: carte.iconColor, size: 32),
           const SizedBox(height: 12),
           Text(
             carte.number,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),
           ),
           const SizedBox(height: 8),
           Text(
             carte.label,
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey[600],
-              fontWeight: FontWeight.w500,
-            ),
+            style: TextStyle(fontSize: 13, color: Colors.grey[600], fontWeight: FontWeight.w500),
             textAlign: TextAlign.center,
           ),
         ],
       ),
     );
   }
-
 }

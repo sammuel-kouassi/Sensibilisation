@@ -1,6 +1,4 @@
-
-
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class CarteModels {
   final IconData icon;
@@ -13,5 +11,5 @@ class CarteModels {
     required this.iconColor,
     required this.number,
     required this.label,
-});
+  });
 }

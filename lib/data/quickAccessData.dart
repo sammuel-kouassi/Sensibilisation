@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-
 import '../models/quickAccessItem_models.dart';
+
+// Adapte ces imports selon l'emplacement exact de tes vues
 import '../views/formulaire/campagne_form.dart';
 import '../views/formulaire/inscrt_form.dart';
 import '../views/formulaire/prisecontact_form.dart';

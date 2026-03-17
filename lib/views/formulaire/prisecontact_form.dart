@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+// Import du modèle et des widgets réutilisables
+import '../../models/prise_contact_model.dart';
+import 'widgets/custom_text_field.dart';
+import 'widgets/custom_dropdown.dart';
+import 'widgets/custom_date_picker.dart';
+import 'widgets/form_section.dart';
+
 class PrisedeContactForm extends StatefulWidget {
   const PrisedeContactForm({super.key});
 
@@ -9,19 +16,19 @@ class PrisedeContactForm extends StatefulWidget {
 }
 
 class _PrisedeContactFormState extends State<PrisedeContactForm> {
+  final _formKey = GlobalKey<FormState>(); // Ajout pour la validation standardisée
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _dateController = TextEditingController(); // Ajouté pour le CustomDatePicker
   final TextEditingController _objectController = TextEditingController();
   final TextEditingController _agencyController = TextEditingController();
   final TextEditingController _quarterController = TextEditingController();
   final TextEditingController _siteController = TextEditingController();
   final TextEditingController _observationsController = TextEditingController();
 
-
   DateTime? _contactDate;
   String? _selectedDirection;
-
 
   late Map<String, bool> _pointsAbordables;
 
@@ -46,10 +53,21 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
     };
   }
 
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    _dateController.dispose();
+    _objectController.dispose();
+    _agencyController.dispose();
+    _quarterController.dispose();
+    _siteController.dispose();
+    _observationsController.dispose();
+    super.dispose();
+  }
 
   void _onBackPressed() {
     Navigator.pop(context);
-    debugPrint('← Retour cliqué');
   }
 
   Future<void> _selectDate() async {
@@ -62,8 +80,8 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
     if (picked != null && picked != _contactDate) {
       setState(() {
         _contactDate = picked;
+        _dateController.text = DateFormat('dd/MM/yyyy').format(picked);
       });
-      debugPrint('📅 Date sélectionnée: ${DateFormat('dd/MM/yyyy').format(picked)}');
     }
   }
 
@@ -71,69 +89,38 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
     setState(() {
       _pointsAbordables[point] = !(_pointsAbordables[point] ?? false);
     });
-    debugPrint('☑️ ${_pointsAbordables[point]! ? "✓" : "○"} $point');
   }
 
   void _onSave() {
+    if (_formKey.currentState!.validate() && _selectedDirection != null) {
+      // Filtrer les points cochés
+      final checkedPoints = _pointsAbordables.entries
+          .where((e) => e.value)
+          .map((e) => e.key)
+          .toList();
 
-    if (_nameController.text.isEmpty) {
-      _showError('Veuillez entrer un nom complet');
-      return;
+      // Création du modèle
+      final newContact = PriseContactModel(
+        name: _nameController.text,
+        phone: _phoneController.text,
+        date: _dateController.text,
+        object: _objectController.text,
+        direction: _selectedDirection!,
+        agency: _agencyController.text,
+        quarter: _quarterController.text,
+        site: _siteController.text,
+        pointsAbordes: checkedPoints,
+        observations: _observationsController.text,
+      );
+
+      // On renvoie l'objet à la page précédente
+      Navigator.pop(context, newContact);
+
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Veuillez remplir tous les champs obligatoires')),
+      );
     }
-    if (_phoneController.text.isEmpty) {
-      _showError('Veuillez entrer un téléphone');
-      return;
-    }
-    if (_contactDate == null) {
-      _showError('Veuillez sélectionner une date');
-      return;
-    }
-    if (_objectController.text.isEmpty) {
-      _showError('Veuillez entrer l\'objet de la mission');
-      return;
-    }
-    if (_selectedDirection == null) {
-      _showError('Veuillez sélectionner une direction régionale');
-      return;
-    }
-
-
-    debugPrint('💾 Contact enregistré avec succès');
-    debugPrint('   - Nom: ${_nameController.text}');
-    debugPrint('   - Téléphone: ${_phoneController.text}');
-    debugPrint('   - Date: ${DateFormat('dd/MM/yyyy').format(_contactDate!)}');
-    debugPrint('   - Objet: ${_objectController.text}');
-    debugPrint('   - Direction: $_selectedDirection');
-    debugPrint('   - Agence: ${_agencyController.text}');
-    debugPrint('   - Quartier: ${_quarterController.text}');
-    debugPrint('   - Site: ${_siteController.text}');
-
-    final checkedPoints = _pointsAbordables.entries
-        .where((e) => e.value)
-        .map((e) => e.key)
-        .toList();
-    debugPrint('   - Points abordés: $checkedPoints');
-    debugPrint('   - Observations: ${_observationsController.text}');
-
-    Navigator.pop(context);
-  }
-
-  void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _phoneController.dispose();
-    _objectController.dispose();
-    _agencyController.dispose();
-    _quarterController.dispose();
-    _siteController.dispose();
-    _observationsController.dispose();
-    super.dispose();
   }
 
   @override
@@ -145,107 +132,109 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
         elevation: 0,
         leading: GestureDetector(
           onTap: _onBackPressed,
-          child: const Icon(
-            Icons.arrow_back,
-            color: Colors.black,
-            size: 28,
-          ),
+          child: const Icon(Icons.arrow_back, color: Colors.black, size: 28),
         ),
         title: const Text(
           'Prise de Contact',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 25,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold),
         ),
         centerTitle: false,
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(24),
+        child: Form(
+          key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
 
-              _buildSection(
+              // 1. Informations générales
+              FormSection(
                 title: 'Informations générales',
                 children: [
-                  _buildTextField(
+                  CustomTextField(
                     label: 'Nom complet',
-                    controller: _nameController,
                     hint: 'Nom et prénoms',
+                    controller: _nameController,
+                    isRequired: true,
+                    validator: (v) => v!.isEmpty ? 'Requis' : null,
                   ),
                   const SizedBox(height: 24),
-                  _buildTextField(
+                  CustomTextField(
                     label: 'Téléphone',
-                    controller: _phoneController,
                     hint: '+225 07 00 00 00',
+                    controller: _phoneController,
                     keyboardType: TextInputType.phone,
+                    isRequired: true,
+                    validator: (v) => v!.isEmpty ? 'Requis' : null,
                   ),
                   const SizedBox(height: 24),
-                  _buildDateField(),
+                  CustomDatePicker(
+                    label: 'Date',
+                    hint: 'Sélectionner une date',
+                    controller: _dateController,
+                    onTap: _selectDate,
+                    isRequired: true,
+                  ),
                   const SizedBox(height: 24),
-                  _buildTextField(
+                  CustomTextField(
                     label: 'Objet de la mission',
-                    controller: _objectController,
                     hint: 'Ex: Sensibilisation sur la sécurité',
+                    controller: _objectController,
+                    isRequired: true,
+                    validator: (v) => v!.isEmpty ? 'Requis' : null,
                   ),
                 ],
               ),
-
               const SizedBox(height: 24),
 
-
-              _buildSection(
+              // 2. Localisation
+              FormSection(
                 title: 'Localisation',
                 icon: Icons.location_on,
                 children: [
-                  _buildDropdown(
+                  CustomDropdown(
                     label: 'Direction régionale',
                     hint: 'Sélectionner',
                     value: _selectedDirection,
                     items: _directions,
+                    isRequired: true,
                     onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedDirection = newValue;
-                      });
-                      debugPrint('📍 Direction: $newValue');
+                      setState(() => _selectedDirection = newValue);
                     },
                   ),
                   const SizedBox(height: 24),
-                  _buildTextField(
+                  CustomTextField(
                     label: 'Agence',
-                    controller: _agencyController,
                     hint: 'Nom de l\'agence',
+                    controller: _agencyController,
                   ),
                   const SizedBox(height: 24),
                   Row(
                     children: [
                       Expanded(
-                        child: _buildTextField(
+                        child: CustomTextField(
                           label: 'Quartier',
-                          controller: _quarterController,
                           hint: 'Quartier',
+                          controller: _quarterController,
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: _buildTextField(
+                        child: CustomTextField(
                           label: 'Site',
-                          controller: _siteController,
                           hint: 'Site',
+                          controller: _siteController,
                         ),
                       ),
                     ],
                   ),
                 ],
               ),
-
               const SizedBox(height: 24),
 
-
-              _buildSection(
+              // 3. Points abordés
+              FormSection(
                 title: 'Points abordés',
                 children: [
                   Column(
@@ -261,34 +250,21 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
                                 height: 28,
                                 decoration: BoxDecoration(
                                   border: Border.all(
-                                    color: entry.value
-                                        ? const Color(0xFFFF9500)
-                                        : Colors.grey[400]!,
+                                    color: entry.value ? const Color(0xFFFF9500) : Colors.grey[400]!,
                                     width: 2,
                                   ),
                                   borderRadius: BorderRadius.circular(16),
-                                  color: entry.value
-                                      ? const Color(0xFFFF9500)
-                                      : Colors.transparent,
+                                  color: entry.value ? const Color(0xFFFF9500) : Colors.transparent,
                                 ),
                                 child: entry.value
-                                    ? const Center(
-                                  child: Icon(
-                                    Icons.check,
-                                    color: Colors.white,
-                                    size: 18,
-                                  ),
-                                )
+                                    ? const Center(child: Icon(Icons.check, color: Colors.white, size: 18))
                                     : null,
                               ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
                                   entry.key,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyLarge
-                                      ?.copyWith(
+                                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                                     fontWeight: FontWeight.w500,
                                     color: Colors.black,
                                     fontSize: 15,
@@ -303,11 +279,10 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
                   ),
                 ],
               ),
-
               const SizedBox(height: 24),
 
-
-              _buildSection(
+              // 4. Signature
+              FormSection(
                 title: 'Signature',
                 children: [
                   Container(
@@ -315,44 +290,32 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
                     height: 150,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: Colors.grey.withValues(alpha: 0.3),
-                        width: 2,
-                        style: BorderStyle.solid,
-                      ),
+                      border: Border.all(color: Colors.grey.withValues(alpha: 0.3), width: 2),
                       color: Colors.grey[50],
                     ),
                     child: Center(
-                      child: Text(
-                        'Zone de signature numérique',
-                        style: TextStyle(
-                          color: Colors.grey[400],
-                          fontSize: 16,
-                        ),
-                      ),
+                      child: Text('Zone de signature numérique', style: TextStyle(color: Colors.grey[400], fontSize: 16)),
                     ),
                   ),
                 ],
               ),
-
               const SizedBox(height: 24),
 
-
-              _buildSection(
+              // 5. Observations
+              FormSection(
                 title: 'Observations',
                 children: [
-                  _buildTextField(
-                    label: '',
-                    controller: _observationsController,
+                  CustomTextField(
+                    label: '', // Pas de label au dessus
                     hint: 'Notes et observations...',
+                    controller: _observationsController,
                     maxLines: 6,
                   ),
                 ],
               ),
-
               const SizedBox(height: 32),
 
-
+              // 6. Bouton Enregistrer
               GestureDetector(
                 onTap: _onSave,
                 child: Container(
@@ -364,282 +327,21 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [
-                      Icon(
-                        Icons.check_circle_outline,
-                        color: Colors.white,
-                        size: 24,
-                      ),
+                      Icon(Icons.check_circle_outline, color: Colors.white, size: 24),
                       SizedBox(width: 10),
                       Text(
                         'Enregistrer le contact',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                          fontSize: 16,
-                        ),
+                        style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white, fontSize: 16),
                       ),
                     ],
                   ),
                 ),
               ),
-
               const SizedBox(height: 150),
             ],
           ),
         ),
       ),
-    );
-  }
-
-
-
-
-  Widget _buildSection({
-    required String title,
-    required List<Widget> children,
-    IconData? icon,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.grey.withValues(alpha: 0.15),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              if (icon != null) ...[
-                Icon(
-                  icon,
-                  color: const Color(0xFFFF9500),
-                  size: 24,
-                ),
-                const SizedBox(width: 8),
-              ],
-              Text(
-                title,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFFFF9500),
-                  fontSize: 20,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          ...children,
-        ],
-      ),
-    );
-  }
-
-
-  Widget _buildTextField({
-    required String label,
-    required TextEditingController controller,
-    required String hint,
-    int maxLines = 1,
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (label.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Colors.black,
-                fontSize: 15,
-              ),
-            ),
-          ),
-        TextField(
-          controller: controller,
-          maxLines: maxLines,
-          keyboardType: keyboardType,
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: TextStyle(
-              color: Colors.grey[400],
-              fontSize: 15,
-            ),
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(
-                color: Colors.grey.withValues(alpha: 0.15),
-                width: 1.5,
-              ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(
-                color: Colors.grey.withValues(alpha: 0.15),
-                width: 1.5,
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: Color(0xFFFF9500),
-                width: 2,
-              ),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              vertical: 14,
-              horizontal: 16,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-
-  Widget _buildDropdown({
-    required String label,
-    required String hint,
-    required String? value,
-    required List<String> items,
-    required ValueChanged<String?> onChanged,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: Colors.black,
-            fontSize: 15,
-          ),
-        ),
-        const SizedBox(height: 10),
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: Colors.grey.withValues(alpha: 0.15),
-              width: 1.5,
-            ),
-          ),
-          child: DropdownButton<String>(
-            value: value,
-            hint: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                hint,
-                style: TextStyle(
-                  color: Colors.grey[400],
-                  fontSize: 15,
-                ),
-              ),
-            ),
-            isExpanded: true,
-            underline: const SizedBox(),
-            icon: Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: Icon(
-                Icons.keyboard_arrow_down,
-                color: Colors.grey[600],
-                size: 24,
-              ),
-            ),
-            items: items.map((String item) {
-              return DropdownMenuItem<String>(
-                value: item,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    item,
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontSize: 15,
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
-            onChanged: onChanged,
-            dropdownColor: Colors.white,
-          ),
-        ),
-      ],
-    );
-  }
-
-
-  Widget _buildDateField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Date',
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: Colors.black,
-            fontSize: 15,
-          ),
-        ),
-        const SizedBox(height: 10),
-        GestureDetector(
-          onTap: _selectDate,
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              vertical: 14,
-              horizontal: 14,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: Colors.grey.withValues(alpha: 0.15),
-                width: 1.5,
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    _contactDate != null
-                        ? DateFormat('dd/MM/yyyy').format(_contactDate!)
-                        : 'Sélectionner...',
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: _contactDate != null ? Colors.black : Colors.grey[400],
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Icon(
-                  Icons.keyboard_arrow_down,
-                  color: Colors.grey[600],
-                  size: 20,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

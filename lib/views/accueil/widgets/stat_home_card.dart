@@ -1,29 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../../models/startcard_home_models.dart';
 
-class StatCard extends StatelessWidget {
+class StatHomeCard extends StatelessWidget {
+  final StartCardHomeModels startcardModels;
 
-final StartCardHomeModels startcardModels;
-
-  const StatCard({
-    super.key, required this.startcardModels,
-  });
+  const StatHomeCard({super.key, required this.startcardModels});
 
   @override
   Widget build(BuildContext context) {
-
-    final IconData finalIcon =
-        startcardModels.icon ?? Icons.help_outline;
-
-    final Color finalColor =
-        startcardModels.iconColor ?? startcardModels.iconColor;
-
-    final String finalNumber =
-        startcardModels.number ?? startcardModels.number;
-
-    final String finalLabel =
-        startcardModels.label ?? startcardModels.label;
-
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -40,25 +24,15 @@ final StartCardHomeModels startcardModels;
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
-          Icon(finalIcon, color: finalColor, size: 28),
-
+          Icon(startcardModels.icon, color: startcardModels.iconColor, size: 28),
           const SizedBox(height: 12),
-
           Text(
-            finalNumber,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            startcardModels.number,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-
           Text(
-            finalLabel,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[600],
-            ),
+            startcardModels.label,
+            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
           ),
         ],
       ),

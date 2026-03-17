@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../models/rdv_model.dart'; // Import du modèle !
+import 'widgets/custom_text_field.dart';
+import 'widgets/custom_date_picker.dart';
 
-class ParticipantForm extends StatefulWidget {
+class ParticipantForm extends StatefulWidget { // Renommer en RdvForm serait mieux plus tard !
   const ParticipantForm({super.key});
 
   @override
@@ -8,126 +11,38 @@ class ParticipantForm extends StatefulWidget {
 }
 
 class _ParticipantFormState extends State<ParticipantForm> {
-
   final _formKey = GlobalKey<FormState>();
+  final _titreController = TextEditingController();
+  final _lieuController = TextEditingController();
+  final _contactController = TextEditingController();
+  final _campagneController = TextEditingController();
+  final _dateController = TextEditingController();
+  final _timeController = TextEditingController();
 
-
-  final TextEditingController _titreController = TextEditingController();
-  final TextEditingController _lieuController = TextEditingController();
-  final TextEditingController _contactController = TextEditingController();
-  final TextEditingController _telephoneController = TextEditingController();
-  final TextEditingController _campagneController = TextEditingController();
-  final TextEditingController _notesController = TextEditingController();
-
-
-  final TextEditingController _dateController = TextEditingController();
-  final TextEditingController _timeController = TextEditingController();
-
-  DateTime? _selectedDate;
-  TimeOfDay? _selectedTime;
-
-
-  @override
-  void dispose() {
-    _titreController.dispose();
-    _lieuController.dispose();
-    _contactController.dispose();
-    _telephoneController.dispose();
-    _campagneController.dispose();
-    _notesController.dispose();
-    _dateController.dispose();
-    _timeController.dispose();
-    super.dispose();
+  Future<void> _selectDate() async {
+    final picked = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime.now(), lastDate: DateTime(2030));
+    if (picked != null) setState(() => _dateController.text = "${picked.day}/${picked.month}/${picked.year}");
   }
 
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2030),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: Color(0xFFF97316),
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-
-        _dateController.text = "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
-      });
-    }
+  Future<void> _selectTime() async {
+    final picked = await showTimePicker(context: context, initialTime: TimeOfDay.now());
+    if (picked != null) setState(() => _timeController.text = picked.format(context));
   }
-
-
-  Future<void> _selectTime(BuildContext context) async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: _selectedTime ?? TimeOfDay.now(),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: Color(0xFFF97316),
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (picked != null && picked != _selectedTime) {
-      setState(() {
-        _selectedTime = picked;
-        _timeController.text = picked.format(context);
-      });
-    }
-  }
-
 
   void _submitForm() {
-
     if (_formKey.currentState!.validate()) {
-
-      final formData = {
-        'titre': _titreController.text,
-        'date': _selectedDate?.toIso8601String(),
-        'heure': _selectedTime?.format(context),
-        'lieu': _lieuController.text,
-        'contact': _contactController.text,
-        'telephone': _telephoneController.text,
-        'campagne': _campagneController.text,
-        'notes': _notesController.text,
-      };
-
-
-      print("Données du formulaire : $formData");
-
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Rendez-vous planifié avec succès !'),
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
-        ),
+      // Création du modèle RDV
+      final newRdv = RdvModel(
+        titre: _titreController.text,
+        statut: 'Planifié',
+        date: '${_dateController.text} à ${_timeController.text}',
+        lieu: _lieuController.text.isNotEmpty ? _lieuController.text : 'À définir',
+        campagne: _campagneController.text.isNotEmpty ? _campagneController.text : 'Aucune',
       );
 
-
+      // On renvoie l'objet
+      Navigator.pop(context, newRdv);
     }
-  }
-
-  void _onBackPressed() {
-    Navigator.pop(context);
-    debugPrint('← Retour cliqué');
   }
 
   @override
@@ -137,184 +52,43 @@ class _ParticipantFormState extends State<ParticipantForm> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leadingWidth: 64,
-
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F5F5),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87, size: 18),
-
-              onPressed: _onBackPressed,
-            ),
-          ),
-        ),
-        title: const Text(
-          'Nouveau rendez-vous',
-          style: TextStyle(color: Colors.black87, fontSize: 20, fontWeight: FontWeight.bold),
-        ),
+        leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black), onPressed: () => Navigator.pop(context)),
+        title: const Text('Nouveau rendez-vous', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
-
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildInputGroup(
-                  label: 'Titre',
-                  hint: 'Ex: Visite terrain',
-                  isRequired: true,
-                  controller: _titreController,
-                  validator: (value) => value!.isEmpty ? 'Veuillez entrer un titre' : null,
+        padding: const EdgeInsets.all(20),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              CustomTextField(label: 'Titre', hint: 'Ex: Visite terrain', controller: _titreController, isRequired: true, validator: (v) => v!.isEmpty ? 'Requis' : null),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(child: CustomDatePicker(label: 'Date', hint: 'Date', controller: _dateController, onTap: _selectDate, isRequired: true)),
+                  const SizedBox(width: 16),
+                  Expanded(child: CustomDatePicker(label: 'Heure', hint: 'Heure', controller: _timeController, onTap: _selectTime, isRequired: true)),
+                ],
+              ),
+              const SizedBox(height: 16),
+              CustomTextField(label: 'Lieu', hint: 'Ex: Bureau CIE', controller: _lieuController),
+              const SizedBox(height: 16),
+              CustomTextField(label: 'Contact', hint: 'Ex: M. Kouassi', controller: _contactController, isRequired: true, validator: (v) => v!.isEmpty ? 'Requis' : null),
+              const SizedBox(height: 16),
+              CustomTextField(label: 'Campagne associée', hint: 'Sensibilisation Abobo', controller: _campagneController),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: _submitForm,
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFF8000), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                  child: const Text('Planifier le RDV', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                 ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildInputGroup(
-                        label: 'Date',
-                        hint: 'Sélectionner',
-                        isRequired: true,
-                        isDropdown: true,
-                        controller: _dateController,
-                        onTap: () => _selectDate(context),
-                        validator: (value) => value!.isEmpty ? 'Requis' : null,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _buildInputGroup(
-                        label: 'Heure',
-                        hint: 'Sélectionner',
-                        isRequired: true,
-                        isDropdown: true,
-                        controller: _timeController,
-                        onTap: () => _selectTime(context),
-                        validator: (value) => value!.isEmpty ? 'Requis' : null,
-                      ),
-                    ),
-                  ],
-                ),
-                _buildInputGroup(
-                  label: 'Lieu',
-                  hint: 'Ex: Bureau CIE',
-                  controller: _lieuController,
-                ),
-                _buildInputGroup(
-                  label: 'Contact',
-                  hint: 'Ex: M. Kouassi',
-                  isRequired: true,
-                  controller: _contactController,
-                  validator: (value) => value!.isEmpty ? 'Veuillez indiquer un contact' : null,
-                ),
-                _buildInputGroup(
-                  label: 'Téléphone',
-                  hint: '+225 07 12 34 56',
-                  keyboardType: TextInputType.phone,
-                  controller: _telephoneController,
-                ),
-                _buildInputGroup(
-                  label: 'Campagne associée',
-                  hint: 'Sensibilisation Abobo Nord',
-                  controller: _campagneController,
-                ),
-                _buildInputGroup(
-                  label: 'Notes',
-                  hint: 'Notes supplémentaires...',
-                  maxLines: 4,
-                  controller: _notesController,
-                ),
-                const SizedBox(height: 16),
-
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: ElevatedButton(
-                    onPressed: _submitForm,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFF8000),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: const Text(
-                      'Planifier le RDV',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 150),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
-      ),
-    );
-  }
-
-
-  Widget _buildInputGroup({
-    required String label,
-    required String hint,
-    bool isRequired = false,
-    bool isDropdown = false,
-    int maxLines = 1,
-    TextInputType keyboardType = TextInputType.text,
-    TextEditingController? controller,
-    String? Function(String?)? validator,
-    VoidCallback? onTap,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          RichText(
-            text: TextSpan(
-              text: label,
-              style: const TextStyle(color: Colors.black87, fontSize: 15, fontWeight: FontWeight.w500),
-              children: [
-                if (isRequired)
-                  const TextSpan(text: ' *', style: TextStyle(color: Colors.red)), // Astérisque en rouge pour alerter
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextFormField(
-            controller: controller,
-            validator: validator,
-            maxLines: maxLines,
-            keyboardType: keyboardType,
-            readOnly: isDropdown,
-            onTap: onTap,
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: const TextStyle(color: Colors.black38, fontSize: 15),
-              filled: true,
-              fillColor: const Color(0xFFF5F5F5),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-
-              errorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Colors.red, width: 1),
-              ),
-              suffixIcon: isDropdown
-                  ? const Icon(Icons.keyboard_arrow_down, color: Colors.black54)
-                  : null,
-            ),
-          ),
-        ],
       ),
     );
   }

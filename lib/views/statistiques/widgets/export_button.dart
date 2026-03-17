@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class ExportButton extends StatelessWidget {
@@ -9,6 +8,7 @@ class ExportButton extends StatelessWidget {
   final VoidCallback onTap;
 
   const ExportButton({
+    super.key,
     required this.icon,
     required this.iconColor,
     required this.title,
@@ -25,12 +25,12 @@ class ExportButton extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: Colors.grey.withOpacity(0.15),
+            color: Colors.grey.withValues(alpha: 0.15),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -40,28 +40,16 @@ class ExportButton extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              color: iconColor,
-              size: 36,
-            ),
+            Icon(icon, color: iconColor, size: 36),
             const SizedBox(height: 12),
             Text(
               title,
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 6),
             Text(
               subtitle,
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 13,
-                fontWeight: FontWeight.w400,
-              ),
+              style: TextStyle(color: Colors.grey[600], fontSize: 13, fontWeight: FontWeight.w400),
             ),
           ],
         ),

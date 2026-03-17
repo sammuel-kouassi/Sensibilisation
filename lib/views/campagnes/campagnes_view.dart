@@ -1,7 +1,16 @@
-import 'package:cie_services/views/campagnes/widgets/campaign_card.dart';
 import 'package:flutter/material.dart';
 
+// Imports Model & Data
+import '../../models/campaign_model.dart';
+import '../../data/campaign_data.dart';
+
+// Imports form
 import '../formulaire/campagne_form.dart';
+
+// Imports Widgets
+import 'widgets/campaign_header.dart';
+import 'widgets/campaign_search_bar.dart';
+import 'widgets/campaign_card.dart';
 
 class CampagnesView extends StatefulWidget {
   const CampagnesView({super.key});
@@ -13,57 +22,53 @@ class CampagnesView extends StatefulWidget {
 class _CampagnesViewState extends State<CampagnesView> {
   final TextEditingController _searchController = TextEditingController();
 
-  final List<Map<String, dynamic>> _campaigns = [
-    {
-      'title': 'Sensibilisation Abobo',
-      'location': 'Abobo',
-      'participants': '234/300 participants',
-      'dates': '2026-02-01 → 2026-03-15',
-      'supervisor': 'Kouamé Jean',
-      'status': 'En cours',
-      'statusColor': const Color(0xFFFFE4CC),
-      'statusTextColor': const Color(0xFFFF9500),
-      'progress': 0.78,
-    },
-    {
-      'title': 'Campagne Yopougon Nord',
-      'location': 'Yopougon',
-      'participants': '180/200 participants',
-      'dates': '2026-01-15 → 2026-02-28',
-      'supervisor': 'Diallo Fatou',
-      'status': 'Validée',
-      'statusColor': const Color(0xFFD4F1E4),
-      'statusTextColor': const Color(0xFF4CAF50),
-      'progress': 0.90,
-    },
-    {
-      'title': 'Sensibilisation Cocody',
-      'location': 'Cocody',
-      'participants': '320/300 participants',
-      'dates': '2025-12-01 → 2026-01-31',
-      'supervisor': 'N/A',
-      'status': 'Clôturée',
-      'statusColor': const Color(0xFFF0F0F0),
-      'statusTextColor': const Color(0xFF999999),
-      'progress': 1.0,
-    },
-  ];
+  // Listes pour gérer l'état et la recherche
+  List<CampaignModel> _allCampaigns = [];
+  List<CampaignModel> _filteredCampaigns = [];
 
+  @override
+  void initState() {
+    super.initState();
+    // Initialisation des données
+    _allCampaigns = CampaignData.getCampaigns();
+    _filteredCampaigns = _allCampaigns;
+  }
 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  // Logique de recherche (filtre par titre ou localisation)
+  void _onSearchChanged(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        _filteredCampaigns = _allCampaigns;
+      } else {
+        _filteredCampaigns = _allCampaigns.where((campaign) {
+          final titleLower = campaign.title.toLowerCase();
+          final locationLower = campaign.location.toLowerCase();
+          final searchLower = query.toLowerCase();
+          return titleLower.contains(searchLower) || locationLower.contains(searchLower);
+        }).toList();
+      }
+    });
+  }
+
+  // Ajout d'une nouvelle campagne
   Future<void> _onAddCampaignPressed() async {
     final nouvelleCampagne = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const CampagneForm(),
-      ),
+      MaterialPageRoute(builder: (context) => const CampagneForm()),
     );
 
-
-    if (nouvelleCampagne != null) {
+    // Attention: Ton formulaire devra renvoyer un objet 'CampaignModel' pour que ça marche
+    if (nouvelleCampagne != null && nouvelleCampagne is CampaignModel) {
       setState(() {
-        _campaigns.insert(0, nouvelleCampagne);
+        _allCampaigns.insert(0, nouvelleCampagne);
+        _onSearchChanged(_searchController.text); // Met à jour la liste visible
       });
-
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -74,16 +79,6 @@ class _CampagnesViewState extends State<CampagnesView> {
     }
   }
 
-  void _onSearchChanged(String value) {
-    debugPrint('🔍 Recherche: $value');
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,127 +86,28 @@ class _CampagnesViewState extends State<CampagnesView> {
       body: SingleChildScrollView(
         child: Column(
           children: [
+            // 1. Header
+            CampaignHeader(onAddPressed: _onAddCampaignPressed),
 
-            Container(
-              color: Colors.white,
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Campagnes',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                      fontSize: 25,
-                    ),
-                  ),
-
-                  GestureDetector(
-                    onTap: _onAddCampaignPressed,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 21,
-                        vertical: 11,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFF9500),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Row(
-                        children: const [
-                          Icon(
-                            Icons.add,
-                            color: Colors.white,
-                            size: 17,
-                          ),
-                          SizedBox(width: 5),
-                          Text(
-                            'Nouvelle',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-            ],
-              ),
+            // 2. Barre de recherche
+            CampaignSearchBar(
+              controller: _searchController,
+              onChanged: _onSearchChanged,
             ),
 
-            Container(
-              height: 1,
-              color: Colors.grey.withOpacity(0.2),
-            ),
-
+            // 3. Liste des cartes
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
-              child: TextField(
-                controller: _searchController,
-                onChanged: _onSearchChanged,
-                decoration: InputDecoration(
-                  hintText: 'Rechercher une campagne...',
-                  hintStyle: TextStyle(
-                    color: Colors.grey[500],
-                    fontSize: 17,
-                  ),
-                  prefixIcon: Icon(
-                    Icons.search,
-                    color: Colors.grey[600],
-                    size: 22,
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(
-                      color: Colors.grey.withOpacity(0.15),
-                      width: 1.5,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(
-                      color: Colors.grey.withOpacity(0.15),
-                      width: 1.5,
-                    ),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 14,
-                    horizontal: 14,
-                  ),
-                ),
-              ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
-                children: List.generate(
-                  _campaigns.length,
-                      (index) {
-                    final campaign = _campaigns[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: CampaignCard(
-                        title: campaign['title'],
-                        location: campaign['location'],
-                        participants: campaign['participants'],
-                        dates: campaign['dates'],
-                        supervisor: campaign['supervisor'],
-                        status: campaign['status'],
-                        statusColor: campaign['statusColor'],
-                        statusTextColor: campaign['statusTextColor'],
-                        progress: campaign['progress'],
-                      ),
-                    );
-                  },
-                ),
+                children: _filteredCampaigns.map((campaign) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: CampaignCard(campaign: campaign),
+                  );
+                }).toList(),
               ),
             ),
+
             const SizedBox(height: 130),
           ],
         ),
@@ -219,5 +115,3 @@ class _CampagnesViewState extends State<CampagnesView> {
     );
   }
 }
-
-
