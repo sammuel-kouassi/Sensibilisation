@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../models/startcard_home_models.dart';
+import '../../../models/stat_card_home_models.dart';
 
 class StatHomeCard extends StatelessWidget {
-  final StartCardHomeModels startcardModels;
+  final StatCardHomeModels statCardHomeModels;
 
-  const StatHomeCard({super.key, required this.startcardModels});
+  const StatHomeCard({super.key, required this.statCardHomeModels});
 
   @override
   Widget build(BuildContext context) {
@@ -24,14 +24,14 @@ class StatHomeCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(startcardModels.icon, color: startcardModels.iconColor, size: 28),
+          Icon(statCardHomeModels.icon, color: statCardHomeModels.iconColor, size: 28),
           const SizedBox(height: 12),
           Text(
-            startcardModels.number,
+            statCardHomeModels.number,
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           Text(
-            startcardModels.label,
+            statCardHomeModels.label,
             style: TextStyle(fontSize: 12, color: Colors.grey[600]),
           ),
         ],

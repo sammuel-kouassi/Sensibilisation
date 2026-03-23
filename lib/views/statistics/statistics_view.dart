@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 // Imports de tes données
 import '../../data/carte_data.dart';
 import '../../data/period_data.dart';
-import '../../data/chart_data.dart'; // Contient maintenant getBarchartModels
+import '../../data/barchart_data.dart'; // Contient maintenant getBarchartModels
 
 // Imports de tes widgets
 import 'widgets/statistics_header.dart';
@@ -13,19 +13,18 @@ import 'widgets/period_selector.dart';
 import 'widgets/monthly_chart_widget.dart';
 import 'widgets/export_section.dart';
 
-class StatistiquesView extends StatefulWidget {
-  const StatistiquesView({super.key});
+class StatisticsView extends StatefulWidget {
+  const StatisticsView({super.key});
 
   @override
-  State<StatistiquesView> createState() => _StatistiquesViewState();
+  State<StatisticsView> createState() => _StatisticsViewState();
 }
 
-class _StatistiquesViewState extends State<StatistiquesView> {
+class _StatisticsViewState extends State<StatisticsView> {
   String _selectedPeriod = PeriodData.defaultPeriod;
 
   @override
   Widget build(BuildContext context) {
-    // 🛠️ CORRECTION ICI : On utilise getBarchartModels(context) au lieu de l'ancienne méthode
     final carteList = getCarteModels(context);
     final chartData = getBarchartModels(context);
 

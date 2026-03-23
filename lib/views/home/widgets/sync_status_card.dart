@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../providers/home_provider.dart';
+
 
 class SyncStatusCard extends StatelessWidget {
   const SyncStatusCard({super.key});
 
   @override
   Widget build(BuildContext context) {
+
+    final provider = context.watch<HomeProvider>();
+    final isOnline = provider.isOnline;
+    final pendingCount = provider.pendingSyncOperations;
+
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 150),
       decoration: BoxDecoration(
@@ -29,11 +37,15 @@ class SyncStatusCard extends StatelessWidget {
                   width: 55,
                   height: 55,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFD4F1E4),
+                    color: isOnline ? const Color(0xFFD4F1E4) : Colors.orange.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(18),
                   ),
-                  child: const Center(
-                    child: Icon(Icons.sync_outlined, size: 28, color: Color(0xFF4CAF50)),
+                  child: Center(
+                    child: Icon(
+                      isOnline ? Icons.sync_outlined : Icons.cloud_off,
+                      size: 28,
+                      color: isOnline ? const Color(0xFF4CAF50) : Colors.orange,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -52,7 +64,9 @@ class SyncStatusCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '12 opérations en attente',
+                        pendingCount > 0
+                            ? '$pendingCount opération(s) en attente'
+                            : 'À jour',
                         style: TextStyle(color: Colors.grey[600], fontSize: 13),
                       ),
                     ],
@@ -65,12 +79,20 @@ class SyncStatusCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.withValues(alpha: 0.3), width: 1.5),
+              border: Border.all(
+                  color: isOnline ? Colors.green.withValues(alpha: 0.3) : Colors.orange.withValues(alpha: 0.3),
+                  width: 1.5
+              ),
               borderRadius: BorderRadius.circular(20),
+              color: isOnline ? Colors.green.withValues(alpha: 0.05) : Colors.orange.withValues(alpha: 0.05),
             ),
             child: Text(
-              'Connecté',
-              style: TextStyle(color: Colors.grey[700], fontSize: 12, fontWeight: FontWeight.w600),
+              isOnline ? 'Connecté' : 'Hors-ligne',
+              style: TextStyle(
+                  color: isOnline ? Colors.green[700] : Colors.orange[800],
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600
+              ),
             ),
           ),
         ],

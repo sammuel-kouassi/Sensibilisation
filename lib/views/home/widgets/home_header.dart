@@ -1,12 +1,12 @@
 import 'package:cie_services/views/accueil/widgets/stat_home_card.dart';
 import 'package:flutter/material.dart';
-import '../../../models/startcard_home_models.dart';
+import '../../../models/stat_card_home_models.dart';
 
 
-class AccueilHeader extends StatelessWidget {
-  final List<StartCardHomeModels> statCardList;
+class HomeHeader extends StatelessWidget {
+  final List<StatCardHomeModels> statCardList;
 
-  const AccueilHeader({super.key, required this.statCardList});
+  const HomeHeader({super.key, required this.statCardList});
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +93,7 @@ class AccueilHeader extends StatelessWidget {
                   padding: EdgeInsets.only(
                     right: statModel == statCardList.last ? 0 : 16.0,
                   ),
-                  child: StatHomeCard(startcardModels: statModel),
+                  child: StatHomeCard(statCardHomeModels: statModel),
                 ),
               );
             }).toList(),

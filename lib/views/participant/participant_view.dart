@@ -4,10 +4,8 @@ import 'package:flutter/material.dart';
 import '../../models/participant_model.dart';
 import '../../data/participant_data.dart';
 
-// Import Form
-import '../formulaire/inscrt_form.dart';
 
-// Imports Widgets
+import '../widgets/forms/inscription_form.dart';
 import 'widgets/inscriptions_header.dart';
 import 'widgets/inscriptions_search_bar.dart';
 import 'widgets/participant_card.dart';
@@ -54,14 +52,12 @@ class _InscriptionsViewState extends State<InscriptionsView> {
     });
   }
 
-  // Navigation vers le formulaire et ajout du nouveau participant
   Future<void> _onAddParticipantPressed() async {
     final nouveauParticipant = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const InscrtForm()),
+      MaterialPageRoute(builder: (context) => const InscriptionForm()),
     );
 
-    // Vérifie si le formulaire renvoie bien un ParticipantModel
     if (nouveauParticipant != null && nouveauParticipant is ParticipantModel) {
       setState(() {
         _allParticipants.insert(0, nouveauParticipant);

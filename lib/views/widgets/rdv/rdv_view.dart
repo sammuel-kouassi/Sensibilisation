@@ -5,9 +5,9 @@ import '../../models/rdv_model.dart';
 import '../../data/rdv_data.dart';
 
 // Import Navigation (Formulaire)
-import '../formulaire/rendez-vous_form.dart'; // Vérifie ce chemin d'import selon ton projet
 
 // Imports Widgets
+import '../widgets/forms/rendez-vous_form.dart';
 import 'widgets/rdv_header.dart';
 import 'widgets/rdv_card.dart';
 
@@ -29,9 +29,9 @@ class _RdvViewState extends State<RdvView> {
     _rdvs = RdvData.getRdvs();
   }
 
-  // Méthode de navigation vers le formulaire
+  // Méthode de navigation vers le forms
   void _onPlanifierPressed() {
-    debugPrint("Ouvrir le formulaire de planification");
+    debugPrint("Ouvrir le forms de planification");
     Navigator.push(
       context,
       MaterialPageRoute(

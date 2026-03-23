@@ -1,6 +1,6 @@
-import 'package:cie_services/views/accueil/widgets/quickAccessItem.dart';
+import 'package:cie_services/views/accueil/widgets/quick_access_widget.dart';
 import 'package:flutter/material.dart';
-import '../../../models/quickAccessItem_models.dart';
+import '../../../models/quick_access_models.dart';
 
 
 class QuickAccessSection extends StatelessWidget {
@@ -46,7 +46,7 @@ class QuickAccessSection extends StatelessWidget {
             mainAxisSpacing: 16,
             childAspectRatio: 0.75,
             children: quickAccessList.map((model) {
-              return QuickAccessItem(quickAccessModel: model);
+              return QuickAccessWidget(quickAccessModel: model);
             }).toList(),
           ),
         ],

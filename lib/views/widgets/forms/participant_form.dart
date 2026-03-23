@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import '../../models/participant_model.dart'; // Import du modèle !
+import '../../../models/participant_model.dart';
 import 'widgets/custom_text_field.dart';
 
-class InscrtForm extends StatefulWidget {
-  const InscrtForm({super.key});
+class InscriptionForm extends StatefulWidget {
+  const InscriptionForm({super.key});
 
   @override
-  State<InscrtForm> createState() => _InscrtFormState();
+  State<InscriptionForm> createState() => _InscriptionFormState();
 }
 
-class _InscrtFormState extends State<InscrtForm> {
+class _InscriptionFormState extends State<InscriptionForm> {
   final _formKey = GlobalKey<FormState>();
   final _nomController = TextEditingController();
   final _prenomController = TextEditingController();
@@ -25,7 +25,6 @@ class _InscrtFormState extends State<InscrtForm> {
     setState(() => _showConsentError = !_consentementCIE);
 
     if (_formKey.currentState!.validate() && _consentementCIE) {
-      // Création du vrai modèle Participant
       final nouveauParticipant = ParticipantModel(
         id: 'P${DateTime.now().millisecondsSinceEpoch.toString().substring(9)}', // ID généré
         name: '${_nomController.text} ${_prenomController.text}',
@@ -38,7 +37,6 @@ class _InscrtFormState extends State<InscrtForm> {
         statusTextColor: const Color(0xFF4CAF50),
       );
 
-      // On renvoie l'objet
       Navigator.pop(context, nouveauParticipant);
     }
   }

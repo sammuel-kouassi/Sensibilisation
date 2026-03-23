@@ -5,20 +5,19 @@ import 'widgets/custom_text_field.dart';
 import 'widgets/custom_dropdown.dart';
 import 'widgets/form_section.dart';
 
-class CampagneForm extends StatefulWidget {
-  const CampagneForm({super.key});
+class CampaignForm extends StatefulWidget {
+  const CampaignForm({super.key});
 
   @override
-  State<CampagneForm> createState() => _CampagneFormState();
+  State<CampaignForm> createState() => _CampaignFormState();
 }
 
-class _CampagneFormState extends State<CampagneForm> {
+class _CampaignFormState extends State<CampaignForm> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _objectifsController = TextEditingController();
   final _participantsController = TextEditingController();
   final _supervisorController = TextEditingController();
-  final _logisticsController = TextEditingController();
 
   String? _selectedZone;
   DateTime? _startDate;
@@ -48,7 +47,7 @@ class _CampagneFormState extends State<CampagneForm> {
 
   void _onSave() {
     if (_formKey.currentState!.validate() && _startDate != null && _endDate != null) {
-      // On crée un véritable objet CampaignModel
+
       final newCampaign = CampaignModel(
         title: _nameController.text,
         location: _selectedZone!,

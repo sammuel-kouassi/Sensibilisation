@@ -5,24 +5,23 @@ import '../../models/campaign_model.dart';
 import '../../data/campaign_data.dart';
 
 // Imports form
-import '../formulaire/campagne_form.dart';
+import '../formulaire/campaign_form.dart';
 
 // Imports Widgets
 import 'widgets/campaign_header.dart';
 import 'widgets/campaign_search_bar.dart';
 import 'widgets/campaign_card.dart';
 
-class CampagnesView extends StatefulWidget {
-  const CampagnesView({super.key});
+class CampaignView extends StatefulWidget {
+  const CampaignView({super.key});
 
   @override
-  State<CampagnesView> createState() => _CampagnesViewState();
+  State<CampaignView> createState() => _CampaignViewState();
 }
 
-class _CampagnesViewState extends State<CampagnesView> {
+class _CampaignViewState extends State<CampaignView> {
   final TextEditingController _searchController = TextEditingController();
 
-  // Listes pour gérer l'état et la recherche
   List<CampaignModel> _allCampaigns = [];
   List<CampaignModel> _filteredCampaigns = [];
 
@@ -60,10 +59,9 @@ class _CampagnesViewState extends State<CampagnesView> {
   Future<void> _onAddCampaignPressed() async {
     final nouvelleCampagne = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const CampagneForm()),
+      MaterialPageRoute(builder: (context) => const CampaignForm()),
     );
 
-    // Attention: Ton formulaire devra renvoyer un objet 'CampaignModel' pour que ça marche
     if (nouvelleCampagne != null && nouvelleCampagne is CampaignModel) {
       setState(() {
         _allCampaigns.insert(0, nouvelleCampagne);
@@ -86,16 +84,13 @@ class _CampagnesViewState extends State<CampagnesView> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // 1. Header
             CampaignHeader(onAddPressed: _onAddCampaignPressed),
-
-            // 2. Barre de recherche
+            const SizedBox(height: 20),
             CampaignSearchBar(
               controller: _searchController,
               onChanged: _onSearchChanged,
             ),
-
-            // 3. Liste des cartes
+            const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
@@ -107,8 +102,7 @@ class _CampagnesViewState extends State<CampagnesView> {
                 }).toList(),
               ),
             ),
-
-            const SizedBox(height: 130),
+            const SizedBox(height: 20),
           ],
         ),
       ),

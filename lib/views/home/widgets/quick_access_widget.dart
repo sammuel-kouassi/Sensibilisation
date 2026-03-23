@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../models/quickAccessItem_models.dart';
+import '../../../models/quick_access_models.dart';
 
-class QuickAccessItem extends StatelessWidget {
+class QuickAccessWidget extends StatelessWidget {
   final QuickAccessModel quickAccessModel;
 
-  const QuickAccessItem({super.key, required this.quickAccessModel});
+  const QuickAccessWidget({super.key, required this.quickAccessModel});
 
   @override
   Widget build(BuildContext context) {
