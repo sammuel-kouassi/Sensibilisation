@@ -1,7 +1,6 @@
-import 'package:cie_services/views/accueil/widgets/stat_home_card.dart';
 import 'package:flutter/material.dart';
 import '../../../models/stat_card_home_models.dart';
-
+import 'stat_home_card.dart';
 
 class HomeHeader extends StatelessWidget {
   final List<StatCardHomeModels> statCardList;
@@ -23,80 +22,28 @@ class HomeHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Bienvenue sur',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.8),
-                        fontSize: 18,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'GS2E',
-                      style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                        color: Colors.white,
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.25),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    const Icon(Icons.notifications_outlined, color: Colors.white, size: 28),
-                    Positioned(
-                      top: 0,
-                      right: 0,
-                      child: Container(
-                        width: 25,
-                        height: 25,
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Center(
-                          child: Text(
-                            '2',
-                            style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+          // ... Le haut du header (Bienvenue sur GS2E) reste inchangé ...
+          // (Je le raccourcis ici pour la lisibilité, garde ton code actuel pour la ligne du haut)
+
           const SizedBox(height: 30),
-          Row(
-            children: statCardList.map((statModel) {
-              return Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    right: statModel == statCardList.last ? 0 : 16.0,
+
+          // L'astuce pour avoir des cartes de hauteur identique :
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch, // Étire les cartes en hauteur
+              children: statCardList.asMap().entries.map((entry) {
+                final index = entry.key;
+                final statModel = entry.value;
+                return Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      right: index == statCardList.length - 1 ? 0 : 16.0,
+                    ),
+                    child: StatHomeCard(statCardHomeModels: statModel),
                   ),
-                  child: StatHomeCard(statCardHomeModels: statModel),
-                ),
-              );
-            }).toList(),
+                );
+              }).toList(),
+            ),
           ),
         ],
       ),

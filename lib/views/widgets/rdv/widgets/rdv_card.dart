@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../models/rdv_model.dart';
+import '../../../../models/rdv_model.dart';
 
 class RdvCard extends StatelessWidget {
   final RdvModel rdv;

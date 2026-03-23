@@ -1,22 +1,10 @@
 import 'package:flutter/material.dart';
-import '../models/startcard_home_models.dart';
+import '../models/stat_card_home_models.dart';
 
-List<StartCardHomeModels> getStartcardModels(BuildContext context) {
+List<StatCardHomeModels> getStatCardModels(BuildContext context) {
   return [
-    StartCardHomeModels(
-      iconColor: Colors.blue,
-      number: '1247',
-      label: 'Participants',
-    ),
-    StartCardHomeModels(
-      iconColor: Colors.orange,
-      number: '8',
-      label: 'Campagnes',
-    ),
-    StartCardHomeModels(
-      iconColor: Colors.green,
-      number: '3456',
-      label: 'Gadgets',
-    ),
+    StatCardHomeModels(number: '1247', label: 'Participants'),
+    StatCardHomeModels(number: '8', label: 'Campagnes'),
+    StatCardHomeModels(number: '3456', label: 'Gadgets'),
   ];
 }

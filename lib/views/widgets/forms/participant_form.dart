@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import '../../../models/participant_model.dart';
 import 'widgets/custom_text_field.dart';
 
-class InscriptionForm extends StatefulWidget {
-  const InscriptionForm({super.key});
+class ParticipantForm extends StatefulWidget {
+  const ParticipantForm({super.key});
 
   @override
-  State<InscriptionForm> createState() => _InscriptionFormState();
+  State<ParticipantForm> createState() => _ParticipantFormState();
 }
 
-class _InscriptionFormState extends State<InscriptionForm> {
+class _ParticipantFormState extends State<ParticipantForm> {
   final _formKey = GlobalKey<FormState>();
   final _nomController = TextEditingController();
   final _prenomController = TextEditingController();

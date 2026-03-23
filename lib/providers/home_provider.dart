@@ -1,45 +1,47 @@
 import 'package:flutter/material.dart';
+
+import '../data/stat_card_home_data.dart';
 import '../models/barchart_models.dart';
-import '../models/quickAccessItem_models.dart';
-import '../models/startcard_home_models.dart';
+import '../models/quick_access_models.dart';
+import '../models/stat_card_home_models.dart';
+import '../data/barchart_data.dart';
+import '../data/quick_access_data.dart';
 
 class HomeProvider extends ChangeNotifier {
-  // --- États ---
-  bool _isLoading = true;
-  bool _isOnline = true; // Simule l'état du réseau
-  int _pendingSyncOperations = 12; // Opérations en attente de synchro
 
-  List<StartCardHomeModels> _statCards = [];
+  bool _isLoading = true;
+  bool _isOnline = true;
+  int _pendingSyncOperations = 12;
+
+  List<StatCardHomeModels> _statCards = [];
   List<QuickAccessModel> _quickAccess = [];
   List<BarchartModels> _barCharts = [];
 
-  // --- Getters ---
   bool get isLoading => _isLoading;
   bool get isOnline => _isOnline;
   int get pendingSyncOperations => _pendingSyncOperations;
 
-  List<StartCardHomeModels> get statCards => _statCards;
+  List<StatCardHomeModels> get statCards => _statCards;
   List<QuickAccessModel> get quickAccess => _quickAccess;
   List<BarchartModels> get barCharts => _barCharts;
 
   // --- Initialisation ---
-  HomeProvider() {
-    loadHomeData();
+  void init(BuildContext context) {
+    if (_statCards.isEmpty && _isLoading) {
+      loadHomeData(context);
+    }
   }
 
   // --- Méthodes ---
-  Future<void> loadHomeData() async {
+  Future<void> loadHomeData(BuildContext context) async {
     _isLoading = true;
     notifyListeners();
 
-    // TODO: Plus tard, remplacer par l'appel au Repository (ex: HomeRepository.getDashboardData())
-    // Pour l'instant, on simule un chargement depuis tes anciennes fonctions
-    await Future.delayed(const Duration(milliseconds: 800)); // Simule latence
+    await Future.delayed(const Duration(milliseconds: 600));
 
-    // Remplacer ces lignes par tes vraies données d'initialisation
-    _statCards = []; // getStartcardModels()
-    _quickAccess = []; // getQuickAccessModels()
-    _barCharts = []; // getBarchartModels()
+    _statCards = getStatCardModels(context);
+    _quickAccess = getQuickAccessModels(context);
+    _barCharts = getBarchartModels(context);
 
     _isLoading = false;
     notifyListeners();
@@ -54,7 +56,6 @@ class HomeProvider extends ChangeNotifier {
   }
 
   Future<void> syncData() async {
-    // Logique de synchronisation avec le backend (à implémenter plus tard)
     await Future.delayed(const Duration(seconds: 2));
     _pendingSyncOperations = 0;
     notifyListeners();

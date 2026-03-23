@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../models/rdv_model.dart'; // Import du modèle !
+import '../../../models/rdv_model.dart';
 import 'widgets/custom_text_field.dart';
 import 'widgets/custom_date_picker.dart';
 

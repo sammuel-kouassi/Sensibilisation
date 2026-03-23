@@ -2,8 +2,14 @@ import 'package:flutter/material.dart';
 
 class GadgetSearchBar extends StatelessWidget {
   final TextEditingController controller;
+  // Ajout du callback onChanged
+  final ValueChanged<String>? onChanged;
 
-  const GadgetSearchBar({super.key, required this.controller});
+  const GadgetSearchBar({
+    super.key,
+    required this.controller,
+    this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +23,7 @@ class GadgetSearchBar extends StatelessWidget {
         ),
         child: TextField(
           controller: controller,
+          onChanged: onChanged, // <-- Branchement du callback ici
           decoration: InputDecoration(
             hintText: 'Rechercher un gadget...',
             hintStyle: TextStyle(color: Colors.grey[400], fontSize: 15),

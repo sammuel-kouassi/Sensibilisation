@@ -25,13 +25,22 @@ class CampaignSearchBar extends StatelessWidget {
           fillColor: Colors.white,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: Colors.grey.withOpacity(0.15), width: 1.5),
+            borderSide: BorderSide(
+              color: Colors.grey.withOpacity(0.15),
+              width: 1.5,
+            ),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: Colors.grey.withOpacity(0.15), width: 1.5),
+            borderSide: BorderSide(
+              color: Colors.grey.withOpacity(0.15),
+              width: 1.5,
+            ),
           ),
-          contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 14,
+            horizontal: 14,
+          ),
         ),
       ),
     );

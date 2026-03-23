@@ -1,12 +1,8 @@
-import 'package:flutter/material.dart';
-
-class StartCardHomeModels {
-  final Color iconColor;
+class StatCardHomeModels {
   final String number;
   final String label;
 
-  StartCardHomeModels({
-    required this.iconColor,
+  StatCardHomeModels({
     required this.number,
     required this.label,
   });

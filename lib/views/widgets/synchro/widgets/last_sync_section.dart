@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../models/sync_history_model.dart';
+import '../../../../models/sync_history_model.dart';
 
 class LastSyncSection extends StatelessWidget {
   final List<SyncHistoryModel> lastSync;

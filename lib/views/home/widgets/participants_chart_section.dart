@@ -53,7 +53,7 @@ class ParticipantsChartSection extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           SizedBox(
-            height: 180,
+            height: 220,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.end,

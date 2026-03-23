@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-// Imports Model & Data
+// Imports Model & Provider
 import '../../models/campaign_model.dart';
-import '../../data/campaign_data.dart';
+import '../../providers/campaign_provider.dart';
 
 // Imports form
-import '../formulaire/campaign_form.dart';
+import '../widgets/animated_section.dart';
+import '../widgets/forms/campaign_form.dart';
 
 // Imports Widgets
 import 'widgets/campaign_header.dart';
 import 'widgets/campaign_search_bar.dart';
 import 'widgets/campaign_card.dart';
+
 
 class CampaignView extends StatefulWidget {
   const CampaignView({super.key});
@@ -22,88 +25,104 @@ class CampaignView extends StatefulWidget {
 class _CampaignViewState extends State<CampaignView> {
   final TextEditingController _searchController = TextEditingController();
 
-  List<CampaignModel> _allCampaigns = [];
-  List<CampaignModel> _filteredCampaigns = [];
-
-  @override
-  void initState() {
-    super.initState();
-    // Initialisation des données
-    _allCampaigns = CampaignData.getCampaigns();
-    _filteredCampaigns = _allCampaigns;
-  }
-
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
   }
 
-  // Logique de recherche (filtre par titre ou localisation)
-  void _onSearchChanged(String query) {
-    setState(() {
-      if (query.isEmpty) {
-        _filteredCampaigns = _allCampaigns;
-      } else {
-        _filteredCampaigns = _allCampaigns.where((campaign) {
-          final titleLower = campaign.title.toLowerCase();
-          final locationLower = campaign.location.toLowerCase();
-          final searchLower = query.toLowerCase();
-          return titleLower.contains(searchLower) || locationLower.contains(searchLower);
-        }).toList();
-      }
-    });
-  }
-
-  // Ajout d'une nouvelle campagne
-  Future<void> _onAddCampaignPressed() async {
-    final nouvelleCampagne = await Navigator.push(
+  Future<void> _onAddCampaignPressed(BuildContext context, CampaignProvider provider) async {
+    final newCampaign = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const CampaignForm()),
     );
 
-    if (nouvelleCampagne != null && nouvelleCampagne is CampaignModel) {
-      setState(() {
-        _allCampaigns.insert(0, nouvelleCampagne);
-        _onSearchChanged(_searchController.text); // Met à jour la liste visible
-      });
+    if (newCampaign != null && newCampaign is CampaignModel) {
+      provider.addCampaign(newCampaign);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Campagne ajoutée avec succès !'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      _searchController.clear();
+      provider.filterCampaigns('');
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Campagne ajoutée et prête pour synchronisation !'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            CampaignHeader(onAddPressed: _onAddCampaignPressed),
-            const SizedBox(height: 20),
-            CampaignSearchBar(
-              controller: _searchController,
-              onChanged: _onSearchChanged,
-            ),
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                children: _filteredCampaigns.map((campaign) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: CampaignCard(campaign: campaign),
-                  );
-                }).toList(),
-              ),
-            ),
-            const SizedBox(height: 20),
-          ],
+    return ChangeNotifierProvider(
+      create: (_) => CampaignProvider(),
+      child: Scaffold(
+        backgroundColor: Colors.grey[50],
+        body: SafeArea(
+          child: Consumer<CampaignProvider>(
+            builder: (context, provider, child) {
+              return Column(
+                children: [
+                  AnimatedSection(
+                    delayMs: 0,
+                    child: CampaignHeader(
+                      onAddPressed: () => _onAddCampaignPressed(context, provider),
+                    ),
+                  ),
+
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          AnimatedSection(
+                            delayMs: 150,
+                            child: CampaignSearchBar(
+                              controller: _searchController,
+                              onChanged: provider.filterCampaigns,
+                            ),
+                          ),
+
+                          // Gestion du chargement
+                          if (provider.isLoading)
+                            const Padding(
+                              padding: EdgeInsets.only(top: 50.0),
+                              child: CircularProgressIndicator(color: Color(0xFFFF9500)),
+                            )
+                          else if (provider.filteredCampaigns.isEmpty)
+                            const Padding(
+                              padding: EdgeInsets.only(top: 50.0),
+                              child: Text(
+                                'Aucune campagne trouvée.',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            )
+                          else
+                            AnimatedSection(
+                              delayMs: 300,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                child: Column(
+                                  children: provider.filteredCampaigns.map((campaign) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(bottom: 16),
+                                      child: CampaignCard(campaign: campaign),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                            ),
+
+                          const SizedBox(height: 130),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

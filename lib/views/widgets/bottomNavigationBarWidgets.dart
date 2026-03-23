@@ -1,10 +1,10 @@
-import 'package:cie_services/views/inscriptions/inscriptions_view.dart';
-import 'package:cie_services/views/param/param_view.dart';
 import 'package:flutter/material.dart';
 
-import '../accueil/accueil_view.dart';
-import '../campagnes/campagnes_view.dart';
-import '../statistiques/statistiques_view.dart';
+import '../campaign/campaign_view.dart';
+import '../home/home_view.dart';
+import '../participant/participant_view.dart';
+import '../settings/param_view.dart';
+import '../statistics/statistics_view.dart';
 
 class BottomNavigationBarWidget extends StatefulWidget {
   const BottomNavigationBarWidget({super.key});
@@ -18,10 +18,10 @@ class _BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = const [
-    AccueilView(),
-    CampagnesView(),
-    InscriptionsView(),
-    StatistiquesView(),
+    HomeView(),
+    CampaignView(),
+    ParticipantView(),
+    StatisticsView(),
     ParamView(),
   ];
 
@@ -38,50 +38,49 @@ class _BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
       });
       return false;
     }
-    return false;
+    return true;
   }
 
-  // ====== MÉTHODE POUR CRÉER UN BOUTON PERSONNALISÉ ======
-  Widget _buildNavItem(int index, IconData icon, String label) {
+  Widget _buildNavItem(int index, IconData unselectedIcon, IconData selectedIcon, String label) {
     final isSelected = _selectedIndex == index;
-    // Couleurs exactes
-    final color = isSelected ? const Color(0xFFFF8000) : Colors.grey.shade600;
 
-    return GestureDetector(
-      onTap: () => _onItemTapped(index),
-      behavior: HitTestBehavior.opaque, // Rend toute la zone cliquable
-      child: SizedBox(
-        width: 70, // Garde les icônes bien espacées
+    final activeColor = const Color(0xFFFF8000);
+    final inactiveIconColor = Colors.grey.shade800;
+    final inactiveTextColor = Colors.grey.shade600;
+    final pillColor = activeColor.withValues(alpha: 0.15);
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => _onItemTapped(index),
+        behavior: HitTestBehavior.opaque,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              color: color,
-              size: 26,
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeInOut,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+              decoration: BoxDecoration(
+                color: isSelected ? pillColor : Colors.transparent,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Icon(
+                isSelected ? selectedIcon : unselectedIcon,
+                color: isSelected ? activeColor : inactiveIconColor,
+                size: 26,
+              ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
-                color: color,
+                color: isSelected ? Colors.black87 : inactiveTextColor,
                 fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 4),
-            // === LE PETIT POINT ORANGE ANIMÉ ===
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 4,
-              height: 4,
-              decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFFFF8000) : Colors.transparent,
-                shape: BoxShape.circle,
-              ),
             ),
           ],
         ),
@@ -94,40 +93,31 @@ class _BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-        extendBody: true,
-        body: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          child: _pages[_selectedIndex],
-        ),
+        extendBody: false,
+
+        // CORRECTION ICI : On retire l'IndexedStack.
+        // On affiche directement la page demandée.
+        // Cela va forcer la page à se reconstruire et déclencher ton AnimatedSection !
+        body: _pages[_selectedIndex],
+
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(24),
-              topRight: Radius.circular(24),
+            border: Border(
+              top: BorderSide(color: Colors.grey.shade300, width: 0.5),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.06),
-                blurRadius: 16,
-                offset: const Offset(0, -4),
-              ),
-            ],
           ),
-          // === LE SAFE AREA EST LA SOLUTION AU PROBLEME D'AFFICHAGE ===
           child: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.only(top: 12, bottom: 8), // Espace intérieur
+              padding: const EdgeInsets.only(top: 10, bottom: 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Icônes modifiées pour correspondre parfaitement à l'image :
-                  _buildNavItem(0, Icons.space_dashboard_outlined, 'Accueil'), // Les 4 blocs
-                  _buildNavItem(1, Icons.track_changes, 'Campagnes'), // La cible / bullseye
-                  _buildNavItem(2, Icons.people_outline, 'Participants'), // Les 2 personnes
-                  _buildNavItem(3, Icons.insert_chart_outlined, 'Stats'), // Les barres de stats avec l'axe
-                  _buildNavItem(4, Icons.settings_outlined, 'Plus'), // La roue crantée
+                  _buildNavItem(0, Icons.grid_view_outlined, Icons.grid_view_rounded, 'Accueil'),
+                  _buildNavItem(1, Icons.campaign_outlined, Icons.campaign_rounded, 'Campagnes'),
+                  _buildNavItem(2, Icons.groups_outlined, Icons.groups_rounded, 'Participants'),
+                  _buildNavItem(3, Icons.analytics_outlined, Icons.analytics_rounded, 'Stats'),
+                  _buildNavItem(4, Icons.settings_outlined, Icons.settings, 'Paramètres'),
                 ],
               ),
             ),

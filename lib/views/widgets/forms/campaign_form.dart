@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../models/campaign_model.dart'; // Import du modèle !
+import '../../../models/campaign_model.dart';
 import 'widgets/custom_text_field.dart';
 import 'widgets/custom_dropdown.dart';
 import 'widgets/form_section.dart';

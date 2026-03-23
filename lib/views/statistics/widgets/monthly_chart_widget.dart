@@ -27,7 +27,7 @@ class MonthlyChartWidget extends StatelessWidget {
           ),
           const SizedBox(height: 30),
           SizedBox(
-            height: 200,
+            height: 220, // <-- Ajusté ici pour éviter le RenderFlex Overflow
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.end,

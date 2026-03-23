@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-class InscriptionsHeader extends StatelessWidget {
+class ParticipantHeader extends StatelessWidget {
   final VoidCallback onAddPressed;
 
-  const InscriptionsHeader({super.key, required this.onAddPressed});
+  const ParticipantHeader({super.key, required this.onAddPressed});
 
   @override
   Widget build(BuildContext context) {

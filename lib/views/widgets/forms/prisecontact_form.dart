@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-// Import du modèle et des widgets réutilisables
-import '../../models/prise_contact_model.dart';
+import '../../../models/prise_contact_model.dart';
 import 'widgets/custom_text_field.dart';
 import 'widgets/custom_dropdown.dart';
 import 'widgets/custom_date_picker.dart';

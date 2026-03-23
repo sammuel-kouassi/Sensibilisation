@@ -9,7 +9,7 @@ class StatHomeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -22,17 +22,21 @@ class StatHomeCard extends StatelessWidget {
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center, // Centre le texte verticalement
         children: [
-          Icon(statCardHomeModels.icon, color: statCardHomeModels.iconColor, size: 28),
-          const SizedBox(height: 12),
           Text(
             statCardHomeModels.number,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFFFF8000), // On met le chiffre en couleur pour attirer l'oeil
+            ),
           ),
+          const SizedBox(height: 6),
           Text(
             statCardHomeModels.label,
-            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w500),
           ),
         ],
       ),

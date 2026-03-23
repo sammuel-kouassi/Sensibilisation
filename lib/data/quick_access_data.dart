@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import '../models/quickAccessItem_models.dart';
-
-// Adapte ces imports selon l'emplacement exact de tes vues
-import '../views/formulaire/campagne_form.dart';
-import '../views/formulaire/inscrt_form.dart';
-import '../views/formulaire/prisecontact_form.dart';
-import '../views/gadgets/gadgets_view.dart';
-import '../views/rdv/rdv_view.dart';
-import '../views/synchro/synchro_view.dart';
+import '../models/quick_access_models.dart';
+import '../views/widgets/forms/campaign_form.dart';
+import '../views/widgets/forms/participant_form.dart';
+import '../views/widgets/forms/prisecontact_form.dart';
+import '../views/widgets/gadgets/gadgets_view.dart';
+import '../views/widgets/rdv/rdv_view.dart';
+import '../views/widgets/synchro/synchro_view.dart';
 
 List<QuickAccessModel> getQuickAccessModels(BuildContext context) {
   return [
@@ -38,7 +36,7 @@ List<QuickAccessModel> getQuickAccessModels(BuildContext context) {
       label: 'Ajouter Une Campagne',
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const CampagneForm()),
+        MaterialPageRoute(builder: (context) => const CampaignForm()),
       ),
     ),
     QuickAccessModel(
@@ -48,7 +46,7 @@ List<QuickAccessModel> getQuickAccessModels(BuildContext context) {
       label: 'Ajouter Participant',
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const InscrtForm()),
+        MaterialPageRoute(builder: (context) => const ParticipantForm()),
       ),
     ),
     QuickAccessModel(

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../models/gadget_model.dart';
+import '../../../../models/gadget_model.dart';
 
 class GadgetCard extends StatelessWidget {
   final GadgetModel gadget;

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../models/sync_queue_model.dart';
+import '../../../../models/sync_queue_model.dart';
 
 class QueueSection extends StatelessWidget {
   final List<SyncQueueModel> waitingQueue;
