@@ -1,6 +1,7 @@
+import 'package:cie_services/views/login/login_views.dart';
 import 'package:cie_services/views/widgets/bottomNavigationBarWidgets.dart';
 import 'package:flutter/material.dart';
-
+// Importe ton écran de connexion
 
 void main() {
   runApp(const MyApp());
@@ -16,9 +17,10 @@ class MyApp extends StatelessWidget {
       title: 'CIE Sensibilisation',
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFFF9500)),
       ),
-      home: const MyHomePage(),
+      // L'application démarre directement sur la page de connexion !
+      home: const LoginView(),
     );
   }
 }
