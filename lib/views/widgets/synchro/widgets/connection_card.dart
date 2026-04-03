@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 class ConnectionCard extends StatelessWidget {
-  final bool isOnline; // Ajout de la variable d'état
+  final bool isOnline;
 
   const ConnectionCard({super.key, this.isOnline = true});
 
   @override
   Widget build(BuildContext context) {
-    // Définition des couleurs dynamiques
+
     final iconColor = isOnline ? const Color(0xFF4CAF50) : Colors.red;
     final bgColor = isOnline ? const Color(0xFF4CAF50).withOpacity(0.15) : Colors.red.withOpacity(0.15);
     final badgeColor = isOnline ? const Color(0xFFFF9500) : Colors.grey[600];

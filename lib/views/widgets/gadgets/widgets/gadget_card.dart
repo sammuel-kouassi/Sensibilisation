@@ -28,7 +28,6 @@ class GadgetCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Ligne 1 : Icône, Nom, Catégorie et Badge
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -93,7 +92,6 @@ class GadgetCard extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Ligne 2 : Blocs "En stock" et "Distribués"
             Row(
               children: [
                 Expanded(
@@ -139,7 +137,6 @@ class GadgetCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // Ligne 3 : Barre de progression
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

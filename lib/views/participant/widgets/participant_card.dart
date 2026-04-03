@@ -68,6 +68,15 @@ class ParticipantCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
+
+          Row(
+            children: [
+              Icon(Icons.person, size: 16, color: Colors.grey[600]),
+              const SizedBox(width: 6),
+              Text(participant.accommodation, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+            ],
+          ),
+          const SizedBox(height: 10),
           Row(
             children: [
               Icon(Icons.location_on, size: 16, color: Colors.grey[600]),
@@ -85,7 +94,7 @@ class ParticipantCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Campagne : ${participant.campaign}',
+            'Séance : ${participant.campaign}',
             style: TextStyle(color: Colors.grey[600], fontSize: 13),
           ),
         ],

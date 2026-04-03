@@ -2,19 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/home_provider.dart';
 
-
 class SyncStatusCard extends StatelessWidget {
   const SyncStatusCard({super.key});
 
   @override
   Widget build(BuildContext context) {
-
     final provider = context.watch<HomeProvider>();
     final isOnline = provider.isOnline;
     final pendingCount = provider.pendingSyncOperations;
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 150),
+
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
@@ -93,10 +92,17 @@ class SyncStatusCard extends StatelessWidget {
                   fontSize: 12,
                   fontWeight: FontWeight.w600
               ),
+
             ),
+
           ),
+          const SizedBox(width: 2),
         ],
+
       ),
+
     );
+
+
   }
 }

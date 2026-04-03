@@ -23,6 +23,8 @@ class ParticipantsChartSection extends StatelessWidget {
           ),
         ],
       ),
+
+
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,3 +71,5 @@ class ParticipantsChartSection extends StatelessWidget {
     );
   }
 }
+
+

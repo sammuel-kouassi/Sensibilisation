@@ -38,7 +38,7 @@ class _ParamViewState extends State<ParamView> {
 
   @override
   Widget build(BuildContext context) {
-    // Récupération des données depuis le fichier data
+
     final currentUser = ParamData.getCurrentUser();
     final appInfo = ParamData.getAppInfo();
 
@@ -47,18 +47,17 @@ class _ParamViewState extends State<ParamView> {
       body: SafeArea(
         child: Column(
           children: [
-            // 1. LE HEADER FIXE (Apparaît immédiatement)
+
             const AnimatedSection(
               delayMs: 0,
               child: ParamHeader(),
             ),
 
-            // 2. LA ZONE DE DÉFILEMENT ANIMÉE
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    // Carte de profil (Cascade à 150ms)
+
                     AnimatedSection(
                       delayMs: 150,
                       child: ProfileCard(
@@ -69,7 +68,6 @@ class _ParamViewState extends State<ParamView> {
 
                     const SizedBox(height: 24),
 
-                    // Section Compte (Cascade à 300ms)
                     AnimatedSection(
                       delayMs: 300,
                       child: SettingSection(
@@ -118,7 +116,7 @@ class _ParamViewState extends State<ParamView> {
                           SettingItemClickable(
                             icon: Icons.shield_outlined,
                             title: 'Sécurité',
-                            subtitle: 'Mot de passe et accès',
+                            subtitle: 'Mot de passe',
                             onTap: () => debugPrint('🔐 Sécurité cliqué'),
                             showDivider: false,
                           ),
@@ -127,7 +125,6 @@ class _ParamViewState extends State<ParamView> {
                     ),
                     const SizedBox(height: 32),
 
-                    // Section Informations (Cascade à 600ms)
                     AnimatedSection(
                       delayMs: 600,
                       child: SettingSection(
@@ -148,9 +145,8 @@ class _ParamViewState extends State<ParamView> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 105),
+                    const SizedBox(height: 45),
 
-                    // Footer / Copyright (Cascade à 750ms)
                     AnimatedSection(
                       delayMs: 750,
                       child: Padding(

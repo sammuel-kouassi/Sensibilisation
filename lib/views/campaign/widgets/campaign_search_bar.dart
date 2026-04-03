@@ -18,7 +18,7 @@ class CampaignSearchBar extends StatelessWidget {
         controller: controller,
         onChanged: onChanged,
         decoration: InputDecoration(
-          hintText: 'Rechercher une campagne...',
+          hintText: 'Rechercher une séance...',
           hintStyle: TextStyle(color: Colors.grey[500], fontSize: 17),
           prefixIcon: Icon(Icons.search, color: Colors.grey[600], size: 22),
           filled: true,

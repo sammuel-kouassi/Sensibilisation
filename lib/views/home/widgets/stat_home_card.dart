@@ -22,14 +22,14 @@ class StatHomeCard extends StatelessWidget {
         ],
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center, // Centre le texte verticalement
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             statCardHomeModels.number,
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Color(0xFFFF8000), // On met le chiffre en couleur pour attirer l'oeil
+              color: Color(0xFFFF8000),
             ),
           ),
           const SizedBox(height: 6),

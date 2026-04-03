@@ -14,14 +14,12 @@ class RdvHeader extends StatelessWidget {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade200),
               ),
               child: IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87, size: 18),
+                icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 28),
                 onPressed: () {
-                  Navigator.pop(context); // Action de retour native
+                  Navigator.pop(context);
                 },
               ),
             ),
@@ -37,11 +35,10 @@ class RdvHeader extends StatelessWidget {
           ],
         ),
 
-        // Bouton Planifier
         ElevatedButton(
           onPressed: onPlanifierPressed,
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFF97316),
+            backgroundColor: const Color(0xFFFF9500),
             elevation: 0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),

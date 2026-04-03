@@ -1,4 +1,6 @@
+// Dans campaign_card.dart
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../../models/campaign_model.dart';
 
 class CampaignCard extends StatelessWidget {
@@ -8,14 +10,17 @@ class CampaignCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String dateStr = DateFormat('dd MMM yyyy').format(campaign.date);
+    String heureStr = '${campaign.heureDebut.format(context)} - ${campaign.heureFin.format(context)}';
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey.withOpacity(0.15), width: 1.5),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.15), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -73,21 +78,28 @@ class CampaignCard extends StatelessWidget {
             children: [
               Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
               const SizedBox(width: 6),
-              Text(campaign.dates, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+              Text('$dateStr • $heureStr', style: TextStyle(color: Colors.grey[600], fontSize: 14)),
             ],
           ),
           const SizedBox(height: 12),
           Text(
-            'Superviseur : ${campaign.supervisor}',
+            'Organisateur : ${campaign.supervisor}',
             style: TextStyle(color: Colors.grey[600], fontSize: 13),
           ),
+          if (campaign.coutTotalLogistique > 0) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Budget Logistique: ${campaign.coutTotalLogistique.toStringAsFixed(0)} FCFA',
+              style: const TextStyle(color: Color(0xFFFF9500), fontSize: 13, fontWeight: FontWeight.bold),
+            ),
+          ],
           const SizedBox(height: 12),
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: LinearProgressIndicator(
               value: campaign.progress,
               minHeight: 8,
-              backgroundColor: Colors.grey.withOpacity(0.2),
+              backgroundColor: Colors.grey.withValues(alpha: 0.2),
               valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFF9500)),
             ),
           ),

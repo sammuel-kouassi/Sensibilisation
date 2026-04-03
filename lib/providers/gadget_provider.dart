@@ -4,21 +4,17 @@ import '../models/gadget_model.dart';
 import '../data/gadget_data.dart';
 
 class GadgetProvider extends ChangeNotifier {
-  // --- États ---
   bool _isLoading = false;
   List<GadgetModel> _allGadgets = [];
   List<GadgetModel> _filteredGadgets = [];
 
-  // --- Getters ---
   bool get isLoading => _isLoading;
   List<GadgetModel> get filteredGadgets => _filteredGadgets;
 
-  // --- Initialisation ---
   GadgetProvider() {
     loadGadgets();
   }
 
-  // --- Méthodes ---
   Future<void> loadGadgets() async {
     _isLoading = true;
     notifyListeners();

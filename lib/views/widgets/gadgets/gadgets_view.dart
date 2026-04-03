@@ -8,7 +8,7 @@ import '../../../models/gadget_model.dart';
 // Imports Widgets
 import '../../home/home_view.dart';
 import '../animated_section.dart';
-import 'widgets/gadget_header.dart'; // <-- Nouveau Header fixe
+import 'widgets/gadget_header.dart';
 import 'widgets/gadget_search_bar.dart';
 import 'widgets/gadget_card.dart';
 
@@ -31,12 +31,10 @@ class _GadgetsViewState extends State<GadgetsView> {
 
   void _onScannerPressed() {
     debugPrint('📱 Scanner QR - Lancer scan');
-    // Logique de navigation vers la vue du scanner
   }
 
   void _onGadgetTapped(GadgetModel gadget) {
     debugPrint('📦 Gadget sélectionné: ${gadget.name}');
-    // Logique pour voir les détails d'un gadget
   }
 
   @override
@@ -50,18 +48,17 @@ class _GadgetsViewState extends State<GadgetsView> {
             builder: (context, provider, child) {
               return Column(
                 children: [
-                  // 1. HEADER FIXE (Apparaît immédiatement)
+
                   AnimatedSection(
                     delayMs: 0,
                     child: GadgetHeader(onScannerPressed: _onScannerPressed),
                   ),
 
-                  // 2. ZONE DE DÉFILEMENT
                   Expanded(
                     child: SingleChildScrollView(
                       child: Column(
                         children: [
-                          // La barre de recherche (Cascade à 150ms)
+
                           AnimatedSection(
                             delayMs: 150,
                             child: GadgetSearchBar(
@@ -70,10 +67,8 @@ class _GadgetsViewState extends State<GadgetsView> {
                             ),
                           ),
 
-                          // Espacement pour aérer
                           const SizedBox(height: 16),
 
-                          // 3. Gestion de l'état de chargement et liste
                           if (provider.isLoading)
                             const Padding(
                               padding: EdgeInsets.only(top: 50.0),
@@ -88,7 +83,7 @@ class _GadgetsViewState extends State<GadgetsView> {
                               ),
                             )
                           else
-                          // La liste des gadgets filtrée (Cascade à 300ms)
+
                             AnimatedSection(
                               delayMs: 300,
                               child: Padding(
@@ -107,8 +102,7 @@ class _GadgetsViewState extends State<GadgetsView> {
                               ),
                             ),
 
-                          // Espace vide en bas pour le scroll
-                          const SizedBox(height: 130),
+                          const SizedBox(height: 45),
                         ],
                       ),
                     ),

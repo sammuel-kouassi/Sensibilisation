@@ -57,12 +57,12 @@ class _ParticipantViewState extends State<ParticipantView> {
       create: (_) => ParticipantProvider(),
       child: Scaffold(
         backgroundColor: Colors.grey[50],
-        body: SafeArea( // Protège le header fixe de la barre de statut
+        body: SafeArea(
           child: Consumer<ParticipantProvider>(
             builder: (context, provider, child) {
               return Column(
                 children: [
-                  // 1. LE HEADER FIXE (Apparaît immédiatement)
+
                   AnimatedSection(
                     delayMs: 0,
                     child: ParticipantHeader(
@@ -70,12 +70,11 @@ class _ParticipantViewState extends State<ParticipantView> {
                     ),
                   ),
 
-                  // 2. LA ZONE DE DÉFILEMENT
                   Expanded(
                     child: SingleChildScrollView(
                       child: Column(
                         children: [
-                          // La barre de recherche (Cascade à 150ms)
+
                           AnimatedSection(
                             delayMs: 150,
                             child: ParticipantSearchBar(
@@ -84,7 +83,6 @@ class _ParticipantViewState extends State<ParticipantView> {
                             ),
                           ),
 
-                          // Le compteur de résultats (Cascade à 300ms)
                           AnimatedSection(
                             delayMs: 300,
                             child: Padding(
@@ -103,7 +101,6 @@ class _ParticipantViewState extends State<ParticipantView> {
                             ),
                           ),
 
-                          // Gestion du chargement
                           if (provider.isLoading)
                             const Padding(
                               padding: EdgeInsets.only(top: 50.0),
@@ -115,7 +112,7 @@ class _ParticipantViewState extends State<ParticipantView> {
                               child: Text('Aucun participant trouvé.', style: TextStyle(color: Colors.grey)),
                             )
                           else
-                          // La liste des cartes (Cascade à 450ms)
+
                             AnimatedSection(
                               delayMs: 450,
                               child: Padding(
@@ -131,7 +128,7 @@ class _ParticipantViewState extends State<ParticipantView> {
                               ),
                             ),
 
-                          const SizedBox(height: 130), // Espace final de respiration
+                          const SizedBox(height: 45),
                         ],
                       ),
                     ),

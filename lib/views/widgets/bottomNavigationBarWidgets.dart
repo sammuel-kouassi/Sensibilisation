@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../campaign/campaign_view.dart';
 import '../home/home_view.dart';
 import '../participant/participant_view.dart';
 import '../settings/param_view.dart';
@@ -19,7 +18,6 @@ class _BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
 
   final List<Widget> _pages = const [
     HomeView(),
-    CampaignView(),
     ParticipantView(),
     StatisticsView(),
     ParamView(),
@@ -95,9 +93,7 @@ class _BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
       child: Scaffold(
         extendBody: false,
 
-        // CORRECTION ICI : On retire l'IndexedStack.
-        // On affiche directement la page demandée.
-        // Cela va forcer la page à se reconstruire et déclencher ton AnimatedSection !
+
         body: _pages[_selectedIndex],
 
         bottomNavigationBar: Container(
@@ -114,10 +110,9 @@ class _BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   _buildNavItem(0, Icons.grid_view_outlined, Icons.grid_view_rounded, 'Accueil'),
-                  _buildNavItem(1, Icons.campaign_outlined, Icons.campaign_rounded, 'Campagnes'),
-                  _buildNavItem(2, Icons.groups_outlined, Icons.groups_rounded, 'Participants'),
-                  _buildNavItem(3, Icons.analytics_outlined, Icons.analytics_rounded, 'Stats'),
-                  _buildNavItem(4, Icons.settings_outlined, Icons.settings, 'Paramètres'),
+                  _buildNavItem(1, Icons.groups_outlined, Icons.groups_rounded, 'Participants'), // Corrigé : 1
+                  _buildNavItem(2, Icons.analytics_outlined, Icons.analytics_rounded, 'Stats'),  // Corrigé : 2
+                  _buildNavItem(3, Icons.settings_outlined, Icons.settings, 'Paramètres'),       // Corrigé : 3
                 ],
               ),
             ),

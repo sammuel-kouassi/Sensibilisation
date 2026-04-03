@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:signature/signature.dart';
 
 import '../../../models/prise_contact_model.dart';
 import 'widgets/custom_text_field.dart';
@@ -15,11 +16,17 @@ class PrisedeContactForm extends StatefulWidget {
 }
 
 class _PrisedeContactFormState extends State<PrisedeContactForm> {
-  final _formKey = GlobalKey<FormState>(); // Ajout pour la validation standardisée
+  final _formKey = GlobalKey<FormState>();
+  final SignatureController _signatureController = SignatureController(
+    penStrokeWidth: 3,
+    penColor: Colors.black,
+    exportBackgroundColor: Colors.white,
+  );
+
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _dateController = TextEditingController(); // Ajouté pour le CustomDatePicker
+  final TextEditingController _dateController = TextEditingController();
   final TextEditingController _objectController = TextEditingController();
   final TextEditingController _agencyController = TextEditingController();
   final TextEditingController _quarterController = TextEditingController();
@@ -32,11 +39,21 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
   late Map<String, bool> _pointsAbordables;
 
   final List<String> _directions = [
-    'Direction Nord',
-    'Direction Sud',
-    'Direction Est',
-    'Direction Ouest',
-    'Direction Centrale',
+    'DRC',
+    'DRCS',
+    'DRBC',
+    'DRAS',
+    'DRABO',
+    'DRYOP',
+    'DRBC',
+    'DRCO',
+    'DRLO',
+    'DRAN',
+    'DRO',
+    'DRN',
+    'DRSO',
+    'DRE',
+    'DRSE',
   ];
 
   @override
@@ -92,13 +109,12 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
 
   void _onSave() {
     if (_formKey.currentState!.validate() && _selectedDirection != null) {
-      // Filtrer les points cochés
+
       final checkedPoints = _pointsAbordables.entries
           .where((e) => e.value)
           .map((e) => e.key)
           .toList();
 
-      // Création du modèle
       final newContact = PriseContactModel(
         name: _nameController.text,
         phone: _phoneController.text,
@@ -112,7 +128,6 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
         observations: _observationsController.text,
       );
 
-      // On renvoie l'objet à la page précédente
       Navigator.pop(context, newContact);
 
     } else {
@@ -131,7 +146,7 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
         elevation: 0,
         leading: GestureDetector(
           onTap: _onBackPressed,
-          child: const Icon(Icons.arrow_back, color: Colors.black, size: 28),
+          child: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 28),
         ),
         title: const Text(
           'Prise de Contact',
@@ -147,7 +162,6 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
 
-              // 1. Informations générales
               FormSection(
                 title: 'Informations générales',
                 children: [
@@ -187,7 +201,6 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
               ),
               const SizedBox(height: 24),
 
-              // 2. Localisation
               FormSection(
                 title: 'Localisation',
                 icon: Icons.location_on,
@@ -232,7 +245,6 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
               ),
               const SizedBox(height: 24),
 
-              // 3. Points abordés
               FormSection(
                 title: 'Points abordés',
                 children: [
@@ -280,32 +292,46 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
               ),
               const SizedBox(height: 24),
 
-              // 4. Signature
               FormSection(
                 title: 'Signature',
                 children: [
                   Container(
                     width: double.infinity,
-                    height: 150,
+                    height: 180,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: Colors.grey.withValues(alpha: 0.3), width: 2),
-                      color: Colors.grey[50],
+                      border: Border.all(
+                        color: const Color(0xFFFF8000).withValues(alpha: 0.3),
+                        width: 2,
+                      ),
+                      color: Colors.white,
                     ),
-                    child: Center(
-                      child: Text('Zone de signature numérique', style: TextStyle(color: Colors.grey[400], fontSize: 16)),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Signature(
+                        controller: _signatureController,
+                        backgroundColor: Colors.grey[50]!,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton.icon(
+                      onPressed: () => _signatureController.clear(),
+                      icon: const Icon(Icons.delete_outline, size: 20, color: Colors.redAccent),
+                      label: const Text('Effacer la signature', style: TextStyle(color: Colors.redAccent)),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
 
-              // 5. Observations
               FormSection(
                 title: 'Observations',
                 children: [
                   CustomTextField(
-                    label: '', // Pas de label au dessus
+                    label: '',
                     hint: 'Notes et observations...',
                     controller: _observationsController,
                     maxLines: 6,
@@ -314,7 +340,6 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
               ),
               const SizedBox(height: 32),
 
-              // 6. Bouton Enregistrer
               GestureDetector(
                 onTap: _onSave,
                 child: Container(

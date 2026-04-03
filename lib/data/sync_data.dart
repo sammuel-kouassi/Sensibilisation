@@ -44,7 +44,7 @@ class SyncData {
         iconColor: const Color(0xFF4CAF50),
       ),
       SyncHistoryModel(
-        title: 'Campagnes',
+        title: 'Séances',
         time: 'il y a 2h',
         icon: Icons.check_circle,
         iconColor: const Color(0xFF4CAF50),

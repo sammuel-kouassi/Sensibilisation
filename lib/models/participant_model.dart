@@ -4,6 +4,8 @@ class ParticipantModel {
   final String id;
   final String name;
   final String phone;
+  final String accommodation;
+
   final String location;
   final String date;
   final String campaign;
@@ -15,6 +17,7 @@ class ParticipantModel {
     required this.id,
     required this.name,
     required this.phone,
+    required this.accommodation,
     required this.location,
     required this.date,
     required this.campaign,

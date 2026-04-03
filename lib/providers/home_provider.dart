@@ -25,14 +25,12 @@ class HomeProvider extends ChangeNotifier {
   List<QuickAccessModel> get quickAccess => _quickAccess;
   List<BarchartModels> get barCharts => _barCharts;
 
-  // --- Initialisation ---
   void init(BuildContext context) {
     if (_statCards.isEmpty && _isLoading) {
       loadHomeData(context);
     }
   }
 
-  // --- Méthodes ---
   Future<void> loadHomeData(BuildContext context) async {
     _isLoading = true;
     notifyListeners();

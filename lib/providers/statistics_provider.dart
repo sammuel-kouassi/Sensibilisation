@@ -7,27 +7,24 @@ import '../data/barchart_data.dart';
 import '../data/period_data.dart';
 
 class StatisticsProvider extends ChangeNotifier {
-  // --- États ---
+
   bool _isLoading = false;
   String _selectedPeriod = PeriodData.defaultPeriod;
 
   List<CarteModels> _carteList = [];
   List<BarchartModels> _chartData = [];
 
-  // --- Getters ---
   bool get isLoading => _isLoading;
   String get selectedPeriod => _selectedPeriod;
   List<CarteModels> get carteList => _carteList;
   List<BarchartModels> get chartData => _chartData;
 
-  // --- Initialisation ---
   void init(BuildContext context) {
     if (_carteList.isEmpty && !_isLoading) {
       loadStatistics(context);
     }
   }
 
-  // --- Méthodes ---
   Future<void> loadStatistics(BuildContext context) async {
     _isLoading = true;
     notifyListeners();

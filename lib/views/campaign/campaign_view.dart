@@ -46,7 +46,7 @@ class _CampaignViewState extends State<CampaignView> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Campagne ajoutée et prête pour synchronisation !'),
+            content: Text('Séance ajoutée et prête pour synchronisation !'),
             backgroundColor: Colors.green,
           ),
         );
@@ -84,6 +84,7 @@ class _CampaignViewState extends State<CampaignView> {
                             ),
                           ),
 
+
                           // Gestion du chargement
                           if (provider.isLoading)
                             const Padding(
@@ -94,7 +95,7 @@ class _CampaignViewState extends State<CampaignView> {
                             const Padding(
                               padding: EdgeInsets.only(top: 50.0),
                               child: Text(
-                                'Aucune campagne trouvée.',
+                                'Aucune séance trouvée.',
                                 style: TextStyle(color: Colors.grey),
                               ),
                             )
@@ -104,17 +105,38 @@ class _CampaignViewState extends State<CampaignView> {
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 16),
                                 child: Column(
-                                  children: provider.filteredCampaigns.map((campaign) {
-                                    return Padding(
-                                      padding: const EdgeInsets.only(bottom: 16),
-                                      child: CampaignCard(campaign: campaign),
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: provider.groupByLocalite.entries.map((entry) {
+
+                                    String localite = entry.key; // Nom de la commune
+                                    List<CampaignModel> seances = entry.value; // Fiches de la commune
+
+                                    return Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 16),
+                                          child: Text(
+                                            '📍 $localite',
+                                            style: const TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.w800,
+                                                color: Color(0xFFFF9500)
+                                            ),
+                                          ),
+                                        ),
+                                        ...seances.map((seance) => Padding(
+                                          padding: const EdgeInsets.only(bottom: 12),
+                                          child: CampaignCard(campaign: seance),
+                                        )).toList(),
+                                      ],
                                     );
                                   }).toList(),
                                 ),
                               ),
                             ),
 
-                          const SizedBox(height: 130),
+                          const SizedBox(height: 45),
                         ],
                       ),
                     ),

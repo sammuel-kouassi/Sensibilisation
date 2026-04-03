@@ -13,6 +13,5 @@ class RdvModel {
     required this.campagne,
   });
 
-  // Propriété calculée pour savoir si le rendez-vous est planifié
   bool get isPlanifie => statut == 'Planifié';
 }

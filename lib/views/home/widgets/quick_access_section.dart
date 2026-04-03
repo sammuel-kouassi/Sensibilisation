@@ -3,7 +3,6 @@ import '../../../models/quick_access_models.dart';
 import '../../widgets/animated_section.dart';
 import 'quick_access_widget.dart';
 
-// N'oublie pas d'importer ton widget d'animation ici aussi
 
 class QuickAccessSection extends StatelessWidget {
   final List<QuickAccessModel> quickAccessList;
@@ -48,13 +47,11 @@ class QuickAccessSection extends StatelessWidget {
             mainAxisSpacing: 16,
             childAspectRatio: 0.75,
 
-            // On transforme la liste pour avoir accès à l'INDEX
             children: quickAccessList.asMap().entries.map((entry) {
               final index = entry.key;
               final model = entry.value;
 
               return AnimatedSection(
-                // Effet domino : chaque bouton met 50ms de plus que le précédent à apparaître
                 delayMs: 150 + (index * 50),
                 child: QuickAccessWidget(quickAccessModel: model),
               );

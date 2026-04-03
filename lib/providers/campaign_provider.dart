@@ -8,16 +8,13 @@ class CampaignProvider extends ChangeNotifier {
   List<CampaignModel> _allCampaigns = [];
   List<CampaignModel> _filteredCampaigns = [];
 
-  // --- Getters ---
   bool get isLoading => _isLoading;
   List<CampaignModel> get filteredCampaigns => _filteredCampaigns;
 
-  // --- Initialisation ---
   CampaignProvider() {
     loadCampaigns();
   }
 
-  // --- Méthodes ---
   Future<void> loadCampaigns() async {
     _isLoading = true;
     notifyListeners();
@@ -29,6 +26,21 @@ class CampaignProvider extends ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
+  }
+  Map<String, List<CampaignModel>> get groupByLocalite {
+
+    Map<String, List<CampaignModel>> groupes = {};
+
+    for (var seance in filteredCampaigns) {
+
+      if (!groupes.containsKey(seance.location)) {
+        groupes[seance.location] = [];
+      }
+
+      groupes[seance.location]!.add(seance);
+    }
+
+    return groupes;
   }
 
   void filterCampaigns(String query) {

@@ -8,7 +8,7 @@ class RdvCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Utilisation de la propriété de notre modèle pour déterminer les couleurs
+
     final statusColor = rdv.isPlanifie ? const Color(0xFFF97316) : const Color(0xFF10B981);
     final statusBgColor = rdv.isPlanifie ? const Color(0xFFFFF7ED) : const Color(0xFFECFDF5);
 
@@ -23,7 +23,7 @@ class RdvCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Ligne 1 : Titre et Badge de statut
+
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -56,22 +56,18 @@ class RdvCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // Ligne 2 : Date et Heure
           _buildDetailRow(Icons.access_time_rounded, rdv.date),
           const SizedBox(height: 8),
 
-          // Ligne 3 : Lieu
           _buildDetailRow(Icons.location_on_outlined, rdv.lieu),
           const SizedBox(height: 8),
 
-          // Ligne 4 : Campagne
           _buildDetailRow(Icons.adjust, rdv.campagne),
         ],
       ),
     );
   }
 
-  // Sous-widget interne pour garder le code de la carte propre
   Widget _buildDetailRow(IconData icon, String text) {
     return Row(
       children: [

@@ -6,7 +6,7 @@ import '../models/sync_queue_model.dart';
 import '../data/sync_data.dart';
 
 class SyncProvider extends ChangeNotifier {
-  // --- États ---
+
   bool _isLoading = false;
   bool _isSyncing = false;
   bool _isOnline = true;
@@ -14,7 +14,6 @@ class SyncProvider extends ChangeNotifier {
   List<SyncQueueModel> _waitingQueue = [];
   List<SyncHistoryModel> _lastSync = [];
 
-  // --- Getters ---
   bool get isLoading => _isLoading;
   bool get isSyncing => _isSyncing;
   bool get isOnline => _isOnline;
@@ -24,12 +23,10 @@ class SyncProvider extends ChangeNotifier {
 
   int get totalWaiting => _waitingQueue.fold<int>(0, (sum, item) => sum + item.count);
 
-  // --- Initialisation ---
   SyncProvider() {
     loadSyncData();
   }
 
-  // --- Méthodes ---
   Future<void> loadSyncData() async {
     _isLoading = true;
     notifyListeners();

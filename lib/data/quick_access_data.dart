@@ -6,6 +6,8 @@ import '../views/widgets/forms/prisecontact_form.dart';
 import '../views/widgets/gadgets/gadgets_view.dart';
 import '../views/widgets/rdv/rdv_view.dart';
 import '../views/widgets/synchro/synchro_view.dart';
+// Modifie le chemin selon l'endroit où tu as enregistré rdv_view.dart
+import '../views/rdv/rdv_view.dart';
 
 List<QuickAccessModel> getQuickAccessModels(BuildContext context) {
   return [
@@ -29,16 +31,7 @@ List<QuickAccessModel> getQuickAccessModels(BuildContext context) {
         MaterialPageRoute(builder: (context) => const RdvView()),
       ),
     ),
-    QuickAccessModel(
-      icon: Icons.campaign_outlined,
-      iconColor: const Color(0xFFFF9500),
-      backgroundColor: const Color(0xFFFFE4CC),
-      label: 'Ajouter Une Campagne',
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const CampaignForm()),
-      ),
-    ),
+
     QuickAccessModel(
       icon: Icons.people_outline,
       iconColor: const Color(0xFF4CAF50),

@@ -4,28 +4,28 @@ import '../models/carte_models.dart';
 List<CarteModels> getCarteModels(BuildContext context) {
   return [
     CarteModels(
-      icon: Icons.flash_on,
+      icon: Icons.groups_rounded,
       iconColor: const Color(0xFFFF8000),
-      number: '1,245',
-      label: 'Consommations',
+      number: '124',
+      label: 'Participants',
     ),
     CarteModels(
-      icon: Icons.warning_amber_rounded,
-      iconColor: const Color(0xFFE74C3C),
-      number: '34',
-      label: 'Incidents',
-    ),
-    CarteModels(
-      icon: Icons.check_circle_outline,
-      iconColor: const Color(0xFF4CAF50),
-      number: '98%',
-      label: 'Taux de résolution',
-    ),
-    CarteModels(
-      icon: Icons.people_outline,
+      icon: Icons.forum_rounded,
       iconColor: const Color(0xFF3498DB),
-      number: '+12%',
-      label: 'Nouveaux abonnés',
+      number: '89',
+      label: 'Prises de contact',
+    ),
+    CarteModels(
+      icon: Icons.card_giftcard_rounded,
+      iconColor: const Color(0xFF4CAF50),
+      number: '250',
+      label: 'Gadgets distribués',
+    ),
+    CarteModels(
+      icon: Icons.calendar_month_rounded,
+      iconColor: const Color(0xFFE74C3C),
+      number: '12',
+      label: 'Rendez-vous',
     ),
   ];
 }

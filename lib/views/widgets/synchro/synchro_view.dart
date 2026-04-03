@@ -29,7 +29,6 @@ class SynchroView extends StatelessWidget {
       return;
     }
 
-    // Lance la synchro via le provider
     final success = await provider.synchronizeNow();
 
     if (success && context.mounted) {
@@ -58,7 +57,7 @@ class SynchroView extends StatelessWidget {
           elevation: 0,
           leading: GestureDetector(
             onTap: () => _onBackPressed(context),
-            child: const Icon(Icons.arrow_back, color: Colors.black, size: 28),
+            child: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 22),
           ),
           title: const Text(
             'Synchronisation',
@@ -78,14 +77,13 @@ class SynchroView extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // On passe l'état en ligne à la carte
                     ConnectionCard(isOnline: provider.isOnline),
 
                     const SizedBox(height: 24),
 
                     QueueSection(
                       waitingQueue: provider.waitingQueue,
-                      totalWaiting: provider.totalWaiting, // Calculé dans le provider !
+                      totalWaiting: provider.totalWaiting,
                       onItemTapped: _onQueueItemTapped,
                     ),
 
