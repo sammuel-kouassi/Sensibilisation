@@ -21,10 +21,7 @@ class ParamHeader extends StatelessWidget {
             ),
           ),
         ),
-        Container(
-          height: 1,
-          color: Colors.grey.withOpacity(0.2),
-        ),
+        Container(height: 1, color: Colors.grey.withOpacity(0.2)),
       ],
     );
   }

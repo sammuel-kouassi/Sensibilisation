@@ -6,6 +6,7 @@ class ExportButton extends StatelessWidget {
   final String title;
   final String subtitle;
   final VoidCallback onTap;
+  final bool isEnabled;
 
   const ExportButton({
     super.key,
@@ -14,44 +15,34 @@ class ExportButton extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.onTap,
+    this.isEnabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: Colors.grey.withValues(alpha: 0.15),
-            width: 1.5,
+      onTap: isEnabled ? onTap : () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('🔒 Accès restreint à l\'Administrateur')),
+        );
+      },
+      child: Opacity(
+        opacity: isEnabled ? 1.0 : 0.4,
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.grey.withOpacity(0.1)),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Icon(icon, color: iconColor, size: 36),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              subtitle,
-              style: TextStyle(color: Colors.grey[600], fontSize: 13, fontWeight: FontWeight.w400),
-            ),
-          ],
+          child: Column(
+            children: [
+              Icon(icon, color: iconColor, size: 32),
+              const SizedBox(height: 12),
+              Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              Text(subtitle, style: TextStyle(color: Colors.grey[500], fontSize: 11)),
+            ],
+          ),
         ),
       ),
     );

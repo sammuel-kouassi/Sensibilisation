@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../models/carte_models.dart';
+import '../../../models/kpi_model.dart';
 import 'stat_card.dart';
 
 class StatsGridWidget extends StatelessWidget {
-  final List<CarteModels> carteList;
+  final List<KpiModel> kpiList;
 
-  const StatsGridWidget({super.key, required this.carteList});
+  const StatsGridWidget({super.key, required this.kpiList});
 
   @override
   Widget build(BuildContext context) {
@@ -20,9 +20,9 @@ class StatsGridWidget extends StatelessWidget {
           mainAxisSpacing: 16,
           childAspectRatio: 1.0,
         ),
-        itemCount: carteList.length,
+        itemCount: kpiList.length,
         itemBuilder: (context, index) {
-          return StatCard(carte: carteList[index]);
+          return StatCard(kpiModel: kpiList[index]);
         },
       ),
     );

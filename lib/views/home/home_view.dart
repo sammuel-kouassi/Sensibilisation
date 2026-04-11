@@ -43,15 +43,18 @@ class _HomeViewState extends State<HomeView> {
                     offset: const Offset(0, -40),
                     child: Column(
                       children: [
-
                         AnimatedSection(
                           delayMs: 150,
-                          child: QuickAccessSection(quickAccessList: provider.quickAccess),
+                          child: QuickAccessSection(
+                            quickAccessList: provider.quickAccess,
+                          ),
                         ),
 
                         AnimatedSection(
                           delayMs: 300,
-                          child: ParticipantsChartSection(barChartList: provider.barCharts),
+                          child: ParticipantsChartSection(
+                            barChartList: provider.barCharts,
+                          ),
                         ),
 
                         const AnimatedSection(
@@ -59,7 +62,7 @@ class _HomeViewState extends State<HomeView> {
                           child: SyncStatusCard(),
                         ),
 
-                        const SizedBox(height: 80),
+                        const SizedBox(height: 20),
                       ],
                     ),
                   ),

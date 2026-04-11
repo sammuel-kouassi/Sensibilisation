@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../models/barchart_models.dart';
+import '../../../models/bar_chart_model.dart';
 import 'barchart_item.dart';
 
-
 class ParticipantsChartSection extends StatelessWidget {
-  final List<BarchartModels> barChartList;
+  final List<BarchartModel> barChartList;
 
   const ParticipantsChartSection({super.key, required this.barChartList});
 
@@ -24,7 +23,6 @@ class ParticipantsChartSection extends StatelessWidget {
         ],
       ),
 
-
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,14 +39,21 @@ class ParticipantsChartSection extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFF4CAF50),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
                   '6 derniers mois',
-                  style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -71,5 +76,3 @@ class ParticipantsChartSection extends StatelessWidget {
     );
   }
 }
-
-

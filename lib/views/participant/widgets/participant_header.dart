@@ -26,7 +26,10 @@ class ParticipantHeader extends StatelessWidget {
               GestureDetector(
                 onTap: onAddPressed,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 21, vertical: 11),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 21,
+                    vertical: 11,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFF9500),
                     borderRadius: BorderRadius.circular(14),
@@ -50,10 +53,7 @@ class ParticipantHeader extends StatelessWidget {
             ],
           ),
         ),
-        Container(
-          height: 1,
-          color: Colors.grey.withOpacity(0.2),
-        ),
+        Container(height: 1, color: Colors.grey.withOpacity(0.2)),
       ],
     );
   }

@@ -1,25 +1,31 @@
 class PriseContactModel {
-  final String name;
-  final String phone;
-  final String date;
-  final String object;
-  final String direction;
-  final String agency;
-  final String quarter;
-  final String site;
+  final int? id;
+  final int seanceId;
+  final String nomContact;
+  final String telephone;
+  final DateTime date;
+  final String objetMission;
+  final String directionRegionale;
+  final String? agence;
+  final String? quartier;
+  final String? site;
   final List<String> pointsAbordes;
-  final String observations;
+  final String? observations;
+  final String? signatureBase64;
 
   PriseContactModel({
-    required this.name,
-    required this.phone,
+    this.id,
+    required this.seanceId,
+    required this.nomContact,
+    required this.telephone,
     required this.date,
-    required this.object,
-    required this.direction,
-    required this.agency,
-    required this.quarter,
-    required this.site,
+    required this.objetMission,
+    required this.directionRegionale,
+    this.agence,
+    this.quartier,
+    this.site,
     required this.pointsAbordes,
-    required this.observations,
+    this.observations,
+    this.signatureBase64,
   });
 }

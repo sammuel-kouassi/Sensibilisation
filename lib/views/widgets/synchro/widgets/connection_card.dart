@@ -7,9 +7,10 @@ class ConnectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     final iconColor = isOnline ? const Color(0xFF4CAF50) : Colors.red;
-    final bgColor = isOnline ? const Color(0xFF4CAF50).withOpacity(0.15) : Colors.red.withOpacity(0.15);
+    final bgColor = isOnline
+        ? const Color(0xFF4CAF50).withOpacity(0.15)
+        : Colors.red.withOpacity(0.15);
     final badgeColor = isOnline ? const Color(0xFFFF9500) : Colors.grey[600];
 
     return Container(
@@ -36,9 +37,9 @@ class ConnectionCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
             ),
             child: Icon(
-                isOnline ? Icons.wifi : Icons.wifi_off,
-                color: iconColor,
-                size: 28
+              isOnline ? Icons.wifi : Icons.wifi_off,
+              color: iconColor,
+              size: 28,
             ),
           ),
           const SizedBox(width: 16),
@@ -57,7 +58,11 @@ class ConnectionCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   isOnline ? 'Réseau disponible' : 'En attente de réseau',
-                  style: TextStyle(color: Colors.grey[600], fontSize: 13, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),
@@ -70,7 +75,11 @@ class ConnectionCard extends StatelessWidget {
             ),
             child: Text(
               isOnline ? 'En ligne' : 'Déconnecté',
-              style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],

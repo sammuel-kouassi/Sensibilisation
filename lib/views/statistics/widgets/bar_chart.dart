@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../../models/barchart_models.dart';
+import '../../../models/bar_chart_model.dart';
 
 
 class BarChart extends StatelessWidget {
-  final BarchartModels barchartModels;
+  final BarchartModel barchartModels;
 
   const BarChart({super.key, required this.barchartModels});
 

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../models/quick_access_models.dart';
+import '../../../models/quick_access_model.dart';
 import '../../widgets/animated_section.dart';
 import 'quick_access_widget.dart';
-
 
 class QuickAccessSection extends StatelessWidget {
   final List<QuickAccessModel> quickAccessList;

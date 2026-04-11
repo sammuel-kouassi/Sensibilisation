@@ -1,15 +1,11 @@
-
 import 'package:flutter/material.dart';
 
-import '../../../models/barchart_models.dart';
-
+import '../../../models/bar_chart_model.dart';
 
 class BarChart extends StatelessWidget {
+  final BarchartModel barchartModels;
 
-  final BarchartModels barchartModels;
-
-  const BarChart({super.key,
-   required this.barchartModels});
+  const BarChart({super.key, required this.barchartModels});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +14,7 @@ class BarChart extends StatelessWidget {
       children: [
         Container(
           width: 40,
-          height:barchartModels.height,
+          height: barchartModels.height,
           decoration: BoxDecoration(
             color: const Color(0xFFFF9500),
             borderRadius: const BorderRadius.only(

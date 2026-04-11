@@ -6,6 +6,14 @@ class LastSyncSection extends StatelessWidget {
 
   const LastSyncSection({super.key, required this.lastSync});
 
+  IconData _getIcon(String status) {
+    return status == 'success' ? Icons.check_circle : Icons.error;
+  }
+
+  Color _getColor(String status) {
+    return status == 'success' ? const Color(0xFF4CAF50) : Colors.red;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -24,10 +32,13 @@ class LastSyncSection extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.grey.withValues(alpha: 0.15), width: 1.5),
+            border: Border.all(
+              color: Colors.grey.withOpacity(0.15),
+              width: 1.5,
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
+                color: Colors.black.withOpacity(0.05),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -41,7 +52,11 @@ class LastSyncSection extends StatelessWidget {
                 padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
                 child: Row(
                   children: [
-                    Icon(sync.icon, color: sync.iconColor, size: 20),
+                    Icon(
+                      _getIcon(sync.status),
+                      color: _getColor(sync.status),
+                      size: 20,
+                    ), // Déduit dynamiquement
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -49,12 +64,20 @@ class LastSyncSection extends StatelessWidget {
                         children: [
                           Text(
                             sync.title,
-                            style: const TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.w500),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             sync.time,
-                            style: TextStyle(fontSize: 12, color: Colors.grey[500], fontWeight: FontWeight.w400),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[500],
+                              fontWeight: FontWeight.w400,
+                            ),
                           ),
                         ],
                       ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-// Importe ta barre de navigation (l'écran d'accueil après connexion)
 import 'package:cie_services/views/widgets/bottomNavigationBarWidgets.dart';
+import 'package:provider/provider.dart';
+
+import '../../providers/auth_provider.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -24,20 +26,32 @@ class _LoginViewState extends State<LoginView> {
     super.dispose();
   }
 
-  // --- LOGIQUE DE CONNEXION ---
   Future<void> _onLogin() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
 
-      await Future.delayed(const Duration(seconds: 2));
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+      final errorMessage = await authProvider.login(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
 
       if (!mounted) return;
       setState(() => _isLoading = false);
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const BottomNavigationBarWidget()),
-      );
+      if (errorMessage == null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const BottomNavigationBarWidget(),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
+        );
+      }
     }
   }
 
@@ -45,15 +59,19 @@ class _LoginViewState extends State<LoginView> {
     if (_emailController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Veuillez entrer votre email pour réinitialiser le mot de passe.'),
+          content: Text(
+            'Veuillez entrer votre email pour réinitialiser le mot de passe.',
+          ),
           backgroundColor: Colors.red,
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Un lien de réinitialisation a été envoyé à ${_emailController.text}'),
-          backgroundColor: Colors.green,
+          content: Text(
+            'Un lien de réinitialisation a été envoyé à ${_emailController.text}',
+          ),
+          backgroundColor: const Color(0xFF21951D), // Vert CIE
         ),
       );
     }
@@ -67,7 +85,7 @@ class _LoginViewState extends State<LoginView> {
       resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
-          // --- 1. LE FOND DÉGRADÉ ---
+          // --- FOND DÉGRADÉ ---
           Container(
             width: double.infinity,
             height: size.height,
@@ -75,183 +93,279 @@ class _LoginViewState extends State<LoginView> {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Color(0xFF21951D), Color(0xFFFF8000)], // Orange CIE -> Vert SODECI
+                colors: [Color(0xFF21951D), Color(0xFFFF8000)],
               ),
             ),
           ),
 
-          // --- 2. LE LOGO ET LES TITRES ---
+          // --- EN-TÊTE (FAUX LOGO ET TITRES) ---
           Positioned(
-            top: size.height * 0.10, // S'adapte à la taille de l'écran
+            top: size.height * 0.12,
             left: 0,
             right: 0,
             child: Column(
               children: [
+                // Petite icône ou badge pour faire "Pro"
                 Container(
-                  width: 80,
-                  height: 80,
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
                   ),
-                  child: const Center(
-                    child: Icon(Icons.bolt, color: Color(0xFFFF8000), size: 45),
+                  child: const Icon(
+                    Icons.admin_panel_settings_rounded,
+                    color: Colors.white,
+                    size: 48,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
                 const Text(
-                  'CIE - SODECI',
+                  'DLF | Sensibilisation',
                   style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 26,
+                    fontWeight: FontWeight.w900,
                     color: Colors.white,
-                    letterSpacing: 1.5,
+                    letterSpacing: 1.2,
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'DLF | Sensibilisation',
-                  style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.w500),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    'CIE - SODECI',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 2.0,
+                    ),
+                  ),
                 ),
               ],
             ),
           ),
 
+          // --- FORMULAIRE BLANC ANIMÉ ---
           Positioned(
             bottom: 0,
             left: 0,
             right: 0,
-            height: size.height * 0.60,
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
+            height: size.height * 0.62,
+            // 🚀 Ajout de l'animation d'apparition fluide
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 1.0, end: 0.0),
+              duration: const Duration(milliseconds: 800),
+              curve: Curves.easeOutCubic,
+              builder: (context, value, child) {
+                return Transform.translate(
+                  offset: Offset(0, value * 100), // Glisse vers le haut
+                  child: Opacity(
+                    opacity: 1.0 - value, // Apparition en fondu
+                    child: child,
+                  ),
+                );
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(40), // Bordures plus arrondies
+                    topRight: Radius.circular(40),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 20,
+                      offset: const Offset(0, -5),
+                    ),
+                  ],
                 ),
-              ),
-              child: ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
-                ),
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Connexion',
-                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Entrez vos identifiants pour continuer',
-                          style: TextStyle(fontSize: 15, color: Colors.grey[600]),
-                        ),
-                        const SizedBox(height: 32),
-
-                        // --- CHAMP EMAIL ---
-                        const Text('Email', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          decoration: _inputDecoration(hint: 'votre.email@cie.ci'),
-                          validator: (v) {
-                            if (v == null || v.isEmpty) return 'Veuillez entrer votre email';
-                            // Regex pour forcer un vrai format email
-                            final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                            if (!emailRegex.hasMatch(v)) return 'Format d\'email invalide';
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 20),
-
-                        // --- CHAMP MOT DE PASSE ---
-                        const Text('Mot de passe', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _passwordController,
-                          obscureText: !_isPasswordVisible,
-                          decoration: _inputDecoration(
-                            hint: '••••••••',
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                                color: Colors.grey[500],
-                                size: 20,
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(40),
+                    topRight: Radius.circular(40),
+                  ),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 28,
+                      vertical: 32,
+                    ),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Center(
+                            child: Text(
+                              'Connexion',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF1E293B),
                               ),
-                              onPressed: () {
-                                setState(() {
-                                  _isPasswordVisible = !_isPasswordVisible;
-                                });
-                              },
                             ),
                           ),
-                          validator: (v) => v == null || v.isEmpty ? 'Veuillez entrer votre mot de passe' : null,
-                        ),
-                        const SizedBox(height: 12),
+                          const SizedBox(height: 32),
 
-                        // --- MOT DE PASSE OUBLIÉ ---
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: _onForgotPassword,
-                            child: const Text(
-                              'Mot de passe oublié ?',
-                              style: TextStyle(color: Color(0xFFFF8000), fontWeight: FontWeight.w600, fontSize: 14),
+                          // --- CHAMP EMAIL ---
+                          const Text(
+                            'Email professionnel',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 24),
-
-                        SizedBox(
-                          width: double.infinity,
-                          height: 56,
-                          child: ElevatedButton(
-                            onPressed: _isLoading ? null : _onLogin, // Désactivé pendant le chargement
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFFF8000),
-                              disabledBackgroundColor: const Color(0xFFFF8000).withValues(alpha: 0.6),
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: _inputDecoration(
+                              hint: 'votre.email@cie.ci',
+                              prefixIcon:
+                                  Icons.email_outlined, // Ajout de l'icône
                             ),
-                            child: _isLoading
-                                ? const SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
-                            )
-                                : const Text(
-                              'Se connecter',
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                            validator: (v) {
+                              if (v == null || v.isEmpty)
+                                return 'Veuillez entrer votre email';
+                              final emailRegex = RegExp(
+                                r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                              );
+                              if (!emailRegex.hasMatch(v))
+                                return 'Format d\'email invalide';
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 20),
+
+                          // --- CHAMP MOT DE PASSE ---
+                          const Text(
+                            'Mot de passe',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
                             ),
                           ),
-                        ),
-
-                        // Espace pour repousser le copyright vers le bas
-                        const SizedBox(height: 40),
-
-                        // --- COPYRIGHT ---
-                        Center(
-                          child: Text(
-                            'CIE-SODECI © 2026 - Tous droits réservés',
-                            style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _passwordController,
+                            obscureText: !_isPasswordVisible,
+                            decoration: _inputDecoration(
+                              hint: '••••••••',
+                              prefixIcon: Icons
+                                  .lock_outline_rounded, // Ajout de l'icône
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _isPasswordVisible
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
+                                  color: Colors.grey[500],
+                                  size: 20,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _isPasswordVisible = !_isPasswordVisible;
+                                  });
+                                },
+                              ),
+                            ),
+                            validator: (v) => v == null || v.isEmpty
+                                ? 'Veuillez entrer votre mot de passe'
+                                : null,
                           ),
-                        ),
-                        const SizedBox(height: 40),
 
-                      ],
+                          // --- MOT DE PASSE OUBLIÉ ---
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: _onForgotPassword,
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                  vertical: 8,
+                                ),
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: const Text(
+                                'Mot de passe oublié ?',
+                                style: TextStyle(
+                                  color: Color(0xFFFF8000), // Orange CIE
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+
+                          // --- BOUTON DE CONNEXION ---
+                          SizedBox(
+                            width: double.infinity,
+                            height: 56,
+                            child: ElevatedButton(
+                              onPressed: _isLoading ? null : _onLogin,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(
+                                  0xFFFF8000,
+                                ), // Orange CIE
+                                disabledBackgroundColor: const Color(
+                                  0xFFFF8000,
+                                ).withOpacity(0.6),
+                                elevation: 2, // Légère ombre pour le bouton
+                                shadowColor: const Color(
+                                  0xFFFF8000,
+                                ).withOpacity(0.5),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    16,
+                                  ), // Plus arrondi
+                                ),
+                              ),
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      height: 24,
+                                      width: 24,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 3,
+                                      ),
+                                    )
+                                  : const Text(
+                                      'Se connecter',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 32),
+
+                          Center(
+                            child: Text(
+                              'CIE-SODECI © 2026 - Tous droits réservés',
+                              style: TextStyle(
+                                color: Colors.grey[400],
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -263,23 +377,37 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 
-  // --- DESIGN DES CHAMPS DE SAISIE ---
-  InputDecoration _inputDecoration({required String hint, Widget? suffixIcon}) {
+  // --- DESIGN DES CHAMPS DE TEXTE ---
+  InputDecoration _inputDecoration({
+    required String hint,
+    Widget? suffixIcon,
+    required IconData prefixIcon,
+  }) {
     return InputDecoration(
       hintText: hint,
       hintStyle: TextStyle(color: Colors.grey[400], fontSize: 15),
+      prefixIcon: Icon(
+        prefixIcon,
+        color: Colors.grey[500],
+        size: 22,
+      ), // Icône ajoutée ici
       filled: true,
-      fillColor: const Color(0xFFF5F5F5),
+      fillColor: const Color(
+        0xFFF8FAFC,
+      ), // Un gris-bleuté très léger et moderne
       suffixIcon: suffixIcon,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16), // Plus arrondi
         borderSide: BorderSide.none,
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         borderSide: const BorderSide(color: Color(0xFFFF8000), width: 1.5),
       ),
-      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+      contentPadding: const EdgeInsets.symmetric(
+        vertical: 18,
+        horizontal: 16,
+      ),
     );
   }
 }

@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import '../../../data/period_data.dart';
 import 'period_option.dart';
 
 class PeriodSelector extends StatefulWidget {
   final String selectedPeriod;
+  final List<String> availablePeriods;
   final ValueChanged<String> onPeriodChanged;
 
   const PeriodSelector({
     super.key,
     required this.selectedPeriod,
+    required this.availablePeriods,
     required this.onPeriodChanged,
   });
 
@@ -18,7 +19,6 @@ class PeriodSelector extends StatefulWidget {
 
 class _PeriodSelectorState extends State<PeriodSelector> {
   bool _isDropdownOpen = false;
-  final periods = PeriodData.getPeriods();
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +35,7 @@ class _PeriodSelectorState extends State<PeriodSelector> {
                 border: Border.all(color: const Color(0xFFFF8000), width: 2),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: Colors.black.withOpacity(0.05), // Modifié ici
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -64,24 +64,25 @@ class _PeriodSelectorState extends State<PeriodSelector> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.grey.withValues(alpha: 0.15), width: 1.5),
+              border: Border.all(color: Colors.grey.withOpacity(0.15), width: 1.5), // Modifié ici
             ),
             child: Column(
-              children: periods.map((periodModel) {
+              // On boucle directement sur les chaînes de caractères (String)
+              children: widget.availablePeriods.map((period) {
                 return Column(
                   children: [
                     PeriodOption(
-                      title: periodModel.title,
-                      isSelected: widget.selectedPeriod == periodModel.title,
+                      title: period,
+                      isSelected: widget.selectedPeriod == period,
                       onTap: () {
-                        widget.onPeriodChanged(periodModel.title);
+                        widget.onPeriodChanged(period);
                         setState(() => _isDropdownOpen = false);
                       },
                     ),
-                    if (periodModel != periods.last)
+                    if (period != widget.availablePeriods.last)
                       Container(
                         height: 1,
-                        color: Colors.grey.withValues(alpha: 0.1),
+                        color: Colors.grey.withOpacity(0.1), // Modifié ici
                       ),
                   ],
                 );

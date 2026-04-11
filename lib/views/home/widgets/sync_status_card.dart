@@ -12,7 +12,6 @@ class SyncStatusCard extends StatelessWidget {
     final pendingCount = provider.pendingSyncOperations;
 
     return Container(
-
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -36,7 +35,9 @@ class SyncStatusCard extends StatelessWidget {
                   width: 55,
                   height: 55,
                   decoration: BoxDecoration(
-                    color: isOnline ? const Color(0xFFD4F1E4) : Colors.orange.withValues(alpha: 0.2),
+                    color: isOnline
+                        ? const Color(0xFFD4F1E4)
+                        : Colors.orange.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(18),
                   ),
                   child: Center(
@@ -55,11 +56,12 @@ class SyncStatusCard extends StatelessWidget {
                     children: [
                       Text(
                         'Synchronisation',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                          fontSize: 16,
-                        ),
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                              fontSize: 16,
+                            ),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -79,30 +81,28 @@ class SyncStatusCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               border: Border.all(
-                  color: isOnline ? Colors.green.withValues(alpha: 0.3) : Colors.orange.withValues(alpha: 0.3),
-                  width: 1.5
+                color: isOnline
+                    ? Colors.green.withValues(alpha: 0.3)
+                    : Colors.orange.withValues(alpha: 0.3),
+                width: 1.5,
               ),
               borderRadius: BorderRadius.circular(20),
-              color: isOnline ? Colors.green.withValues(alpha: 0.05) : Colors.orange.withValues(alpha: 0.05),
+              color: isOnline
+                  ? Colors.green.withValues(alpha: 0.05)
+                  : Colors.orange.withValues(alpha: 0.05),
             ),
             child: Text(
               isOnline ? 'Connecté' : 'Hors-ligne',
               style: TextStyle(
-                  color: isOnline ? Colors.green[700] : Colors.orange[800],
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600
+                color: isOnline ? Colors.green[700] : Colors.orange[800],
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
               ),
-
             ),
-
           ),
           const SizedBox(width: 2),
         ],
-
       ),
-
     );
-
-
   }
 }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../models/stat_card_home_models.dart';
+import '../../../models/kpi_model.dart';
 
 class StatHomeCard extends StatelessWidget {
-  final StatCardHomeModels statCardHomeModels;
+  final KpiModel kpiModel;
 
-  const StatHomeCard({super.key, required this.statCardHomeModels});
+  const StatHomeCard({super.key, required this.kpiModel});
 
   @override
   Widget build(BuildContext context) {
@@ -15,17 +15,17 @@ class StatHomeCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05), // Correction opacité
             blurRadius: 8,
             offset: const Offset(0, 2),
-          )
+          ),
         ],
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            statCardHomeModels.number,
+            kpiModel.value,
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -34,9 +34,13 @@ class StatHomeCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            statCardHomeModels.label,
+            kpiModel.label,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w500),
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),

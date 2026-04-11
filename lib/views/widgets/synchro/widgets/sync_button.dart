@@ -33,7 +33,11 @@ class SyncButton extends StatelessWidget {
             const SizedBox(width: 10),
             Text(
               isSyncing ? 'Synchronisation...' : 'Synchroniser maintenant',
-              style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white, fontSize: 16),
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+                fontSize: 16,
+              ),
             ),
           ],
         ),

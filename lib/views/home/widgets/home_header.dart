@@ -1,110 +1,352 @@
 import 'package:flutter/material.dart';
-import '../../../models/stat_card_home_models.dart';
+import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
+
+import '../../../models/kpi_model.dart';
+import '../../../models/notification_model.dart';
+import '../../../providers/auth_provider.dart';
+import '../../../providers/rdv_provider.dart';
+import '../../../providers/sync_provider.dart';
+import '../../../providers/notification_provider.dart';
 import 'stat_home_card.dart';
 
 class HomeHeader extends StatelessWidget {
+  final List<KpiModel> statCardList;
 
-  final List<StatCardHomeModels> statCardList;
+  const HomeHeader({super.key, required this.statCardList});
 
-  const HomeHeader({
-    super.key,
-    required this.statCardList,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-
-          colors: [Color(0xFFFF8000), Color(0xFF21951D)],
-        ),
+  void _showNotificationsPanel(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
       ),
-      padding: const EdgeInsets.fromLTRB(24, 50, 24, 70),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Bienvenue chez',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const Text(
-                    'CIE-SODECI',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-
-
-              Stack(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: IconButton(
-                      icon: const Icon(Icons.notifications_none_rounded, color: Colors.white),
-                      onPressed: () {
-                      },
-                    ),
-                  ),
-                  Positioned(
-                    right: 12,
-                    top: 12,
-                    child: Container(
-                      width: 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        color: Colors.redAccent,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: const Color(0xFFFF8000), width: 2),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.7,
+          maxChildSize: 0.9,
+          expand: false,
+          builder: (context, scrollController) {
+            return Consumer<NotificationProvider>(
+              builder: (context, notifProv, _) {
+                final list = notifProv.notifications;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    children: [
+                      // Barre de drag
+                      Center(
+                        child: Container(
+                          margin: const EdgeInsets.only(top: 12, bottom: 20),
+                          width: 40,
+                          height: 5,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 35),
-
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: statCardList.asMap().entries.map((entry) {
-                final index = entry.key;
-                final statModel = entry.value;
-                return Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      right: index == statCardList.length - 1 ? 0 : 16.0,
-                    ),
-                    child: StatHomeCard(statCardHomeModels: statModel),
+                      // En-tête du panneau
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Notifications',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFF1E293B),
+                            ),
+                          ),
+                          if (notifProv.unreadCount > 0)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFF8000).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                '${notifProv.unreadCount} non lues',
+                                style: const TextStyle(
+                                  color: Color(0xFFFF8000),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      // Liste dynamique
+                      Expanded(
+                        child: list.isEmpty
+                            ? _buildEmptyState()
+                            : ListView.builder(
+                                controller: scrollController,
+                                itemCount: list.length,
+                                itemBuilder: (context, index) =>
+                                    _buildNotificationItem(
+                                      context,
+                                      list[index],
+                                    ),
+                              ),
+                      ),
+                    ],
                   ),
                 );
-              }).toList(),
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // --- 📝 ITEM DE LISTE DE NOTIFICATION ---
+  Widget _buildNotificationItem(BuildContext context, AppNotification notif) {
+    return GestureDetector(
+      onTap: () => context.read<NotificationProvider>().markAsRead(notif.id),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: notif.isRead ? Colors.white : notif.color.withOpacity(0.06),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: notif.isRead
+                ? Colors.grey.withOpacity(0.1)
+                : notif.color.withOpacity(0.2),
+          ),
+          boxShadow: notif.isRead
+              ? []
+              : [
+                  BoxShadow(
+                    color: notif.color.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: notif.color.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(notif.icon, color: notif.color, size: 20),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          notif.title,
+                          style: TextStyle(
+                            fontWeight: notif.isRead
+                                ? FontWeight.w600
+                                : FontWeight.w900,
+                            fontSize: 15,
+                            color: const Color(0xFF1E293B),
+                          ),
+                        ),
+                      ),
+                      Text(
+                        DateFormat('HH:mm').format(notif.time),
+                        style: TextStyle(color: Colors.grey[500], fontSize: 11),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    notif.body,
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 13,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // --- 📭 ÉTAT VIDE (EMPTY STATE) ---
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.notifications_off_outlined,
+              size: 60,
+              color: Colors.grey[300],
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'Aucune notification',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1E293B),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Vos rappels de rendez-vous et vos infos\nde synchronisation s\'afficheront ici.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[500],
+              height: 1.4,
             ),
           ),
         ],
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final rdvProv = context.watch<RdvProvider>();
+    final syncProv = context.watch<SyncProvider>();
+
+    return Consumer<NotificationProvider>(
+      builder: (context, notifProv, _) {
+        // Synchronisation des données au rendu
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          notifProv.generateNotifications(rdvProv, syncProv);
+        });
+
+        return Container(
+          width: double.infinity,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFFFF8000), Color(0xFF21951D)],
+            ),
+          ),
+          padding: const EdgeInsets.fromLTRB(24, 60, 24, 70),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Bienvenue',
+                        style: TextStyle(color: Colors.white70, fontSize: 16),
+                      ),
+                      Text(
+                        context.watch<AuthProvider>().name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 26,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ],
+                  ),
+                  // --- CLOCHE AVEC BADGE NUMÉRIQUE ---
+                  GestureDetector(
+                    onTap: () => _showNotificationsPanel(context),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Icon(
+                            Icons.notifications_active_outlined,
+                            color: Colors.white,
+                            size: 28,
+                          ),
+                        ),
+                        if (notifProv.unreadCount > 0)
+                          Positioned(
+                            right: -5,
+                            top: -5,
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: const Color(0xFFFF8000),
+                                  width: 2,
+                                ),
+                              ),
+                              constraints: const BoxConstraints(
+                                minWidth: 24,
+                                minHeight: 24,
+                              ),
+                              child: Text(
+                                '${notifProv.unreadCount}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 35),
+              // Cartes KPI (StatHomeCard)
+              IntrinsicHeight(
+                child: Row(
+                  children: statCardList.asMap().entries.map((e) {
+                    return Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          right: e.key == statCardList.length - 1 ? 0 : 16,
+                        ),
+                        child: StatHomeCard(kpiModel: e.value),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -13,6 +13,19 @@ class QueueSection extends StatelessWidget {
     required this.onItemTapped,
   });
 
+  IconData _getIcon(String type) {
+    switch (type) {
+      case 'contact':
+        return Icons.contact_phone_outlined;
+      case 'participant':
+        return Icons.people_outline;
+      case 'gadget':
+        return Icons.card_giftcard_outlined;
+      default:
+        return Icons.cloud_upload_outlined;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -37,7 +50,11 @@ class QueueSection extends StatelessWidget {
               ),
               child: Text(
                 '$totalWaiting en attente',
-                style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],
@@ -47,10 +64,13 @@ class QueueSection extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.grey.withValues(alpha: 0.15), width: 1.5),
+            border: Border.all(
+              color: Colors.grey.withOpacity(0.15),
+              width: 1.5,
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
+                color: Colors.black.withOpacity(0.05),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -59,51 +79,69 @@ class QueueSection extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: waitingQueue.isEmpty
               ? const Center(
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text('Aucun élément en attente', style: TextStyle(color: Colors.grey)),
-            ),
-          )
-              : Column(
-            children: waitingQueue.map((item) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: GestureDetector(
-                  onTap: () => onItemTapped(item),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.all(14),
-                    child: Row(
-                      children: [
-                        Icon(item.icon, color: const Color(0xFFFF9500), size: 20),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            item.title,
-                            style: const TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.w500),
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            item.status,
-                            style: TextStyle(fontSize: 11, color: Colors.grey[600], fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                      ],
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text(
+                      'Aucun élément en attente',
+                      style: TextStyle(color: Colors.grey),
                     ),
                   ),
+                )
+              : Column(
+                  children: waitingQueue.map((item) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: GestureDetector(
+                        onTap: () => onItemTapped(item),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.all(14),
+                          child: Row(
+                            children: [
+                              Icon(
+                                _getIcon(item.type),
+                                color: const Color(0xFFFF9500),
+                                size: 20,
+                              ), // Icône déduite
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  item.title,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  item.status,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
                 ),
-              );
-            }).toList(),
-          ),
         ),
       ],
     );

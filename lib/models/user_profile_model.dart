@@ -1,11 +1,11 @@
-class UserProfileModel {
-  final String name;
-  final String email;
-  final String role;
+class RepartZoneModel {
+  final String zoneName;
+  final double percentage;
+  final int valeurExacte;
 
-  UserProfileModel({
-    required this.name,
-    required this.email,
-    required this.role,
+  RepartZoneModel({
+    required this.zoneName,
+    required this.percentage,
+    required this.valeurExacte,
   });
 }

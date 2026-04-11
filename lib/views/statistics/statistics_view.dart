@@ -1,5 +1,3 @@
-import 'package:cie_services/views/statistics/widgets/repart_zone.dart';
-import 'package:cie_services/views/statistics/widgets/tend_inscr.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -11,6 +9,8 @@ import 'widgets/period_selector.dart';
 import 'widgets/stat_grid.dart';
 import 'widgets/monthly_chart_widget.dart';
 import 'widgets/export_section.dart';
+import 'widgets/repart_zone.dart';
+import 'widgets/tend_inscr.dart';
 
 class StatisticsView extends StatelessWidget {
   const StatisticsView({super.key});
@@ -26,26 +26,27 @@ class StatisticsView extends StatelessWidget {
             builder: (context, provider, child) {
               return Column(
                 children: [
-
-                  const AnimatedSection(
-                    delayMs: 0,
-                    child: StatisticsHeader(),
-                  ),
+                  const AnimatedSection(delayMs: 0, child: StatisticsHeader()),
 
                   Expanded(
                     child: SingleChildScrollView(
-
                       padding: const EdgeInsets.only(bottom: 40.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-
                           AnimatedSection(
                             delayMs: 150,
                             child: PeriodSelector(
                               selectedPeriod: provider.selectedPeriod,
+                              availablePeriods: const [
+                                '7 derniers jours',
+                                '30 derniers jours',
+                                'Cette année',
+                              ],
                               onPeriodChanged: (newPeriod) {
-                                provider.updatePeriod(context, newPeriod);
+                                provider.updatePeriod(
+                                  newPeriod,
+                                ); // Plus besoin du context ici
                               },
                             ),
                           ),
@@ -55,42 +56,45 @@ class StatisticsView extends StatelessWidget {
                           if (provider.isLoading)
                             const Padding(
                               padding: EdgeInsets.symmetric(vertical: 60.0),
-                              child: CircularProgressIndicator(color: Color(0xFFFF9500)),
+                              child: CircularProgressIndicator(
+                                color: Color(0xFFFF9500),
+                              ),
                             )
                           else ...[
-
                             AnimatedSection(
                               delayMs: 300,
-                              child: StatsGridWidget(carteList: provider.carteList),
+                              child: StatsGridWidget(kpiList: provider.kpiList),
                             ),
 
                             const SizedBox(height: 8),
 
                             AnimatedSection(
                               delayMs: 450,
-                              child: MonthlyChartWidget(chartData: provider.chartData),
+                              child: MonthlyChartWidget(
+                                chartData: provider.chartData,
+                              ),
                             ),
 
-                            const AnimatedSection(
+                            AnimatedSection(
                               delayMs: 550,
-                              child: RepartZone(),
+                              // On passe les données du provider au widget
+                              child: RepartZone(zoneData: provider.zoneData),
                             ),
 
                             const SizedBox(height: 8),
 
-                            const AnimatedSection(
+                            AnimatedSection(
                               delayMs: 650,
-                              child: TendInscr(),
+                              // On passe les données du provider au widget
+                              child: TendInscr(trendData: provider.trendData),
                             ),
                           ],
-
                           const SizedBox(height: 8),
 
                           const AnimatedSection(
                             delayMs: 750,
                             child: ExportSection(),
                           ),
-
                         ],
                       ),
                     ),

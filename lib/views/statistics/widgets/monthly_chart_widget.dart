@@ -1,9 +1,9 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import '../../../models/barchart_models.dart';
+import '../../../models/bar_chart_model.dart';
 
 class MonthlyChartWidget extends StatefulWidget {
-  final List<BarchartModels> chartData;
+  final List<BarchartModel> chartData;
 
   const MonthlyChartWidget({super.key, required this.chartData});
 
@@ -19,9 +19,15 @@ class _MonthlyChartWidgetState extends State<MonthlyChartWidget> {
 
     double maxY = 0;
     for (var data in widget.chartData) {
-      if (data.height > maxY) maxY = data.height;
+      // ✅ CORRECTION 1 : On cherche le max avec "data.count" (la vraie valeur)
+      if (data.count.toDouble() > maxY) maxY = data.count.toDouble();
     }
-    maxY = maxY + (maxY * 0.2);
+    // Sécurité : si on n'a aucun participant, on met un plafond à 10 pour l'esthétique
+    if (maxY == 0) {
+      maxY = 10;
+    } else {
+      maxY = maxY + (maxY * 0.2); // Ajoute 20% d'espace en haut
+    }
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -57,22 +63,20 @@ class _MonthlyChartWidgetState extends State<MonthlyChartWidget> {
                   touchTooltipData: BarTouchTooltipData(
                     getTooltipColor: (group) => Colors.white,
                     tooltipBorder: const BorderSide(color: Colors.grey, width: 0.5),
-                    tooltipBorderRadius: BorderRadius.circular(1), // <-- CORRECTION 1 ICI
-                    tooltipPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+                    tooltipBorderRadius: BorderRadius.circular(8), // Correction pour les bords arrondis
+                    tooltipPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     tooltipMargin: 8,
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       final month = widget.chartData[groupIndex].label;
-                      final value = rod.toY.toInt();
+                      final value = rod.toY.toInt(); // Récupère la vraie valeur
+
                       return BarTooltipItem(
                         '$month\n',
-                        const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.normal),
-
+                        const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold),
                         children: <TextSpan>[
-                          const TextSpan(text: '\n'),
-
                           TextSpan(
                             text: 'participants : $value',
-                            style: const TextStyle(color: Color(0xFFFF8000), fontSize: 16, fontWeight: FontWeight.w600),
+                            style: const TextStyle(color: Color(0xFFFF8000), fontSize: 14, fontWeight: FontWeight.w600),
                           ),
                         ],
                       );
@@ -101,6 +105,10 @@ class _MonthlyChartWidgetState extends State<MonthlyChartWidget> {
                           fontWeight: isTouched ? FontWeight.bold : FontWeight.normal,
                           fontSize: 11,
                         );
+                        // Sécurité pour éviter les erreurs d'index
+                        if (value.toInt() < 0 || value.toInt() >= widget.chartData.length) {
+                          return const SizedBox.shrink();
+                        }
                         return SideTitleWidget(
                           meta: meta,
                           space: 10,
@@ -109,11 +117,11 @@ class _MonthlyChartWidgetState extends State<MonthlyChartWidget> {
                       },
                     ),
                   ),
-                  leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 ),
-                gridData: FlGridData(show: false),
+                gridData: const FlGridData(show: false),
                 borderData: FlBorderData(show: false),
                 barGroups: widget.chartData.asMap().entries.map((entry) {
                   final index = entry.key;
@@ -124,7 +132,8 @@ class _MonthlyChartWidgetState extends State<MonthlyChartWidget> {
                     x: index,
                     barRods: [
                       BarChartRodData(
-                        toY: data.height,
+                        // ✅ CORRECTION 2 : On donne la vraie valeur au graphique "toY: data.count"
+                        toY: data.count.toDouble(),
                         color: const Color(0xFFFF8000),
                         width: 40,
                         borderRadius: const BorderRadius.only(topLeft: Radius.circular(6), topRight: Radius.circular(6)),

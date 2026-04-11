@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../../models/participant_model.dart';
+// ⚠️ NOUVEAU : Import de la base de données
+import '../../../core/database/local_db.dart';
+
 import 'widgets/custom_text_field.dart';
 import 'widgets/custom_dropdown.dart';
 
 class ParticipantForm extends StatefulWidget {
-  const ParticipantForm({super.key});
+  final ParticipantModel? participant;
+  const ParticipantForm({super.key, this.participant});
 
   @override
   State<ParticipantForm> createState() => _ParticipantFormState();
@@ -18,16 +22,11 @@ class _ParticipantFormState extends State<ParticipantForm> {
   final _telephoneController = TextEditingController();
   final _localiteController = TextEditingController();
   final _quartierController = TextEditingController();
-
-  // NOUVEAU : Contrôleur pour le champ de ressenti ("Autres")
   final _ressentiController = TextEditingController();
-
   final _lieuHabitationController = TextEditingController();
   final _professionController = TextEditingController();
 
   String? _statutLogement;
-
-  // NOUVEAU : Variable pour stocker la séance sélectionnée
   String? _seanceSelectionnee;
 
   bool _consentementCIE = false;
@@ -35,15 +34,11 @@ class _ParticipantFormState extends State<ParticipantForm> {
 
   final List<String> _optionsLogement = ['Locataire', 'Propriétaire', 'Autres'];
 
-  // NOUVEAU : Liste simulée de tes séances (tu pourras la rendre dynamique plus tard)
-  final List<String> _seancesDisponibles = [
-    'Sensibilisation Abobo (En cours)',
-    'Séance Yopougon Nord (Terminée)',
-    'Campagne Cocody (Créée)',
-    'Séance Treichville (En cours)',
-  ];
+  // ⚠️ NOUVEAU : Variables pour stocker les vraies séances
+  List<SeancesTableData> _seancesList = [];
+  List<String> _seancesNoms = [];
+  bool _isLoadingSeances = true;
 
-  // NOUVEAU : J'ai ajouté 'Autres' à la fin de la liste
   final List<String> _besoinsOptions = [
     'Nouveau compteur',
     'Changement compteur',
@@ -51,9 +46,73 @@ class _ParticipantFormState extends State<ParticipantForm> {
     'Réclamation facture',
     'Information tarifs',
     'Signalement panne',
-    'Autres'
+    'Autres',
   ];
+
   final List<String> _besoinsSelectionnes = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    // ⚠️ NOUVEAU : On charge les vraies séances depuis SQLite
+    _loadSeances();
+
+    if (widget.participant != null) {
+      final p = widget.participant!;
+
+      _nomController.text = p.lastName;
+      _prenomController.text = p.firstName;
+      _telephoneController.text = p.phone;
+      _professionController.text = p.profession ?? '';
+      _localiteController.text = p.locality;
+      _quartierController.text = p.neighborhood ?? '';
+      _lieuHabitationController.text = p.residenceLocation ?? '';
+
+      _statutLogement = p.housingStatus;
+      _besoinsSelectionnes.addAll(p.needs);
+
+      if (p.feedback != null) {
+        _ressentiController.text = p.feedback!;
+      }
+
+      _consentementCIE = p.consent;
+
+      // Note : La pré-sélection de la séance se fera dans _loadSeances()
+      // une fois que la liste sera chargée de la base de données.
+    }
+  }
+
+  // ⚠️ NOUVEAU : Fonction asynchrone pour charger la table
+  Future<void> _loadSeances() async {
+    try {
+      final seances = await localDb.getAllSeances();
+
+      if (mounted) {
+        setState(() {
+          _seancesList = seances;
+          // On crée une liste de textes pour le Dropdown (Ex: "Sensibilisation Abobo (En cours)")
+          _seancesNoms = seances.map((s) => '${s.nom} (${s.statut})').toList();
+          _isLoadingSeances = false;
+
+          // Si on est en mode édition, on cherche à pré-sélectionner la bonne séance
+          if (widget.participant != null) {
+            final int savedSessionId = widget.participant!.sessionId;
+            final matchIndex = _seancesList.indexWhere((s) => s.id == savedSessionId);
+
+            if (matchIndex != -1) {
+              _seanceSelectionnee = _seancesNoms[matchIndex];
+            }
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint('❌ Erreur chargement des séances: $e');
+      if (mounted) {
+        setState(() => _isLoadingSeances = false);
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -62,7 +121,7 @@ class _ParticipantFormState extends State<ParticipantForm> {
     _telephoneController.dispose();
     _localiteController.dispose();
     _quartierController.dispose();
-    _ressentiController.dispose(); // Ne pas oublier de le libérer
+    _ressentiController.dispose();
     _lieuHabitationController.dispose();
     _professionController.dispose();
     super.dispose();
@@ -73,38 +132,53 @@ class _ParticipantFormState extends State<ParticipantForm> {
 
     if (_formKey.currentState!.validate() && _consentementCIE) {
 
-      final nouveauParticipant = ParticipantModel(
-        id: 'P${DateTime.now().millisecondsSinceEpoch.toString().substring(9)}',
-        name: '${_nomController.text} ${_prenomController.text}',
-        phone: _telephoneController.text,
-        accommodation: _statutLogement ?? 'Non renseigné',
-        location: _localiteController.text.isNotEmpty ? _localiteController.text : 'Inconnue',
-        date: 'Aujourd\'hui',
+      // ⚠️ NOUVEAU : On récupère le VRAI ID SQLite de la séance sélectionnée
+      int finalSessionId = 1; // Valeur par défaut de sécurité
+      if (_seanceSelectionnee != null) {
+        final index = _seancesNoms.indexOf(_seanceSelectionnee!);
+        if (index != -1) {
+          finalSessionId = _seancesList[index].id;
+        }
+      }
 
-
-        campaign: _seanceSelectionnee ?? 'Générale',
-        status: 'Actif',
-        statusColor: const Color(0xFFD4F1E4),
-        statusTextColor: const Color(0xFF4CAF50),
+      final participantSauvegarde = ParticipantModel(
+        id: widget.participant?.id,
+        sessionId: finalSessionId, // L'ID réel de la BDD
+        lastName: _nomController.text.trim(),
+        firstName: _prenomController.text.trim(),
+        phone: _telephoneController.text.trim(),
+        profession: _professionController.text.isNotEmpty ? _professionController.text.trim() : null,
+        housingStatus: _statutLogement ?? 'Autres',
+        residenceLocation: _lieuHabitationController.text.isNotEmpty ? _lieuHabitationController.text.trim() : null,
+        locality: _localiteController.text.isNotEmpty ? _localiteController.text.trim() : 'Inconnue',
+        neighborhood: _quartierController.text.isNotEmpty ? _quartierController.text.trim() : null,
+        needs: List.from(_besoinsSelectionnes),
+        feedback: _besoinsSelectionnes.contains('Autres') && _ressentiController.text.isNotEmpty ? _ressentiController.text.trim() : null,
+        consent: _consentementCIE,
+        status: widget.participant?.status ?? 'Actif',
+        registrationDate: widget.participant?.registrationDate ?? DateTime.now(),
       );
 
-
-      Navigator.pop(context, nouveauParticipant);
+      Navigator.pop(context, participantSauvegarde);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isEditing = widget.participant != null;
+    final String pageTitle = isEditing ? 'Éditer le participant' : 'Nouveau participant';
+    final String buttonText = isEditing ? 'Éditer le participant' : 'Inscrire le participant';
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
-            onPressed: () => Navigator.pop(context)
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Nouveau participant', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        title: Text(pageTitle, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -123,44 +197,33 @@ class _ParticipantFormState extends State<ParticipantForm> {
               const SizedBox(height: 16),
               CustomTextField(label: 'Téléphone', hint: '+225 07 12 34 56', controller: _telephoneController, isRequired: true, keyboardType: TextInputType.phone, validator: (v) => v!.isEmpty ? 'Requis' : null),
               const SizedBox(height: 16),
-
               CustomTextField(label: 'Profession', hint: 'Ex: Commerçant', controller: _professionController),
               const SizedBox(height: 16),
-              CustomDropdown(
-                label: 'Statut du logement',
-                hint: 'Sélectionner...',
-                value: _statutLogement,
-                items: _optionsLogement,
-                onChanged: (v) => setState(() => _statutLogement = v),
-              ),
+              CustomDropdown(label: 'Statut du logement', hint: 'Sélectionner...', value: _statutLogement, items: _optionsLogement, onChanged: (v) => setState(() => _statutLogement = v)),
               const SizedBox(height: 16),
-
               CustomTextField(label: 'Lieu d\'habitation', hint: 'Ex: Près de la pharmacie...', controller: _lieuHabitationController),
               const SizedBox(height: 16),
               Row(
                 children: [
-                  Expanded(child: CustomTextField(label: 'Localité', hint: 'Abidjan', controller: _localiteController)),
+                  Expanded(child: CustomTextField(label: 'Localité', hint: 'Abidjan', controller: _localiteController, isRequired: true, validator: (v) => v!.isEmpty ? 'Requis' : null)),
                   const SizedBox(width: 16),
                   Expanded(child: CustomTextField(label: 'Quartier', hint: 'Abobo', controller: _quartierController)),
                 ],
               ),
               const SizedBox(height: 16),
 
-
+              // ⚠️ NOUVEAU : Le Dropdown s'adapte au chargement
               CustomDropdown(
                 label: 'Séance',
-                hint: 'Sélectionner la séance...',
+                hint: _isLoadingSeances ? 'Chargement des séances...' : 'Sélectionner la séance...',
                 value: _seanceSelectionnee,
-                items: _seancesDisponibles,
+                items: _isLoadingSeances ? [] : _seancesNoms, // Vide pendant le chargement
                 onChanged: (v) => setState(() => _seanceSelectionnee = v),
                 isRequired: true,
               ),
               const SizedBox(height: 32),
 
-              const Text(
-                'Besoins exprimés',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
-              ),
+              const Text('Besoins exprimés', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87)),
               const SizedBox(height: 12),
               Wrap(
                 spacing: 10.0,
@@ -172,10 +235,7 @@ class _ParticipantFormState extends State<ParticipantForm> {
                       setState(() {
                         if (isSelected) {
                           _besoinsSelectionnes.remove(besoin);
-
-                          if (besoin == 'Autres') {
-                            _ressentiController.clear();
-                          }
+                          if (besoin == 'Autres') _ressentiController.clear();
                         } else {
                           _besoinsSelectionnes.add(besoin);
                         }
@@ -184,21 +244,11 @@ class _ParticipantFormState extends State<ParticipantForm> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
-                        color: isSelected ? const Color(0xFF21951D).withValues(alpha: 0.1) : const Color(0xFFF5F5F5),
-                        border: Border.all(
-                          color: isSelected ? const Color(0xFF21951D) : Colors.transparent,
-                          width: 1.5,
-                        ),
+                        color: isSelected ? const Color(0xFF21951D).withAlpha(26) : const Color(0xFFF5F5F5),
+                        border: Border.all(color: isSelected ? const Color(0xFF21951D) : Colors.transparent, width: 1.5),
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Text(
-                        besoin,
-                        style: TextStyle(
-                          color: isSelected ? const Color(0xFF21951D) : Colors.grey[700],
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                          fontSize: 14,
-                        ),
-                      ),
+                      child: Text(besoin, style: TextStyle(color: isSelected ? const Color(0xFF21951D) : Colors.grey[700], fontWeight: isSelected ? FontWeight.bold : FontWeight.w500, fontSize: 14)),
                     ),
                   );
                 }).toList(),
@@ -206,31 +256,18 @@ class _ParticipantFormState extends State<ParticipantForm> {
 
               if (_besoinsSelectionnes.contains('Autres')) ...[
                 const SizedBox(height: 16),
-                CustomTextField(
-                  label: 'Votre ressenti / Autre besoin',
-                  hint: 'Exprimez ici votre ressenti ou un autre besoin envers l\'entreprise',
-                  controller: _ressentiController,
-                  maxLines: 4, // Un peu plus grand pour écrire un paragraphe
-                ),
+                CustomTextField(label: 'Votre ressenti / Autre besoin', hint: 'Exprimez ici votre ressenti...', controller: _ressentiController, maxLines: 4),
               ],
 
               const SizedBox(height: 40),
 
               Row(
                 children: [
-                  Checkbox(
-                    value: _consentementCIE,
-                    onChanged: (v) => setState(() { _consentementCIE = v ?? false; _showConsentError = false; }),
-                    activeColor: const Color(0xFFFF9500),
-                  ),
+                  Checkbox(value: _consentementCIE, onChanged: (v) => setState(() { _consentementCIE = v ?? false; _showConsentError = false; }), activeColor: const Color(0xFFFF9500)),
                   const Expanded(child: Text('Le participant consent au traitement de ses données.', style: TextStyle(fontSize: 14))),
                 ],
               ),
-              if (_showConsentError)
-                const Padding(
-                  padding: EdgeInsets.only(left: 48),
-                  child: Text('Requis', style: TextStyle(color: Colors.red, fontSize: 12)),
-                ),
+              if (_showConsentError) const Padding(padding: EdgeInsets.only(left: 48), child: Text('Requis', style: TextStyle(color: Colors.red, fontSize: 12))),
 
               const SizedBox(height: 32),
 
@@ -239,11 +276,8 @@ class _ParticipantFormState extends State<ParticipantForm> {
                 height: 56,
                 child: ElevatedButton(
                   onPressed: _submitForm,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFF9500),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  ),
-                  child: const Text('Inscrire le participant', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFF9500), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                  child: Text(buttonText, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                 ),
               ),
               const SizedBox(height: 45),

@@ -1,28 +1,35 @@
-import 'package:flutter/material.dart';
-
 class ParticipantModel {
-  final String id;
-  final String name;
+  final int? id;
+  final int sessionId;
+  final String lastName;
+  final String firstName;
   final String phone;
-  final String accommodation;
-
-  final String location;
-  final String date;
-  final String campaign;
+  final String? profession;
+  final String housingStatus;
+  final String? residenceLocation;
+  final String locality;
+  final String? neighborhood;
+  final List<String> needs;
+  final String? feedback;
+  final bool consent;
   final String status;
-  final Color statusColor;
-  final Color statusTextColor;
+  final DateTime registrationDate;
 
   ParticipantModel({
-    required this.id,
-    required this.name,
+    this.id,
+    required this.sessionId,
+    required this.lastName,
+    required this.firstName,
     required this.phone,
-    required this.accommodation,
-    required this.location,
-    required this.date,
-    required this.campaign,
+    this.profession,
+    required this.housingStatus,
+    this.residenceLocation,
+    required this.locality,
+    this.neighborhood,
+    required this.needs,
+    this.feedback,
+    required this.consent,
     required this.status,
-    required this.statusColor,
-    required this.statusTextColor,
+    required this.registrationDate,
   });
 }

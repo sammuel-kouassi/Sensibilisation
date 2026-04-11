@@ -1,15 +1,13 @@
-import 'package:flutter/material.dart';
-
 class SyncHistoryModel {
+  final String type;
   final String title;
   final String time;
-  final IconData icon;
-  final Color iconColor;
+  final String status;
 
   SyncHistoryModel({
+    required this.type,
     required this.title,
     required this.time,
-    required this.icon,
-    required this.iconColor,
+    required this.status,
   });
 }

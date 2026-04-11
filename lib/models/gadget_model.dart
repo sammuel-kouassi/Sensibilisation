@@ -1,30 +1,23 @@
-import 'package:flutter/material.dart';
-
 class GadgetModel {
   final int id;
-  final String name;
-  final String category;
-  final int enStock;
-  final int distribues;
-  final int total;
-  final String? statusBadge;
-  final Color? statusColor;
-  final Color? statusTextColor;
-  final IconData icon;
+  final int? serverId;
+  final String seanceNom;
+  final String zone;
+  final int gadgetsPrevus;
+  final int gadgetsDistribues;
 
   GadgetModel({
     required this.id,
-    required this.name,
-    required this.category,
-    required this.enStock,
-    required this.distribues,
-    required this.total,
-    this.statusBadge,
-    this.statusColor,
-    this.statusTextColor,
-    required this.icon,
+    this.serverId,
+    required this.seanceNom,
+    required this.zone,
+    required this.gadgetsPrevus,
+    required this.gadgetsDistribues,
   });
 
-  // Petite fonction utilitaire directement dans le modèle !
-  double get stockPercentage => total > 0 ? enStock / total : 0;
+  int get restants => gadgetsPrevus - gadgetsDistribues;
+  double get stockPercentage => gadgetsPrevus > 0 ? restants / gadgetsPrevus : 0;
+
+  bool get isLowStock => stockPercentage <= 0.25 && gadgetsPrevus > 0;
+  bool get isOutOfStock => restants <= 0;
 }
