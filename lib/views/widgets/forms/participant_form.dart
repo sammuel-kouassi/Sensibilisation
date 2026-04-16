@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../models/participant_model.dart';
-// ⚠️ NOUVEAU : Import de la base de données
 import '../../../core/database/local_db.dart';
 
 import 'widgets/custom_text_field.dart';
@@ -34,7 +34,6 @@ class _ParticipantFormState extends State<ParticipantForm> {
 
   final List<String> _optionsLogement = ['Locataire', 'Propriétaire', 'Autres'];
 
-  // ⚠️ NOUVEAU : Variables pour stocker les vraies séances
   List<SeancesTableData> _seancesList = [];
   List<String> _seancesNoms = [];
   bool _isLoadingSeances = true;
@@ -55,7 +54,6 @@ class _ParticipantFormState extends State<ParticipantForm> {
   void initState() {
     super.initState();
 
-    // ⚠️ NOUVEAU : On charge les vraies séances depuis SQLite
     _loadSeances();
 
     if (widget.participant != null) {
@@ -77,13 +75,9 @@ class _ParticipantFormState extends State<ParticipantForm> {
       }
 
       _consentementCIE = p.consent;
-
-      // Note : La pré-sélection de la séance se fera dans _loadSeances()
-      // une fois que la liste sera chargée de la base de données.
     }
   }
 
-  // ⚠️ NOUVEAU : Fonction asynchrone pour charger la table
   Future<void> _loadSeances() async {
     try {
       final seances = await localDb.getAllSeances();
@@ -91,14 +85,14 @@ class _ParticipantFormState extends State<ParticipantForm> {
       if (mounted) {
         setState(() {
           _seancesList = seances;
-          // On crée une liste de textes pour le Dropdown (Ex: "Sensibilisation Abobo (En cours)")
           _seancesNoms = seances.map((s) => '${s.nom} (${s.statut})').toList();
           _isLoadingSeances = false;
 
-          // Si on est en mode édition, on cherche à pré-sélectionner la bonne séance
           if (widget.participant != null) {
             final int savedSessionId = widget.participant!.sessionId;
-            final matchIndex = _seancesList.indexWhere((s) => s.id == savedSessionId);
+            final matchIndex = _seancesList.indexWhere(
+              (s) => s.id == savedSessionId,
+            );
 
             if (matchIndex != -1) {
               _seanceSelectionnee = _seancesNoms[matchIndex];
@@ -131,9 +125,7 @@ class _ParticipantFormState extends State<ParticipantForm> {
     setState(() => _showConsentError = !_consentementCIE);
 
     if (_formKey.currentState!.validate() && _consentementCIE) {
-
-      // ⚠️ NOUVEAU : On récupère le VRAI ID SQLite de la séance sélectionnée
-      int finalSessionId = 1; // Valeur par défaut de sécurité
+      int finalSessionId = 1;
       if (_seanceSelectionnee != null) {
         final index = _seancesNoms.indexOf(_seanceSelectionnee!);
         if (index != -1) {
@@ -143,20 +135,33 @@ class _ParticipantFormState extends State<ParticipantForm> {
 
       final participantSauvegarde = ParticipantModel(
         id: widget.participant?.id,
-        sessionId: finalSessionId, // L'ID réel de la BDD
+        sessionId: finalSessionId,
         lastName: _nomController.text.trim(),
         firstName: _prenomController.text.trim(),
         phone: _telephoneController.text.trim(),
-        profession: _professionController.text.isNotEmpty ? _professionController.text.trim() : null,
+        profession: _professionController.text.isNotEmpty
+            ? _professionController.text.trim()
+            : null,
         housingStatus: _statutLogement ?? 'Autres',
-        residenceLocation: _lieuHabitationController.text.isNotEmpty ? _lieuHabitationController.text.trim() : null,
-        locality: _localiteController.text.isNotEmpty ? _localiteController.text.trim() : 'Inconnue',
-        neighborhood: _quartierController.text.isNotEmpty ? _quartierController.text.trim() : null,
+        residenceLocation: _lieuHabitationController.text.isNotEmpty
+            ? _lieuHabitationController.text.trim()
+            : null,
+        locality: _localiteController.text.isNotEmpty
+            ? _localiteController.text.trim()
+            : 'Inconnue',
+        neighborhood: _quartierController.text.isNotEmpty
+            ? _quartierController.text.trim()
+            : null,
         needs: List.from(_besoinsSelectionnes),
-        feedback: _besoinsSelectionnes.contains('Autres') && _ressentiController.text.isNotEmpty ? _ressentiController.text.trim() : null,
+        feedback:
+            _besoinsSelectionnes.contains('Autres') &&
+                _ressentiController.text.isNotEmpty
+            ? _ressentiController.text.trim()
+            : null,
         consent: _consentementCIE,
         status: widget.participant?.status ?? 'Actif',
-        registrationDate: widget.participant?.registrationDate ?? DateTime.now(),
+        registrationDate:
+            widget.participant?.registrationDate ?? DateTime.now(),
       );
 
       Navigator.pop(context, participantSauvegarde);
@@ -166,8 +171,12 @@ class _ParticipantFormState extends State<ParticipantForm> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.participant != null;
-    final String pageTitle = isEditing ? 'Éditer le participant' : 'Nouveau participant';
-    final String buttonText = isEditing ? 'Éditer le participant' : 'Inscrire le participant';
+    final String pageTitle = isEditing
+        ? 'Éditer le participant'
+        : 'Nouveau participant';
+    final String buttonText = isEditing
+        ? 'Éditer le participant'
+        : 'Inscrire le participant';
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -178,7 +187,13 @@ class _ParticipantFormState extends State<ParticipantForm> {
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(pageTitle, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        title: Text(
+          pageTitle,
+          style: const TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -189,41 +204,101 @@ class _ParticipantFormState extends State<ParticipantForm> {
             children: [
               Row(
                 children: [
-                  Expanded(child: CustomTextField(label: 'Nom', hint: 'Koné', controller: _nomController, isRequired: true, validator: (v) => v!.isEmpty ? 'Requis' : null)),
+                  Expanded(
+                    child: CustomTextField(
+                      label: 'Nom',
+                      hint: 'Koné',
+                      controller: _nomController,
+                      isRequired: true,
+                      validator: (v) => v!.isEmpty ? 'Requis' : null,
+                    ),
+                  ),
                   const SizedBox(width: 16),
-                  Expanded(child: CustomTextField(label: 'Prénom', hint: 'Amadou', controller: _prenomController, isRequired: true, validator: (v) => v!.isEmpty ? 'Requis' : null)),
+                  Expanded(
+                    child: CustomTextField(
+                      label: 'Prénom',
+                      hint: 'Amadou',
+                      controller: _prenomController,
+                      isRequired: true,
+                      validator: (v) => v!.isEmpty ? 'Requis' : null,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
-              CustomTextField(label: 'Téléphone', hint: '+225 07 12 34 56', controller: _telephoneController, isRequired: true, keyboardType: TextInputType.phone, validator: (v) => v!.isEmpty ? 'Requis' : null),
+              CustomTextField(
+                label: 'Téléphone',
+                hint: '+225 07 12 34 56',
+                controller: _telephoneController,
+                isRequired: true,
+                keyboardType: TextInputType.phone,
+                validator: (v) => v!.isEmpty ? 'Requis' : null,
+              ),
               const SizedBox(height: 16),
-              CustomTextField(label: 'Profession', hint: 'Ex: Commerçant', controller: _professionController),
+              CustomTextField(
+                label: 'Profession',
+                hint: 'Ex: Commerçant',
+                controller: _professionController,
+              ),
               const SizedBox(height: 16),
-              CustomDropdown(label: 'Statut du logement', hint: 'Sélectionner...', value: _statutLogement, items: _optionsLogement, onChanged: (v) => setState(() => _statutLogement = v)),
+              CustomDropdown(
+                label: 'Statut du logement',
+                hint: 'Sélectionner...',
+                value: _statutLogement,
+                items: _optionsLogement,
+                onChanged: (v) => setState(() => _statutLogement = v),
+              ),
               const SizedBox(height: 16),
-              CustomTextField(label: 'Lieu d\'habitation', hint: 'Ex: Près de la pharmacie...', controller: _lieuHabitationController),
+              CustomTextField(
+                label: 'Lieu d\'habitation',
+                hint: 'Ex: Près de la pharmacie...',
+                controller: _lieuHabitationController,
+              ),
               const SizedBox(height: 16),
               Row(
                 children: [
-                  Expanded(child: CustomTextField(label: 'Localité', hint: 'Abidjan', controller: _localiteController, isRequired: true, validator: (v) => v!.isEmpty ? 'Requis' : null)),
+                  Expanded(
+                    child: CustomTextField(
+                      label: 'Localité',
+                      hint: 'Abidjan',
+                      controller: _localiteController,
+                      isRequired: true,
+                      validator: (v) => v!.isEmpty ? 'Requis' : null,
+                      inputFormatters: [CapitalizeFirstLetterFormatter()],
+                    ),
+                  ),
                   const SizedBox(width: 16),
-                  Expanded(child: CustomTextField(label: 'Quartier', hint: 'Abobo', controller: _quartierController)),
+                  Expanded(
+                    child: CustomTextField(
+                      label: 'Quartier',
+                      hint: 'Abobo',
+                      controller: _quartierController,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
 
-              // ⚠️ NOUVEAU : Le Dropdown s'adapte au chargement
               CustomDropdown(
                 label: 'Séance',
-                hint: _isLoadingSeances ? 'Chargement des séances...' : 'Sélectionner la séance...',
+                hint: _isLoadingSeances
+                    ? 'Chargement des séances...'
+                    : 'Sélectionner la séance...',
                 value: _seanceSelectionnee,
-                items: _isLoadingSeances ? [] : _seancesNoms, // Vide pendant le chargement
+                items: _isLoadingSeances ? [] : _seancesNoms,
                 onChanged: (v) => setState(() => _seanceSelectionnee = v),
                 isRequired: true,
               ),
               const SizedBox(height: 32),
 
-              const Text('Besoins exprimés', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87)),
+              const Text(
+                'Besoins exprimés',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
               const SizedBox(height: 12),
               Wrap(
                 spacing: 10.0,
@@ -242,13 +317,34 @@ class _ParticipantFormState extends State<ParticipantForm> {
                       });
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
-                        color: isSelected ? const Color(0xFF21951D).withAlpha(26) : const Color(0xFFF5F5F5),
-                        border: Border.all(color: isSelected ? const Color(0xFF21951D) : Colors.transparent, width: 1.5),
+                        color: isSelected
+                            ? const Color(0xFF21951D).withAlpha(26)
+                            : const Color(0xFFF5F5F5),
+                        border: Border.all(
+                          color: isSelected
+                              ? const Color(0xFF21951D)
+                              : Colors.transparent,
+                          width: 1.5,
+                        ),
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Text(besoin, style: TextStyle(color: isSelected ? const Color(0xFF21951D) : Colors.grey[700], fontWeight: isSelected ? FontWeight.bold : FontWeight.w500, fontSize: 14)),
+                      child: Text(
+                        besoin,
+                        style: TextStyle(
+                          color: isSelected
+                              ? const Color(0xFF21951D)
+                              : Colors.grey[700],
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.w500,
+                          fontSize: 14,
+                        ),
+                      ),
                     ),
                   );
                 }).toList(),
@@ -256,18 +352,42 @@ class _ParticipantFormState extends State<ParticipantForm> {
 
               if (_besoinsSelectionnes.contains('Autres')) ...[
                 const SizedBox(height: 16),
-                CustomTextField(label: 'Votre ressenti / Autre besoin', hint: 'Exprimez ici votre ressenti...', controller: _ressentiController, maxLines: 4),
+                CustomTextField(
+                  label: 'Votre ressenti / Autre besoin',
+                  hint: 'Exprimez ici votre ressenti...',
+                  controller: _ressentiController,
+                  maxLines: 4,
+                ),
               ],
 
               const SizedBox(height: 40),
 
               Row(
                 children: [
-                  Checkbox(value: _consentementCIE, onChanged: (v) => setState(() { _consentementCIE = v ?? false; _showConsentError = false; }), activeColor: const Color(0xFFFF9500)),
-                  const Expanded(child: Text('Le participant consent au traitement de ses données.', style: TextStyle(fontSize: 14))),
+                  Checkbox(
+                    value: _consentementCIE,
+                    onChanged: (v) => setState(() {
+                      _consentementCIE = v ?? false;
+                      _showConsentError = false;
+                    }),
+                    activeColor: const Color(0xFFFF9500),
+                  ),
+                  const Expanded(
+                    child: Text(
+                      'Le participant consent au traitement de ses données.',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ),
                 ],
               ),
-              if (_showConsentError) const Padding(padding: EdgeInsets.only(left: 48), child: Text('Requis', style: TextStyle(color: Colors.red, fontSize: 12))),
+              if (_showConsentError)
+                const Padding(
+                  padding: EdgeInsets.only(left: 48),
+                  child: Text(
+                    'Requis',
+                    style: TextStyle(color: Colors.red, fontSize: 12),
+                  ),
+                ),
 
               const SizedBox(height: 32),
 
@@ -276,8 +396,20 @@ class _ParticipantFormState extends State<ParticipantForm> {
                 height: 56,
                 child: ElevatedButton(
                   onPressed: _submitForm,
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFF9500), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
-                  child: Text(buttonText, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFF9500),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: Text(
+                    buttonText,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 45),
@@ -286,5 +418,20 @@ class _ParticipantFormState extends State<ParticipantForm> {
         ),
       ),
     );
+  }
+}
+
+class CapitalizeFirstLetterFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final text = newValue.text;
+    if (text.isEmpty) return newValue;
+
+    final formatted = text[0].toUpperCase() + text.substring(1).toLowerCase();
+
+    return newValue.copyWith(text: formatted, selection: newValue.selection);
   }
 }

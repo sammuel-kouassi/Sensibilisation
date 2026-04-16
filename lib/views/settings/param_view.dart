@@ -3,6 +3,7 @@ import 'package:cie_services/views/settings/widgets/edit_profile_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/auth_provider.dart';
+import '../login/login_views.dart';
 import '../widgets/animated_section.dart';
 import 'widgets/param_header.dart';
 import 'widgets/profile_card.dart';
@@ -202,8 +203,7 @@ class _ParamViewState extends State<ParamView> {
                         icon: Icons.shield_outlined,
                         title: 'Sécurité',
                         subtitle: 'Modifier le mot de passe',
-                        onTap: () =>
-                            _showChangePasswordSheet(context), // ACTIVÉ ✅
+                        onTap: () => _showChangePasswordSheet(context),
                         showDivider: false,
                         isEnabled: isAdmin,
                       ),
@@ -231,15 +231,56 @@ class _ParamViewState extends State<ParamView> {
                               ),
                             ],
                           );
-                        }, // ACTIVÉ ✅
+                        },
                         showDivider: true,
                       ),
                       SettingItemLogout(
                         icon: Icons.logout,
                         title: 'Déconnexion',
                         onTap: () {
-                          authProvider.logout();
-                          Navigator.pushReplacementNamed(context, '/login');
+                          showDialog(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              title: const Text('Déconnexion'),
+                              content: const Text(
+                                'Voulez-vous vraiment vous déconnecter ?',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(ctx);
+                                  },
+                                  child: const Text(
+                                    'Annuler',
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
+                                ),
+
+                                TextButton(
+                                  onPressed: () {
+                                    authProvider.logout();
+
+                                    Navigator.pop(ctx);
+
+                                    Navigator.pushAndRemoveUntil(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => const LoginView(),
+                                      ),
+                                      (Route<dynamic> route) => false,
+                                    );
+                                  },
+                                  child: const Text(
+                                    'Se déconnecter',
+                                    style: TextStyle(
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
                         },
                       ),
                     ], delay: 600),

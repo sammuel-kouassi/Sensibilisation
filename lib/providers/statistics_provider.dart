@@ -12,7 +12,7 @@ import '../models/tendency_model.dart';
 class StatisticsProvider extends ChangeNotifier {
   bool _isLoading = false;
   String _selectedPeriod = '30 derniers jours';
-  StreamSubscription? _dbSubscription; // 📻 L'écouteur
+  StreamSubscription? _dbSubscription;
 
   List<KpiModel> _kpiList = [];
   List<BarchartModel> _chartData = [];
@@ -196,9 +196,14 @@ class StatisticsProvider extends ChangeNotifier {
     List<RepartzoneModels> zones = [];
     int i = 0;
     zoneCounts.forEach((zoneName, count) {
+
+      final formattedZoneName = zoneName.isNotEmpty
+          ? zoneName[0].toUpperCase() + zoneName.substring(1).toLowerCase()
+          : zoneName;
+
       zones.add(
         RepartzoneModels(
-          zoneName: zoneName,
+          zoneName: formattedZoneName,
           percentage: (count / parts.length) * 100,
           valeurExacte: count,
           color: colors[i % colors.length],

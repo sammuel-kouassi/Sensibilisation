@@ -40,8 +40,20 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
   late Map<String, bool> _pointsAbordables;
 
   final List<String> _directions = [
-    'DRC', 'DRCS', 'DRBC', 'DRAS', 'DRABO', 'DRYOP', 'DRCO',
-    'DRLO', 'DRAN', 'DRO', 'DRN', 'DRSO', 'DRE', 'DRSE',
+    'DRC',
+    'DRCS',
+    'DRBC',
+    'DRAS',
+    'DRABO',
+    'DRYOP',
+    'DRCO',
+    'DRLO',
+    'DRAN',
+    'DRO',
+    'DRN',
+    'DRSO',
+    'DRE',
+    'DRSE',
   ];
 
   @override
@@ -58,7 +70,6 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
       'Numéros d\'urgence': false,
     };
 
-    // --- MAGIE DE L'ÉDITION : PRÉ-REMPLISSAGE ---
     if (widget.contact != null) {
       final c = widget.contact!;
       _nameController.text = c.nomContact;
@@ -86,11 +97,9 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
         }
       }
     } else {
-      // --- MODE NOUVEAU CONTACT ---
       _contactDate = DateTime.now();
       _dateController.text = DateFormat('dd/MM/yyyy').format(_contactDate!);
 
-      // Points par défaut pour un nouveau contact
       _pointsAbordables['Économie d\'énergie'] = true;
       _pointsAbordables['Facturation et paiement'] = true;
       _pointsAbordables['Branchements illicites'] = true;
@@ -163,12 +172,20 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
         date: _contactDate ?? DateTime.now(),
         objetMission: _objectController.text.trim(),
         directionRegionale: _selectedDirection!,
-        agence: _agencyController.text.isNotEmpty ? _agencyController.text.trim() : null,
-        quartier: _quarterController.text.isNotEmpty ? _quarterController.text.trim() : null,
-        site: _siteController.text.isNotEmpty ? _siteController.text.trim() : null,
+        agence: _agencyController.text.isNotEmpty
+            ? _agencyController.text.trim()
+            : null,
+        quartier: _quarterController.text.isNotEmpty
+            ? _quarterController.text.trim()
+            : null,
+        site: _siteController.text.isNotEmpty
+            ? _siteController.text.trim()
+            : null,
         pointsAbordes: checkedPoints,
-        observations: _observationsController.text.isNotEmpty ? _observationsController.text.trim() : null,
-        signatureBase64: base64Signature, // Injecté ici (nouveau ou ancien conservé)
+        observations: _observationsController.text.isNotEmpty
+            ? _observationsController.text.trim()
+            : null,
+        signatureBase64: base64Signature,
       );
 
       if (mounted) {
@@ -185,10 +202,11 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
 
   @override
   Widget build(BuildContext context) {
-    // --- NOUVEAU : VARIABLES DYNAMIQUES SELON LE MODE ---
     final isEditing = widget.contact != null;
     final appBarTitle = isEditing ? 'Modifier un contact' : 'Nouveau contact';
-    final buttonText = isEditing ? 'Modifier le contact' : 'Enregistrer le contact';
+    final buttonText = isEditing
+        ? 'Modifier le contact'
+        : 'Enregistrer le contact';
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -331,12 +349,12 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
                                 ),
                                 child: entry.value
                                     ? const Center(
-                                  child: Icon(
-                                    Icons.check,
-                                    color: Colors.white,
-                                    size: 18,
-                                  ),
-                                )
+                                        child: Icon(
+                                          Icons.check,
+                                          color: Colors.white,
+                                          size: 18,
+                                        ),
+                                      )
                                     : null,
                               ),
                               const SizedBox(width: 12),
@@ -345,10 +363,10 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
                                   entry.key,
                                   style: Theme.of(context).textTheme.bodyLarge
                                       ?.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black,
-                                    fontSize: 15,
-                                  ),
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.black,
+                                        fontSize: 15,
+                                      ),
                                 ),
                               ),
                             ],
@@ -369,7 +387,11 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
                       padding: const EdgeInsets.only(bottom: 8.0),
                       child: Text(
                         "Une signature existe déjà. Ne dessinez rien ici si vous souhaitez la conserver.",
-                        style: TextStyle(color: Colors.orange[800], fontSize: 13, fontStyle: FontStyle.italic),
+                        style: TextStyle(
+                          color: Colors.orange[800],
+                          fontSize: 13,
+                          fontStyle: FontStyle.italic,
+                        ),
                       ),
                     ),
                   Container(
@@ -442,7 +464,7 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        buttonText, // Texte dynamique
+                        buttonText,
                         style: const TextStyle(
                           fontWeight: FontWeight.w600,
                           color: Colors.white,

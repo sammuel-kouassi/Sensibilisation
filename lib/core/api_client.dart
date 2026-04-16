@@ -9,7 +9,7 @@ class ApiClient {
   late Client client;
 
   void init() {
-    client = Client('http://192.168.1.12:8080/')
+    client = Client('http://192.168.1.27:8080/')
       ..connectivityMonitor = FlutterConnectivityMonitor();
   }
 }

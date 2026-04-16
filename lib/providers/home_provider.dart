@@ -118,7 +118,6 @@ class HomeProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint('Erreur HomeProvider : $e');
     } finally {
-      // 🔓 Libérer le verrou quoi qu'il arrive
       _isFetching = false;
       _isLoading = false;
       notifyListeners();
