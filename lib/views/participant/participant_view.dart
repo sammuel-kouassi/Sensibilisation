@@ -1,3 +1,4 @@
+import 'package:cie_services/views/participant/widgets/participants_history_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -8,7 +9,6 @@ import '../widgets/animated_section.dart';
 import '../widgets/forms/participant_form.dart';
 import 'widgets/participant_header.dart';
 import 'widgets/participant_search_bar.dart';
-import 'widgets/participant_card.dart';
 
 class ParticipantView extends StatefulWidget {
   const ParticipantView({super.key});
@@ -98,174 +98,76 @@ class _ParticipantViewState extends State<ParticipantView> {
                   ),
 
                   Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          AnimatedSection(
-                            delayMs: 150,
-                            child: ParticipantSearchBar(
-                              controller: _searchController,
-                              onChanged: provider.filterParticipants,
-                            ),
-                          ),
-
-                          AnimatedSection(
-                            delayMs: 300,
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                24,
-                                10,
-                                24,
-                                10,
+                    child: RefreshIndicator(
+                      color: const Color(0xFFFF9500),
+                      backgroundColor: Colors.white,
+                      onRefresh: () => provider.syncFromServer(),
+                      child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: Column(
+                          children: [
+                            AnimatedSection(
+                              delayMs: 150,
+                              child: ParticipantSearchBar(
+                                controller: _searchController,
+                                onChanged: provider.filterParticipants,
                               ),
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  '${provider.filteredParticipants.length} participant(s) trouvé(s)',
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w400,
+                            ),
+
+                            AnimatedSection(
+                              delayMs: 300,
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  24,
+                                  10,
+                                  24,
+                                  10,
+                                ),
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    '${provider.filteredParticipants.length} participant(s) trouvé(s)',
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
 
-                          if (provider.isLoading)
-                            const Padding(
-                              padding: EdgeInsets.only(top: 50.0),
-                              child: CircularProgressIndicator(
-                                color: Color(0xFFFF9500),
-                              ),
-                            )
-                          else if (provider.filteredParticipants.isEmpty)
-                            const Padding(
-                              padding: EdgeInsets.only(top: 50.0),
-                              child: Text(
-                                'Aucun participant trouvé.',
-                                style: TextStyle(color: Colors.grey),
-                              ),
-                            )
-                          else
-                            AnimatedSection(
-                              delayMs: 450,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
+                            if (provider.isLoading)
+                              const Padding(
+                                padding: EdgeInsets.only(top: 50.0),
+                                child: CircularProgressIndicator(
+                                  color: Color(0xFFFF9500),
                                 ),
-                                child: Column(
-                                  children: provider.filteredParticipants.map((
+                              )
+                            else if (provider.filteredParticipants.isEmpty)
+                              const Padding(
+                                padding: EdgeInsets.only(top: 50.0),
+                                child: Text(
+                                  'Aucun participant trouvé.',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              )
+                            else
+                              AnimatedSection(
+                                delayMs: 450,
+                                child: ParticipantsHistoryView(
+                                  participants: provider.filteredParticipants,
+                                  onEdit: (participant) => _onEditParticipant(
+                                    context,
+                                    provider,
                                     participant,
-                                  ) {
-                                    return Padding(
-                                      padding: const EdgeInsets.only(
-                                        bottom: 16,
-                                      ),
-                                      child: Dismissible(
-                                        key: Key(participant.id.toString()),
-                                        direction: DismissDirection.endToStart,
-                                        background: Container(
-                                          alignment: Alignment.centerRight,
-                                          padding: const EdgeInsets.only(
-                                            right: 24,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: Colors.red.shade400,
-                                            borderRadius: BorderRadius.circular(
-                                              24,
-                                            ),
-                                          ),
-                                          child: const Icon(
-                                            Icons.delete_outline,
-                                            color: Colors.white,
-                                            size: 32,
-                                          ),
-                                        ),
-
-                                        confirmDismiss: (direction) async {
-                                          return await showDialog(
-                                            context: context,
-                                            builder: (context) => AlertDialog(
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(16),
-                                              ),
-                                              title: const Row(
-                                                children: [
-                                                  Icon(
-                                                    Icons.warning_amber_rounded,
-                                                    color: Colors.red,
-                                                  ),
-                                                  SizedBox(width: 8),
-                                                  Text('Confirmation'),
-                                                ],
-                                              ),
-                                              content: Text(
-                                                'Voulez-vous vraiment supprimer ${participant.firstName} ${participant.lastName} ?',
-                                              ),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () => Navigator.of(
-                                                    context,
-                                                  ).pop(false),
-                                                  child: Text(
-                                                    'ANNULER',
-                                                    style: TextStyle(
-                                                      color:
-                                                          Colors.grey.shade600,
-                                                    ),
-                                                  ),
-                                                ),
-                                                ElevatedButton(
-                                                  style: ElevatedButton.styleFrom(
-                                                    backgroundColor: Colors.red,
-                                                    shape: RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            8,
-                                                          ),
-                                                    ),
-                                                  ),
-                                                  onPressed: () => Navigator.of(
-                                                    context,
-                                                  ).pop(true),
-                                                  child: const Text(
-                                                    'SUPPRIMER',
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        },
-
-                                        onDismissed: (direction) {
-                                          provider.deleteParticipant(
-                                            participant.id!,
-                                            participant.id,
-                                          );
-                                        },
-
-                                        child: ParticipantCard(
-                                          participant: participant,
-                                          onEdit: () => _onEditParticipant(
-                                            context,
-                                            provider,
-                                            participant,
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  }).toList(),
+                                  ),
                                 ),
                               ),
-                            ),
 
-                          const SizedBox(height: 45),
-                        ],
+                            const SizedBox(height: 45),
+                          ],
+                        ),
                       ),
                     ),
                   ),

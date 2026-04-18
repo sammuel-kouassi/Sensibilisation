@@ -44,11 +44,9 @@ class HomeProvider extends ChangeNotifier {
   Future<void> _initConnectivity() async {
     final result = await Connectivity().checkConnectivity();
     _updateConnectionState(result);
-    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((
-      result,
-    ) {
-      _updateConnectionState(result);
-    });
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen(
+          (result) => _updateConnectionState(result),
+    );
   }
 
   void _updateConnectionState(dynamic result) {
@@ -72,9 +70,9 @@ class HomeProvider extends ChangeNotifier {
   }
 
   Future<void> loadHomeData(
-    BuildContext context, {
-    bool isRefresh = false,
-  }) async {
+      BuildContext context, {
+        bool isRefresh = false,
+      }) async {
     if (_isFetching) return;
 
     if (!isRefresh) {
@@ -85,13 +83,14 @@ class HomeProvider extends ChangeNotifier {
     try {
       _isFetching = true;
 
-      final participants = await localDb.getAllParticipants();
-      var seances = await localDb.getAllSeances();
-
+      // Stratégie serveur-first : si en ligne, on merge TOUT depuis PostgreSQL
       if (_isOnline) {
-        await _syncNewSeancesOnly(seances);
-        seances = await localDb.getAllSeances();
+        await _fetchAndMergeAll();
       }
+
+      // Lecture depuis le local (toujours à jour après le merge)
+      final participants = await localDb.getAllParticipants();
+      final seances = await localDb.getAllSeances();
 
       final unsyncedParts = await localDb.getUnsyncedParticipants();
       final unsyncedContacts = await localDb.getUnsyncedPriseContacts();
@@ -100,9 +99,9 @@ class HomeProvider extends ChangeNotifier {
 
       _pendingSyncOperations =
           unsyncedParts.length +
-          unsyncedContacts.length +
-          unsyncedRdvs.length +
-          unsyncedSeances.length;
+              unsyncedContacts.length +
+              unsyncedRdvs.length +
+              unsyncedSeances.length;
 
       _quickAccess = HomeData.getQuickAccess(context, _pendingSyncOperations);
 
@@ -124,75 +123,129 @@ class HomeProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> _syncNewSeancesOnly(List<SeancesTableData> localSeances) async {
+  /// Merge complet depuis PostgreSQL → local (séances + participants).
+  /// ✅ Vérification stricte : n'insère que si l'enregistrement n'existe pas déjà
+  Future<void> _fetchAndMergeAll() async {
+    await _mergeSeances();
+    await _mergeParticipants();
+  }
+
+  Future<void> _mergeSeances() async {
     try {
-      final localIds = localSeances
+      final serverSeances = await apiClient.seance.getAllSeances();
+      final localSeances = await localDb.getAllSeances();
+
+      // Créer un set des serverId locaux pour comparaison rapide
+      final localServerIds = localSeances
+          .where((s) => s.serverId != null)
           .map((s) => s.serverId)
-          .whereType<int>()
           .toSet();
 
-      final serverSeances = await apiClient.seance.getAllSeances();
-
-      final newSeances = serverSeances
-          .where((s) => !localIds.contains(s.id))
-          .toList();
-
-      if (newSeances.isEmpty) {
-        debugPrint('✅ Sync : aucune nouvelle séance à importer');
-        return;
+      int newCount = 0;
+      for (var s in serverSeances) {
+        // ✅ Vérifier STRICTEMENT que le serverId n'existe pas en local
+        if (!localServerIds.contains(s.id)) {
+          await localDb
+              .into(localDb.seancesTable)
+              .insert(
+            SeancesTableCompanion(
+              serverId: drift.Value(s.id),
+              nom: drift.Value(s.nom),
+              objectifs: drift.Value(s.objectifs),
+              zone: drift.Value(s.zone),
+              objectifParticipants: drift.Value(s.objectifParticipants),
+              organisateur: drift.Value(s.organisateur),
+              datePrevue: drift.Value(s.datePrevue),
+              heureDebut: drift.Value(s.heureDebut),
+              heureFin: drift.Value(s.heureFin),
+              statut: drift.Value(s.statut),
+              gadgetsPrevus: drift.Value(s.gadgetsPrevus ?? 0),
+              gadgetsDistribues: drift.Value(s.gadgetsDistribues ?? 0),
+              totalLogistique: drift.Value(s.totalLogistique ?? 0.0),
+              isSynced: const drift.Value(true),
+            ),
+          );
+          newCount++;
+        } else {
+          // ⚠️ Optionnel : mettre à jour si les données ont changé
+          // (décommenter si nécessaire)
+          // await _updateSeanceIfChanged(s, localSeances);
+        }
       }
 
-      debugPrint(
-        '⬇️ Sync : ${newSeances.length} nouvelle(s) séance(s) détectée(s)',
-      );
-
-      for (var s in newSeances) {
-        await localDb
-            .into(localDb.seancesTable)
-            .insertOnConflictUpdate(
-              SeancesTableCompanion.insert(
-                serverId: drift.Value(s.id),
-                nom: s.nom,
-                objectifs: drift.Value(s.objectifs),
-                zone: s.zone,
-                objectifParticipants: s.objectifParticipants,
-                organisateur: s.organisateur,
-                datePrevue: s.datePrevue,
-                heureDebut: drift.Value(s.heureDebut),
-                heureFin: drift.Value(s.heureFin),
-                statut: s.statut,
-                gadgetsPrevus: drift.Value(s.gadgetsPrevus ?? 0),
-                gadgetsDistribues: drift.Value(s.gadgetsDistribues ?? 0),
-                totalLogistique: drift.Value(s.totalLogistique ?? 0.0),
-                isSynced: const drift.Value(true),
-              ),
-            );
+      if (newCount > 0) {
+        debugPrint('✅ Home: $newCount nouvelle(s) séance(s) importée(s)');
+      } else {
+        debugPrint('ℹ️ Home: Toutes les séances sont déjà en local');
       }
-
-      debugPrint('✅ Sync terminée : ${newSeances.length} séance(s) insérée(s)');
     } catch (e) {
-      debugPrint('⚠️ Sync serveur échouée (mode hors-ligne conservé) : $e');
+      debugPrint('⚠️ Home mergeSeances échoué : $e');
+    }
+  }
+
+  Future<void> _mergeParticipants() async {
+    try {
+      final serverParticipants = await apiClient.participant.getAllParticipants();
+      final localParticipants = await localDb.getAllParticipants();
+
+      // ✅ Créer une clé unique combinée : serverId (pas de doublons par serverId)
+      final localServerIds = localParticipants
+          .where((p) => p.serverId != null)
+          .map((p) => p.serverId)
+          .toSet();
+
+      int newCount = 0;
+      for (var p in serverParticipants) {
+        // ✅ Vérifier STRICTEMENT que ce serverId n'existe pas en local
+        if (!localServerIds.contains(p.id)) {
+          await localDb
+              .into(localDb.participantsTable)
+              .insert(
+            ParticipantsTableCompanion(
+              serverId: drift.Value(p.id),
+              seanceId: drift.Value(p.seanceId),
+              nom: drift.Value(p.nom),
+              prenom: drift.Value(p.prenom),
+              telephone: drift.Value(p.telephone),
+              profession: drift.Value(p.profession),
+              statutLogement: drift.Value(p.statutLogement),
+              lieu: drift.Value(p.lieu),
+              localite: drift.Value(p.localite),
+              quartier: drift.Value(p.quartier),
+              besoinsExprimes: drift.Value(p.besoinsExprimes),
+              ressenti: drift.Value(p.ressenti),
+              consentement: drift.Value(p.consentement),
+              statut: drift.Value(p.statut),
+              dateInscription: drift.Value(p.dateInscription),
+              isSynced: const drift.Value(true),
+            ),
+          );
+          newCount++;
+        } else {
+          // ⚠️ Optionnel : mettre à jour si les données ont changé
+          // (décommenter si nécessaire)
+          // await _updateParticipantIfChanged(p, localParticipants);
+        }
+      }
+
+      if (newCount > 0) {
+        debugPrint('✅ Home: $newCount nouveau(x) participant(s) importé(s)');
+      } else {
+        debugPrint('ℹ️ Home: Tous les participants sont déjà en local');
+      }
+    } catch (e) {
+      debugPrint('⚠️ Home mergeParticipants échoué : $e');
     }
   }
 
   List<BarchartModel> _generateChartData(
-    List<ParticipantsTableData> participants,
-  ) {
+      List<ParticipantsTableData> participants,
+      ) {
     List<BarchartModel> chartData = [];
     final now = DateTime.now();
     final monthNames = [
-      'Jan',
-      'Fév',
-      'Mar',
-      'Avr',
-      'Mai',
-      'Juin',
-      'Juil',
-      'Aoû',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Déc',
+      'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin',
+      'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc',
     ];
 
     int maxCount = 0;
@@ -203,9 +256,9 @@ class HomeProvider extends ChangeNotifier {
       int count = participants
           .where(
             (p) =>
-                p.dateInscription.month == targetDate.month &&
-                p.dateInscription.year == targetDate.year,
-          )
+        p.dateInscription.month == targetDate.month &&
+            p.dateInscription.year == targetDate.year,
+      )
           .length;
       counts[5 - i] = count;
       if (count > maxCount) maxCount = count;

@@ -49,11 +49,11 @@ class AuthProvider extends ChangeNotifier {
 
   /// Sauvegarde les credentials localement après une connexion online réussie
   Future<void> _saveCredentialsLocally(
-    String email,
-    String password,
-    String name,
-    String role,
-  ) async {
+      String email,
+      String password,
+      String name,
+      String role,
+      ) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyEmail, email);
     await prefs.setString(_keyName, name);
@@ -143,25 +143,44 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  /// ✅ Mise à jour du profil avec vérification de la connectivité
   Future<bool> updateProfile(String newName, String newRole) async {
+    // 1. Empêcher la modification si on est sciemment en mode hors ligne
+    if (_isOfflineMode) {
+      debugPrint('❌ Impossible de mettre à jour le profil en mode hors ligne.');
+      return false;
+    }
+
     _isLoading = true;
     notifyListeners();
 
     try {
+      // 2. Double vérification du réseau avant l'appel Serverpod
+      final isConnected = await _hasInternetConnection();
+      if (!isConnected) {
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // 3. Appel au backend
+      // Si ta méthode est dans UtilisateurEndpoint au lieu de AuthEndpoint,
+      // remplace apiClient.auth.updateUser par apiClient.utilisateur.updateUser
       final success = await apiClient.auth.updateUser(
         sp.Utilisateur(
           nom: newName,
           role: newRole,
           email: _email,
-          motDePasse: '',
+          motDePasse: '', // Requis par le modèle, mais ignoré par la mise à jour
         ),
       );
 
       if (success) {
+        // 4. Mise à jour de l'état local
         _name = newName;
         _role = newRole;
 
-        // Mis à jour des données localement
+        // 5. Mise à jour des SharedPreferences (pour le prochain login offline)
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString(_keyName, newName);
         await prefs.setString(_keyRole, newRole);
@@ -174,6 +193,7 @@ class AuthProvider extends ChangeNotifier {
       debugPrint('❌ Erreur update : $e');
     }
 
+    // En cas d'échec ou d'exception
     _isLoading = false;
     notifyListeners();
     return false;

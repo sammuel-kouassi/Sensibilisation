@@ -9,12 +9,15 @@ import '../models/gadget_model.dart';
 
 class GadgetProvider extends ChangeNotifier {
   bool _isLoading = false;
+  String? _errorMessage;
+
   List<GadgetModel> _allGadgets = [];
   List<GadgetModel> _filteredGadgets = [];
 
   StreamSubscription? _dbSubscription;
 
   bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
   List<GadgetModel> get filteredGadgets => _filteredGadgets;
 
   GadgetProvider() {
@@ -32,16 +35,20 @@ class GadgetProvider extends ChangeNotifier {
   }
 
   Future<void> loadGadgets({bool forceSync = false}) async {
-    if (forceSync) {
-      _isLoading = true;
-      notifyListeners();
-    }
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
 
     try {
       if (forceSync) {
+        // 1. On vérifie d'abord si la BD locale est vide
+        final localBeforeSync = await localDb.getAllSeances();
+        final isFirstInstall = localBeforeSync.isEmpty;
+
         try {
           final serverSeances = await apiClient.seance.getAllSeances();
 
+          // 2. On remplace tout le contenu local par les données serveur
           await localDb.clearSeances();
 
           for (var s in serverSeances) {
@@ -64,13 +71,25 @@ class GadgetProvider extends ChangeNotifier {
               ),
             );
           }
+
+          debugPrint('✅ Gadgets synchronisés depuis le serveur (${serverSeances.length} séances).');
         } catch (e) {
-          debugPrint(
-            '⚠️ Hors-ligne : Impossible de télécharger les séances pour Gadgets.',
-          );
+          debugPrint('⚠️ Hors-ligne : Impossible de télécharger les séances pour Gadgets.');
+
+          // 3. Si premier lancement ET hors-ligne → on informe l'utilisateur
+          if (isFirstInstall) {
+            _errorMessage = 'Aucune donnée locale. Veuillez vous connecter à Internet pour charger les gadgets.';
+            _allGadgets = [];
+            _filteredGadgets = [];
+            _isLoading = false;
+            notifyListeners();
+            return;
+          }
+          // Sinon on continue avec les données locales existantes
         }
       }
 
+      // 4. Lecture depuis la BD locale (après synchro si possible)
       final localData = await localDb.getAllSeances();
 
       _allGadgets = localData.map((row) {
@@ -81,21 +100,23 @@ class GadgetProvider extends ChangeNotifier {
           zone: row.zone,
           gadgetsPrevus: row.gadgetsPrevus,
           gadgetsDistribues: row.gadgetsDistribues,
+          totalLogistique: row.totalLogistique,
+
         );
       }).toList();
+
+      debugPrint('📦 ${_allGadgets.length} gadgets chargés depuis le local.');
     } catch (e) {
       debugPrint('❌ ERREUR lecture SQLite Gadgets : $e');
+      _errorMessage = 'Erreur lors du chargement des gadgets.';
     }
 
     _filteredGadgets = List.from(_allGadgets);
-
-    if (_isLoading) {
-      _isLoading = false;
-    }
+    _isLoading = false;
     notifyListeners();
   }
 
-  // --- 2. RECHERCHE ET FILTRES ---
+  // --- RECHERCHE ET FILTRES ---
   void filterGadgets(String query) {
     if (query.isEmpty) {
       _filteredGadgets = List.from(_allGadgets);
@@ -109,7 +130,7 @@ class GadgetProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // --- 3. DISTRIBUTION ---
+  // --- DISTRIBUTION ---
   Future<void> distributeGadget(GadgetModel gadget, int quantity) async {
     if (quantity <= 0 || quantity > gadget.restants) return;
 
@@ -125,7 +146,6 @@ class GadgetProvider extends ChangeNotifier {
       );
 
       await localDb.updateSeance(updatedData);
-
       localDb.notifyDataChanged();
 
       if (gadget.serverId != null) {
@@ -148,12 +168,9 @@ class GadgetProvider extends ChangeNotifier {
 
           await apiClient.seance.updateSeance(serverSeance);
           await localDb.updateSeance(updatedData.copyWith(isSynced: true));
-
           localDb.notifyDataChanged();
         } catch (e) {
-          debugPrint(
-            '⚠️ Serveur inaccessible. Distribution gardée en file d\'attente.',
-          );
+          debugPrint('⚠️ Serveur inaccessible. Distribution gardée en file d\'attente.');
         }
       }
     } catch (e) {

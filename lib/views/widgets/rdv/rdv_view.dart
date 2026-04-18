@@ -1,12 +1,11 @@
+import 'package:cie_services/views/widgets/rdv/widgets/rdv_history_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../models/rdv_model.dart';
 import '../../../providers/rdv_provider.dart';
-
 import '../forms/rendez-vous_form.dart';
 import 'widgets/rdv_header.dart';
-import 'widgets/rdv_card.dart';
 
 class RdvView extends StatelessWidget {
   const RdvView({super.key});
@@ -37,15 +36,13 @@ class RdvView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ⚠️ CORRECTION : Plus de ChangeNotifierProvider ici !
-    // On retourne directement le Scaffold.
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       body: SafeArea(
         child: Consumer<RdvProvider>(
           builder: (context, provider, child) {
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -77,78 +74,18 @@ class RdvView extends StatelessWidget {
                     )
                   else
                     Expanded(
-                      child: ListView.builder(
-                        physics: const BouncingScrollPhysics(),
-                        itemCount: provider.rdvs.length,
-                        itemBuilder: (context, index) {
-                          final rdv = provider.rdvs[index];
-
-                          // ⚠️ NOUVEAU : On englobe la RdvCard dans un Dismissible
-                          return Dismissible(
-                            key: Key('rdv_${rdv.id}'),
-                            direction: DismissDirection.endToStart,
-                            background: Container(
-                              alignment: Alignment.centerRight,
-                              padding: const EdgeInsets.only(right: 20),
-                              decoration: BoxDecoration(
-                                color: Colors.red,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: const Icon(
-                                Icons.delete,
-                                color: Colors.white,
-                              ),
-                            ),
-                            confirmDismiss: (_) async {
-                              // Boîte de dialogue de confirmation
-                              return await showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: const Text('Supprimer ?'),
-                                  content: Text(
-                                    'Voulez-vous supprimer le RDV "${rdv.titre}" ?',
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.pop(context, false),
-                                      child: const Text('ANNULER'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.pop(context, true),
-                                      child: const Text(
-                                        'SUPPRIMER',
-                                        style: TextStyle(color: Colors.red),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                            onDismissed: (_) {
-                              // On demande au provider de supprimer l'élément
-                              provider.deleteRdv(rdv.id!, null);
-                            },
-                            child: RdvCard(
-                              rdv: rdv,
-                              onEdit: () async {
-                                // On ouvre le formulaire en lui passant le rdv actuel
-                                final updatedRdv = await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => RdvForm(rdv: rdv),
-                                  ),
-                                );
-
-                                // Si l'utilisateur valide les modifications
-                                if (updatedRdv != null &&
-                                    updatedRdv is RdvModel) {
-                                  provider.updateRdv(updatedRdv);
-                                }
-                              },
+                      child: RdvHistoryView(
+                        rdvs: provider.rdvs,
+                        onEdit: (rdv) async {
+                          final updatedRdv = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => RdvForm(rdv: rdv),
                             ),
                           );
+                          if (updatedRdv != null && updatedRdv is RdvModel) {
+                            provider.updateRdv(updatedRdv);
+                          }
                         },
                       ),
                     ),

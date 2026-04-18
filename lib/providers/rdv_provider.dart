@@ -161,18 +161,26 @@ class RdvProvider extends ChangeNotifier {
   }
 
   // --- SUPPRESSION ---
+  // --- SUPPRESSION ---
   Future<void> deleteRdv(int localId, int? serverId) async {
     try {
-      await NotificationService().cancelAllRdvNotifications(localId);
+      // 1. Récupérer le vrai serverId depuis la base locale
+      final localDataList = await localDb.getAllRdvs();
+      final existingData = localDataList.firstWhere((r) => r.id == localId);
+      final trueServerId = serverId ?? existingData.serverId;
 
+      // 2. Supprimer d'abord sur PostgreSQL
+      if (trueServerId != null) {
+        await apiClient.rdv.deleteRdv(trueServerId);
+      }
+
+      // 3. Supprimer localement et annuler les notifications
+      await NotificationService().cancelAllRdvNotifications(localId);
       await localDb.deleteRdv(localId);
       localDb.notifyDataChanged();
 
-      if (serverId != null) {
-        await apiClient.rdv.deleteRdv(serverId);
-      }
     } catch (e) {
-      debugPrint('⚠️ Erreur suppression RDV');
+      debugPrint('⚠️ Erreur suppression RDV (Serveur/Local) : $e');
     }
   }
 }

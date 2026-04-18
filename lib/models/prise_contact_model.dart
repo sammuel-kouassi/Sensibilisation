@@ -12,6 +12,7 @@ class PriseContactModel {
   final List<String> pointsAbordes;
   final String? observations;
   final String? signatureBase64;
+  final DateTime dateInscription; // ✅ Nouveau champ
 
   PriseContactModel({
     this.id,
@@ -27,5 +28,6 @@ class PriseContactModel {
     required this.pointsAbordes,
     this.observations,
     this.signatureBase64,
-  });
+    DateTime? dateInscription,        // ✅ Optionnel à la création
+  }) : dateInscription = dateInscription ?? DateTime.now(); // ✅ Défaut = maintenant
 }

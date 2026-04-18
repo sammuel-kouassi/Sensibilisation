@@ -1,5 +1,5 @@
 class ParticipantModel {
-  final int? id;
+  final int? id;          // id local (SQLite)
   final int sessionId;
   final String lastName;
   final String firstName;

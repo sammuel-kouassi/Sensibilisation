@@ -197,14 +197,4 @@ class PriseContactProvider extends ChangeNotifier {
       debugPrint('⚠️ Erreur update contact');
     }
   }
-
-  Future<void> deleteContact(int localId, int? serverId) async {
-    try {
-      await localDb.deletePriseContact(localId);
-      localDb.notifyDataChanged();
-      if (serverId != null) {
-        await apiClient.priseContact.deletePriseContact(serverId);
-      }
-    } catch (e) {}
-  }
 }

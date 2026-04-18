@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:drift/drift.dart' as drift;
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 import '../core/api_client.dart';
 import '../core/database/local_db.dart';
@@ -11,8 +12,11 @@ import '../models/tendency_model.dart';
 
 class StatisticsProvider extends ChangeNotifier {
   bool _isLoading = false;
+  bool _isOnline = false;
   String _selectedPeriod = '30 derniers jours';
+
   StreamSubscription? _dbSubscription;
+  StreamSubscription? _connectivitySubscription;
 
   List<KpiModel> _kpiList = [];
   List<BarchartModel> _chartData = [];
@@ -20,6 +24,7 @@ class StatisticsProvider extends ChangeNotifier {
   List<TendencyModels> _trendData = [];
 
   bool get isLoading => _isLoading;
+  bool get isOnline => _isOnline;
   String get selectedPeriod => _selectedPeriod;
   List<KpiModel> get kpiList => _kpiList;
   List<BarchartModel> get chartData => _chartData;
@@ -27,18 +32,42 @@ class StatisticsProvider extends ChangeNotifier {
   List<TendencyModels> get trendData => _trendData;
 
   void init(BuildContext context) {
-    if (_kpiList.isEmpty && !_isLoading) {
-      loadStatistics();
-    }
+    _initConnectivity();
+
     _dbSubscription?.cancel();
     _dbSubscription = localDb.changeStream.listen((_) {
       loadStatistics(isRefresh: true);
     });
+
+    // Premier lancement : toujours charger
+    loadStatistics();
+  }
+
+  Future<void> _initConnectivity() async {
+    final result = await Connectivity().checkConnectivity();
+    _updateConnectionState(result);
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen(
+      (result) => _updateConnectionState(result),
+    );
+  }
+
+  void _updateConnectionState(dynamic result) {
+    bool hasConnection = true;
+    if (result is List<ConnectivityResult>) {
+      hasConnection = !result.contains(ConnectivityResult.none);
+    } else if (result is ConnectivityResult) {
+      hasConnection = result != ConnectivityResult.none;
+    }
+    if (_isOnline != hasConnection) {
+      _isOnline = hasConnection;
+      notifyListeners();
+    }
   }
 
   @override
   void dispose() {
     _dbSubscription?.cancel();
+    _connectivitySubscription?.cancel();
     super.dispose();
   }
 
@@ -51,6 +80,109 @@ class StatisticsProvider extends ChangeNotifier {
     return DateTime(now.year, 1, 1);
   }
 
+
+  Future<void> _fetchAndMergeFromServer() async {
+    try {
+      // --- Séances ---
+      final serverSeances = await apiClient.seance.getAllSeances();
+      final localSeances = await localDb.getAllSeances();
+
+      // ✅ Créer un set des serverId existants pour comparaison rapide
+      final localServerIds = localSeances
+          .where((s) => s.serverId != null)
+          .map((s) => s.serverId)
+          .toSet();
+
+      int newSeancesCount = 0;
+      for (var s in serverSeances) {
+        // ✅ N'insérer QUE si ce serverId n'existe pas localement
+        if (!localServerIds.contains(s.id)) {
+          await localDb
+              .into(localDb.seancesTable)
+              .insert(
+                SeancesTableCompanion(
+                  serverId: drift.Value(s.id),
+                  nom: drift.Value(s.nom),
+                  objectifs: drift.Value(s.objectifs),
+                  zone: drift.Value(s.zone),
+                  objectifParticipants: drift.Value(s.objectifParticipants),
+                  organisateur: drift.Value(s.organisateur),
+                  datePrevue: drift.Value(s.datePrevue),
+                  heureDebut: drift.Value(s.heureDebut),
+                  heureFin: drift.Value(s.heureFin),
+                  statut: drift.Value(s.statut),
+                  gadgetsPrevus: drift.Value(s.gadgetsPrevus ?? 0),
+                  gadgetsDistribues: drift.Value(s.gadgetsDistribues ?? 0),
+                  totalLogistique: drift.Value(s.totalLogistique ?? 0.0),
+                  isSynced: const drift.Value(true),
+                ),
+              );
+          newSeancesCount++;
+        }
+      }
+      if (newSeancesCount > 0) {
+        debugPrint(
+          '✅ Stats: $newSeancesCount nouvelle(s) séance(s) importée(s)',
+        );
+      } else {
+        debugPrint('ℹ️ Stats: Toutes les séances sont déjà en local');
+      }
+
+      // --- Participants ---
+      final serverParticipants = await apiClient.participant
+          .getAllParticipants();
+      final localParticipants = await localDb.getAllParticipants();
+
+      // ✅ Créer un set des serverId locaux
+      final localParticipantIds = localParticipants
+          .where((p) => p.serverId != null)
+          .map((p) => p.serverId)
+          .toSet();
+
+      int newParticipantsCount = 0;
+      for (var p in serverParticipants) {
+        // ✅ N'insérer QUE si ce serverId n'existe pas localement
+        if (!localParticipantIds.contains(p.id)) {
+          await localDb
+              .into(localDb.participantsTable)
+              .insert(
+                ParticipantsTableCompanion(
+                  serverId: drift.Value(p.id),
+                  seanceId: drift.Value(p.seanceId),
+                  nom: drift.Value(p.nom),
+                  prenom: drift.Value(p.prenom),
+                  telephone: drift.Value(p.telephone),
+                  profession: drift.Value(p.profession),
+                  statutLogement: drift.Value(p.statutLogement),
+                  lieu: drift.Value(p.lieu),
+                  localite: drift.Value(p.localite),
+                  quartier: drift.Value(p.quartier),
+                  besoinsExprimes: drift.Value(p.besoinsExprimes),
+                  ressenti: drift.Value(p.ressenti),
+                  consentement: drift.Value(p.consentement),
+                  statut: drift.Value(p.statut),
+                  dateInscription: drift.Value(p.dateInscription),
+                  isSynced: const drift.Value(true),
+                ),
+              );
+          newParticipantsCount++;
+        }
+      }
+      if (newParticipantsCount > 0) {
+        debugPrint(
+          '✅ Stats: $newParticipantsCount nouveau(x) participant(s) importé(s)',
+        );
+      } else {
+        debugPrint('ℹ️ Stats: Tous les participants sont déjà en local');
+      }
+    } catch (e) {
+      // Pas de crash : on tombera sur le cache local
+      debugPrint(
+        '⚠️ Stats fetch serveur échoué, données locales utilisées : $e',
+      );
+    }
+  }
+
   Future<void> loadStatistics({bool isRefresh = false}) async {
     if (!isRefresh) {
       _isLoading = true;
@@ -58,41 +190,14 @@ class StatisticsProvider extends ChangeNotifier {
     }
 
     try {
+      // Stratégie serveur-first : si en ligne, on merge depuis PostgreSQL d'abord
+      if (_isOnline) {
+        await _fetchAndMergeFromServer();
+      }
+
       final startDate = _getStartDate();
       final allParticipants = await localDb.getAllParticipants();
-      var allSeances = await localDb.getAllSeances();
-
-      // AUTO FETCH SI VIDE
-      if (allSeances.isEmpty) {
-        try {
-          final serverSeances = await apiClient.seance.getAllSeances();
-          if (serverSeances.isNotEmpty) {
-            for (var s in serverSeances) {
-              await localDb.insertSeance(
-                SeancesTableCompanion.insert(
-                  serverId: drift.Value(s.id),
-                  nom: s.nom,
-                  objectifs: drift.Value(s.objectifs),
-                  zone: s.zone,
-                  objectifParticipants: s.objectifParticipants,
-                  organisateur: s.organisateur,
-                  datePrevue: s.datePrevue,
-                  heureDebut: drift.Value(s.heureDebut),
-                  heureFin: drift.Value(s.heureFin),
-                  statut: s.statut,
-                  gadgetsPrevus: drift.Value(s.gadgetsPrevus ?? 0),
-                  gadgetsDistribues: drift.Value(s.gadgetsDistribues ?? 0),
-                  totalLogistique: drift.Value(s.totalLogistique ?? 0.0),
-                  isSynced: const drift.Value(true),
-                ),
-              );
-            }
-            allSeances = await localDb.getAllSeances();
-          }
-        } catch (e) {
-          debugPrint('Erreur Fetch Stats');
-        }
-      }
+      final allSeances = await localDb.getAllSeances();
 
       final filteredParts = allParticipants
           .where((p) => p.dateInscription.isAfter(startDate))
@@ -182,28 +287,41 @@ class StatisticsProvider extends ChangeNotifier {
 
   List<RepartzoneModels> _generateZoneChart(List<ParticipantsTableData> parts) {
     if (parts.isEmpty) return [];
+
     Map<String, int> zoneCounts = {};
+
     for (var p in parts) {
-      zoneCounts[p.localite] = (zoneCounts[p.localite] ?? 0) + 1;
+      String cleanName = p.localite.trim().toLowerCase();
+
+      // 2. On ignore les saisies vides si l'utilisateur n'a rien mis
+      if (cleanName.isEmpty) {
+        cleanName = "Non spécifié";
+      }
+
+      // 3. On compte cette valeur nettoyée
+      zoneCounts[cleanName] = (zoneCounts[cleanName] ?? 0) + 1;
     }
+
     List<Color> colors = [
       const Color(0xFFFF9500),
       const Color(0xFF21951D),
-      Colors.blue,
-      Colors.red,
-      Colors.purple,
+      const Color(0xFF2196F3),
+      const Color(0xFFF44336),
+      const Color(0xFF9C27B0),
+      const Color(0xFF4CAF50),
     ];
+
     List<RepartzoneModels> zones = [];
     int i = 0;
-    zoneCounts.forEach((zoneName, count) {
 
-      final formattedZoneName = zoneName.isNotEmpty
-          ? zoneName[0].toUpperCase() + zoneName.substring(1).toLowerCase()
-          : zoneName;
+    zoneCounts.forEach((name, count) {
+      final displayName = name.isNotEmpty
+          ? name[0].toUpperCase() + name.substring(1)
+          : name;
 
       zones.add(
         RepartzoneModels(
-          zoneName: formattedZoneName,
+          zoneName: displayName,
           percentage: (count / parts.length) * 100,
           valeurExacte: count,
           color: colors[i % colors.length],
@@ -211,6 +329,7 @@ class StatisticsProvider extends ChangeNotifier {
       );
       i++;
     });
+
     return zones;
   }
 

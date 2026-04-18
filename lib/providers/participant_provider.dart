@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:drift/drift.dart' as drift;
-
 import '../core/api_client.dart';
 import 'package:dlf_backend_client/dlf_backend_client.dart' as sp;
 import '../core/database/local_db.dart';
@@ -29,6 +28,54 @@ class ParticipantProvider extends ChangeNotifier {
   void dispose() {
     _dbSubscription?.cancel();
     super.dispose();
+  }
+
+  // Ajouter cette méthode dans ParticipantProvider
+  Future<void> syncFromServer() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      // 1. Récupérer tous les participants depuis le serveur
+      final serverParticipants = await apiClient.participant
+          .getAllParticipants();
+
+      // 2. Pour chaque participant serveur, insérer/mettre à jour en local
+      for (final sp in serverParticipants) {
+        final localList = await localDb.getAllParticipants();
+        final existing = localList.where((p) => p.serverId == sp.id).toList();
+
+        if (existing.isEmpty) {
+          // Nouveau participant venant d'un autre téléphone → on l'insère
+          await localDb.addParticipant(
+            ParticipantsTableCompanion.insert(
+              serverId: drift.Value(sp.id),
+              seanceId: sp.seanceId,
+              nom: sp.nom,
+              prenom: sp.prenom,
+              telephone: sp.telephone,
+              profession: drift.Value(sp.profession),
+              statutLogement: sp.statutLogement,
+              lieu: drift.Value(sp.lieu),
+              localite: sp.localite,
+              quartier: drift.Value(sp.quartier),
+              besoinsExprimes: sp.besoinsExprimes,
+              ressenti: drift.Value(sp.ressenti),
+              consentement: sp.consentement,
+              statut: sp.statut,
+              dateInscription: sp.dateInscription,
+              isSynced: const drift.Value(true),
+            ),
+          );
+        }
+      }
+
+      localDb.notifyDataChanged();
+    } catch (e) {
+      debugPrint('⚠️ Erreur sync serveur : $e');
+    }
+
+    await loadParticipants();
   }
 
   // --- 1. CHARGEMENT ---
@@ -197,7 +244,6 @@ class ParticipantProvider extends ChangeNotifier {
 
       await localDb.updateParticipant(updatedData);
 
-      // 📣 TEMPS RÉEL : On prévient de la modification locale
       localDb.notifyDataChanged();
 
       if (trueServerId != null) {
@@ -222,26 +268,10 @@ class ParticipantProvider extends ChangeNotifier {
         await apiClient.participant.updateParticipant(serverParticipant);
         await localDb.updateParticipant(updatedData.copyWith(isSynced: true));
 
-        // 📣 TEMPS RÉEL : On prévient que c'est synchronisé avec le serveur
         localDb.notifyDataChanged();
       }
     } catch (e) {
       debugPrint('⚠️ Mode hors-ligne actif (Modification).');
-    }
-  }
-
-  // --- 5. SUPPRESSION ---
-  Future<void> deleteParticipant(int localId, int? serverId) async {
-    try {
-      await localDb.deleteParticipant(localId);
-
-      localDb.notifyDataChanged();
-
-      if (serverId != null) {
-        await apiClient.participant.deleteParticipant(serverId);
-      }
-    } catch (e) {
-      debugPrint('Erreur suppression : $e');
     }
   }
 }

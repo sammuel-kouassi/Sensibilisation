@@ -5,6 +5,8 @@ class GadgetModel {
   final String zone;
   final int gadgetsPrevus;
   final int gadgetsDistribues;
+  final double? totalLogistique;
+
 
   GadgetModel({
     required this.id,
@@ -12,7 +14,7 @@ class GadgetModel {
     required this.seanceNom,
     required this.zone,
     required this.gadgetsPrevus,
-    required this.gadgetsDistribues,
+    required this.gadgetsDistribues, this.totalLogistique,
   });
 
   int get restants => gadgetsPrevus - gadgetsDistribues;

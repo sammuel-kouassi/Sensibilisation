@@ -166,10 +166,13 @@ class AppDatabase extends _$AppDatabase {
 
   // --- REQUÊTES SÉANCES (LOGISTIQUE) ---
   Future<List<SeancesTableData>> getAllSeances() => select(seancesTable).get();
+
   Future<List<SeancesTableData>> getUnsyncedSeances() =>
       (select(seancesTable)..where((t) => t.isSynced.equals(false))).get();
+
   Future<int> insertSeance(SeancesTableCompanion entry) =>
       into(seancesTable).insert(entry);
+
   Future<bool> updateSeance(SeancesTableData entry) =>
       update(seancesTable).replace(entry);
   Future<void> clearSeances() => delete(seancesTable).go();

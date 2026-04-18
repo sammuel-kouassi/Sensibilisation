@@ -44,9 +44,7 @@ class StatisticsView extends StatelessWidget {
                                 'Cette année',
                               ],
                               onPeriodChanged: (newPeriod) {
-                                provider.updatePeriod(
-                                  newPeriod,
-                                ); // Plus besoin du context ici
+                                provider.updatePeriod(newPeriod);
                               },
                             ),
                           ),
