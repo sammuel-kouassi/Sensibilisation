@@ -10,11 +10,18 @@ class ParticipantProvider extends ChangeNotifier {
   bool _isLoading = false;
   List<ParticipantModel> _allParticipants = [];
   List<ParticipantModel> _filteredParticipants = [];
+  List<SeancesTableData> _seances = [];
+  int? _selectedSeanceId;
+
+  List<SeancesTableData> get seances => _seances;
+  int? get selectedSeanceId => _selectedSeanceId;
 
   StreamSubscription? _dbSubscription;
 
   bool get isLoading => _isLoading;
   List<ParticipantModel> get filteredParticipants => _filteredParticipants;
+
+
 
   ParticipantProvider() {
     loadParticipants();
@@ -85,6 +92,8 @@ class ParticipantProvider extends ChangeNotifier {
 
     try {
       final localData = await localDb.getAllParticipants();
+      final seancesData = await localDb.getAllSeances();
+      _seances = seancesData;
 
       _allParticipants = localData.map((row) {
         return ParticipantModel(
@@ -118,20 +127,35 @@ class ParticipantProvider extends ChangeNotifier {
 
   // --- 2. FILTRAGE ---
   void filterParticipants(String query) {
-    if (query.isEmpty) {
-      _filteredParticipants = List.from(_allParticipants);
-    } else {
+    _applyFilters(query: query);
+  }
+
+  void filterBySeance(int? seanceId) {
+    _selectedSeanceId = seanceId;
+    _applyFilters(query: ''); // reset texte
+    notifyListeners();
+  }
+
+  void _applyFilters({required String query}) {
+    List<ParticipantModel> base = List.from(_allParticipants);
+
+    // Filtre par séance d'abord
+    if (_selectedSeanceId != null) {
+      base = base.where((p) => p.sessionId == _selectedSeanceId).toList();
+    }
+
+    // Puis filtre texte
+    if (query.isNotEmpty) {
       final searchLower = query.toLowerCase();
-      _filteredParticipants = _allParticipants.where((participant) {
-        final idString = participant.id?.toString() ?? '';
-        final fullName = '${participant.firstName} ${participant.lastName}'
-            .toLowerCase();
-        final localityLower = participant.locality.toLowerCase();
-        return idString.contains(searchLower) ||
-            fullName.contains(searchLower) ||
-            localityLower.contains(searchLower);
+      base = base.where((p) {
+        final fullName = '${p.firstName} ${p.lastName}'.toLowerCase();
+        return fullName.contains(searchLower) ||
+            p.locality.toLowerCase().contains(searchLower) ||
+            (p.id?.toString() ?? '').contains(searchLower);
       }).toList();
     }
+
+    _filteredParticipants = base;
     notifyListeners();
   }
 

@@ -174,47 +174,47 @@ class _RepartZoneState extends State<RepartZone> {
                               ),
                             ),
                             child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Carré couleur (aligné avec la première ligne du texte)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 2),
-                                  child: Container(
-                                    width: 10,
-                                    height: 10,
-                                    decoration: BoxDecoration(
-                                      color: zone.color,
-                                      borderRadius: BorderRadius.circular(3),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                // Nom de la zone (retour à la ligne si long)
-                                Flexible(
-                                  child: Text(
-                                    zone.zoneName,
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: isSelected
-                                          ? FontWeight.w600
-                                          : FontWeight.w400,
-                                      color: Colors.black87,
-                                    ),
-                                    softWrap: true,
-                                  ),
-                                ),
-                                const SizedBox(width: 4),
-                                // Pourcentage
-                                Text(
-                                  '${zone.percentage.toInt()}%',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Carré couleur
+                              Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: Container(
+                                  width: 10,
+                                  height: 10,
+                                  decoration: BoxDecoration(
                                     color: zone.color,
+                                    borderRadius: BorderRadius.circular(3),
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(width: 8),
+                              // Nom de la zone
+                              Expanded(                          // ← Flexible → Expanded
+                                child: Text(
+                                  zone.zoneName,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                                    color: Colors.black87,
+                                  ),
+                                  softWrap: true,
+                                  maxLines: 2,                   // ← max 2 lignes propres
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              // Pourcentage — ne rétrécit jamais
+                              Text(
+                                '${zone.percentage.toInt()}%',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: zone.color,
+                                ),
+                              ),
+                            ],
+                          ),
                           ),
                         );
                       }).toList(),

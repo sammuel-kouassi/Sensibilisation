@@ -2887,14 +2887,20 @@ class $SeancesTableTable extends SeancesTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _statutMeta = const VerificationMeta('statut');
+  static const VerificationMeta _estTermineeMeta = const VerificationMeta(
+    'estTerminee',
+  );
   @override
-  late final GeneratedColumn<String> statut = GeneratedColumn<String>(
-    'statut',
+  late final GeneratedColumn<bool> estTerminee = GeneratedColumn<bool>(
+    'est_terminee',
     aliasedName,
     false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("est_terminee" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
   );
   static const VerificationMeta _gadgetsPrevusMeta = const VerificationMeta(
     'gadgetsPrevus',
@@ -2959,7 +2965,7 @@ class $SeancesTableTable extends SeancesTable
     datePrevue,
     heureDebut,
     heureFin,
-    statut,
+    estTerminee,
     gadgetsPrevus,
     gadgetsDistribues,
     totalLogistique,
@@ -3050,13 +3056,14 @@ class $SeancesTableTable extends SeancesTable
         heureFin.isAcceptableOrUnknown(data['heure_fin']!, _heureFinMeta),
       );
     }
-    if (data.containsKey('statut')) {
+    if (data.containsKey('est_terminee')) {
       context.handle(
-        _statutMeta,
-        statut.isAcceptableOrUnknown(data['statut']!, _statutMeta),
+        _estTermineeMeta,
+        estTerminee.isAcceptableOrUnknown(
+          data['est_terminee']!,
+          _estTermineeMeta,
+        ),
       );
-    } else if (isInserting) {
-      context.missing(_statutMeta);
     }
     if (data.containsKey('gadgets_prevus')) {
       context.handle(
@@ -3140,9 +3147,9 @@ class $SeancesTableTable extends SeancesTable
         DriftSqlType.string,
         data['${effectivePrefix}heure_fin'],
       ),
-      statut: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}statut'],
+      estTerminee: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}est_terminee'],
       )!,
       gadgetsPrevus: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
@@ -3181,7 +3188,7 @@ class SeancesTableData extends DataClass
   final DateTime datePrevue;
   final String? heureDebut;
   final String? heureFin;
-  final String statut;
+  final bool estTerminee;
   final int gadgetsPrevus;
   final int gadgetsDistribues;
   final double totalLogistique;
@@ -3197,7 +3204,7 @@ class SeancesTableData extends DataClass
     required this.datePrevue,
     this.heureDebut,
     this.heureFin,
-    required this.statut,
+    required this.estTerminee,
     required this.gadgetsPrevus,
     required this.gadgetsDistribues,
     required this.totalLogistique,
@@ -3224,7 +3231,7 @@ class SeancesTableData extends DataClass
     if (!nullToAbsent || heureFin != null) {
       map['heure_fin'] = Variable<String>(heureFin);
     }
-    map['statut'] = Variable<String>(statut);
+    map['est_terminee'] = Variable<bool>(estTerminee);
     map['gadgets_prevus'] = Variable<int>(gadgetsPrevus);
     map['gadgets_distribues'] = Variable<int>(gadgetsDistribues);
     map['total_logistique'] = Variable<double>(totalLogistique);
@@ -3252,7 +3259,7 @@ class SeancesTableData extends DataClass
       heureFin: heureFin == null && nullToAbsent
           ? const Value.absent()
           : Value(heureFin),
-      statut: Value(statut),
+      estTerminee: Value(estTerminee),
       gadgetsPrevus: Value(gadgetsPrevus),
       gadgetsDistribues: Value(gadgetsDistribues),
       totalLogistique: Value(totalLogistique),
@@ -3278,7 +3285,7 @@ class SeancesTableData extends DataClass
       datePrevue: serializer.fromJson<DateTime>(json['datePrevue']),
       heureDebut: serializer.fromJson<String?>(json['heureDebut']),
       heureFin: serializer.fromJson<String?>(json['heureFin']),
-      statut: serializer.fromJson<String>(json['statut']),
+      estTerminee: serializer.fromJson<bool>(json['estTerminee']),
       gadgetsPrevus: serializer.fromJson<int>(json['gadgetsPrevus']),
       gadgetsDistribues: serializer.fromJson<int>(json['gadgetsDistribues']),
       totalLogistique: serializer.fromJson<double>(json['totalLogistique']),
@@ -3299,7 +3306,7 @@ class SeancesTableData extends DataClass
       'datePrevue': serializer.toJson<DateTime>(datePrevue),
       'heureDebut': serializer.toJson<String?>(heureDebut),
       'heureFin': serializer.toJson<String?>(heureFin),
-      'statut': serializer.toJson<String>(statut),
+      'estTerminee': serializer.toJson<bool>(estTerminee),
       'gadgetsPrevus': serializer.toJson<int>(gadgetsPrevus),
       'gadgetsDistribues': serializer.toJson<int>(gadgetsDistribues),
       'totalLogistique': serializer.toJson<double>(totalLogistique),
@@ -3318,7 +3325,7 @@ class SeancesTableData extends DataClass
     DateTime? datePrevue,
     Value<String?> heureDebut = const Value.absent(),
     Value<String?> heureFin = const Value.absent(),
-    String? statut,
+    bool? estTerminee,
     int? gadgetsPrevus,
     int? gadgetsDistribues,
     double? totalLogistique,
@@ -3334,7 +3341,7 @@ class SeancesTableData extends DataClass
     datePrevue: datePrevue ?? this.datePrevue,
     heureDebut: heureDebut.present ? heureDebut.value : this.heureDebut,
     heureFin: heureFin.present ? heureFin.value : this.heureFin,
-    statut: statut ?? this.statut,
+    estTerminee: estTerminee ?? this.estTerminee,
     gadgetsPrevus: gadgetsPrevus ?? this.gadgetsPrevus,
     gadgetsDistribues: gadgetsDistribues ?? this.gadgetsDistribues,
     totalLogistique: totalLogistique ?? this.totalLogistique,
@@ -3360,7 +3367,9 @@ class SeancesTableData extends DataClass
           ? data.heureDebut.value
           : this.heureDebut,
       heureFin: data.heureFin.present ? data.heureFin.value : this.heureFin,
-      statut: data.statut.present ? data.statut.value : this.statut,
+      estTerminee: data.estTerminee.present
+          ? data.estTerminee.value
+          : this.estTerminee,
       gadgetsPrevus: data.gadgetsPrevus.present
           ? data.gadgetsPrevus.value
           : this.gadgetsPrevus,
@@ -3387,7 +3396,7 @@ class SeancesTableData extends DataClass
           ..write('datePrevue: $datePrevue, ')
           ..write('heureDebut: $heureDebut, ')
           ..write('heureFin: $heureFin, ')
-          ..write('statut: $statut, ')
+          ..write('estTerminee: $estTerminee, ')
           ..write('gadgetsPrevus: $gadgetsPrevus, ')
           ..write('gadgetsDistribues: $gadgetsDistribues, ')
           ..write('totalLogistique: $totalLogistique, ')
@@ -3408,7 +3417,7 @@ class SeancesTableData extends DataClass
     datePrevue,
     heureDebut,
     heureFin,
-    statut,
+    estTerminee,
     gadgetsPrevus,
     gadgetsDistribues,
     totalLogistique,
@@ -3428,7 +3437,7 @@ class SeancesTableData extends DataClass
           other.datePrevue == this.datePrevue &&
           other.heureDebut == this.heureDebut &&
           other.heureFin == this.heureFin &&
-          other.statut == this.statut &&
+          other.estTerminee == this.estTerminee &&
           other.gadgetsPrevus == this.gadgetsPrevus &&
           other.gadgetsDistribues == this.gadgetsDistribues &&
           other.totalLogistique == this.totalLogistique &&
@@ -3446,7 +3455,7 @@ class SeancesTableCompanion extends UpdateCompanion<SeancesTableData> {
   final Value<DateTime> datePrevue;
   final Value<String?> heureDebut;
   final Value<String?> heureFin;
-  final Value<String> statut;
+  final Value<bool> estTerminee;
   final Value<int> gadgetsPrevus;
   final Value<int> gadgetsDistribues;
   final Value<double> totalLogistique;
@@ -3462,7 +3471,7 @@ class SeancesTableCompanion extends UpdateCompanion<SeancesTableData> {
     this.datePrevue = const Value.absent(),
     this.heureDebut = const Value.absent(),
     this.heureFin = const Value.absent(),
-    this.statut = const Value.absent(),
+    this.estTerminee = const Value.absent(),
     this.gadgetsPrevus = const Value.absent(),
     this.gadgetsDistribues = const Value.absent(),
     this.totalLogistique = const Value.absent(),
@@ -3479,7 +3488,7 @@ class SeancesTableCompanion extends UpdateCompanion<SeancesTableData> {
     required DateTime datePrevue,
     this.heureDebut = const Value.absent(),
     this.heureFin = const Value.absent(),
-    required String statut,
+    this.estTerminee = const Value.absent(),
     this.gadgetsPrevus = const Value.absent(),
     this.gadgetsDistribues = const Value.absent(),
     this.totalLogistique = const Value.absent(),
@@ -3488,8 +3497,7 @@ class SeancesTableCompanion extends UpdateCompanion<SeancesTableData> {
        zone = Value(zone),
        objectifParticipants = Value(objectifParticipants),
        organisateur = Value(organisateur),
-       datePrevue = Value(datePrevue),
-       statut = Value(statut);
+       datePrevue = Value(datePrevue);
   static Insertable<SeancesTableData> custom({
     Expression<int>? id,
     Expression<int>? serverId,
@@ -3501,7 +3509,7 @@ class SeancesTableCompanion extends UpdateCompanion<SeancesTableData> {
     Expression<DateTime>? datePrevue,
     Expression<String>? heureDebut,
     Expression<String>? heureFin,
-    Expression<String>? statut,
+    Expression<bool>? estTerminee,
     Expression<int>? gadgetsPrevus,
     Expression<int>? gadgetsDistribues,
     Expression<double>? totalLogistique,
@@ -3519,7 +3527,7 @@ class SeancesTableCompanion extends UpdateCompanion<SeancesTableData> {
       if (datePrevue != null) 'date_prevue': datePrevue,
       if (heureDebut != null) 'heure_debut': heureDebut,
       if (heureFin != null) 'heure_fin': heureFin,
-      if (statut != null) 'statut': statut,
+      if (estTerminee != null) 'est_terminee': estTerminee,
       if (gadgetsPrevus != null) 'gadgets_prevus': gadgetsPrevus,
       if (gadgetsDistribues != null) 'gadgets_distribues': gadgetsDistribues,
       if (totalLogistique != null) 'total_logistique': totalLogistique,
@@ -3538,7 +3546,7 @@ class SeancesTableCompanion extends UpdateCompanion<SeancesTableData> {
     Value<DateTime>? datePrevue,
     Value<String?>? heureDebut,
     Value<String?>? heureFin,
-    Value<String>? statut,
+    Value<bool>? estTerminee,
     Value<int>? gadgetsPrevus,
     Value<int>? gadgetsDistribues,
     Value<double>? totalLogistique,
@@ -3555,7 +3563,7 @@ class SeancesTableCompanion extends UpdateCompanion<SeancesTableData> {
       datePrevue: datePrevue ?? this.datePrevue,
       heureDebut: heureDebut ?? this.heureDebut,
       heureFin: heureFin ?? this.heureFin,
-      statut: statut ?? this.statut,
+      estTerminee: estTerminee ?? this.estTerminee,
       gadgetsPrevus: gadgetsPrevus ?? this.gadgetsPrevus,
       gadgetsDistribues: gadgetsDistribues ?? this.gadgetsDistribues,
       totalLogistique: totalLogistique ?? this.totalLogistique,
@@ -3596,8 +3604,8 @@ class SeancesTableCompanion extends UpdateCompanion<SeancesTableData> {
     if (heureFin.present) {
       map['heure_fin'] = Variable<String>(heureFin.value);
     }
-    if (statut.present) {
-      map['statut'] = Variable<String>(statut.value);
+    if (estTerminee.present) {
+      map['est_terminee'] = Variable<bool>(estTerminee.value);
     }
     if (gadgetsPrevus.present) {
       map['gadgets_prevus'] = Variable<int>(gadgetsPrevus.value);
@@ -3627,7 +3635,7 @@ class SeancesTableCompanion extends UpdateCompanion<SeancesTableData> {
           ..write('datePrevue: $datePrevue, ')
           ..write('heureDebut: $heureDebut, ')
           ..write('heureFin: $heureFin, ')
-          ..write('statut: $statut, ')
+          ..write('estTerminee: $estTerminee, ')
           ..write('gadgetsPrevus: $gadgetsPrevus, ')
           ..write('gadgetsDistribues: $gadgetsDistribues, ')
           ..write('totalLogistique: $totalLogistique, ')
@@ -5025,7 +5033,7 @@ typedef $$SeancesTableTableCreateCompanionBuilder =
       required DateTime datePrevue,
       Value<String?> heureDebut,
       Value<String?> heureFin,
-      required String statut,
+      Value<bool> estTerminee,
       Value<int> gadgetsPrevus,
       Value<int> gadgetsDistribues,
       Value<double> totalLogistique,
@@ -5043,7 +5051,7 @@ typedef $$SeancesTableTableUpdateCompanionBuilder =
       Value<DateTime> datePrevue,
       Value<String?> heureDebut,
       Value<String?> heureFin,
-      Value<String> statut,
+      Value<bool> estTerminee,
       Value<int> gadgetsPrevus,
       Value<int> gadgetsDistribues,
       Value<double> totalLogistique,
@@ -5109,8 +5117,8 @@ class $$SeancesTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get statut => $composableBuilder(
-    column: $table.statut,
+  ColumnFilters<bool> get estTerminee => $composableBuilder(
+    column: $table.estTerminee,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5194,8 +5202,8 @@ class $$SeancesTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get statut => $composableBuilder(
-    column: $table.statut,
+  ColumnOrderings<bool> get estTerminee => $composableBuilder(
+    column: $table.estTerminee,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -5267,8 +5275,10 @@ class $$SeancesTableTableAnnotationComposer
   GeneratedColumn<String> get heureFin =>
       $composableBuilder(column: $table.heureFin, builder: (column) => column);
 
-  GeneratedColumn<String> get statut =>
-      $composableBuilder(column: $table.statut, builder: (column) => column);
+  GeneratedColumn<bool> get estTerminee => $composableBuilder(
+    column: $table.estTerminee,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get gadgetsPrevus => $composableBuilder(
     column: $table.gadgetsPrevus,
@@ -5330,7 +5340,7 @@ class $$SeancesTableTableTableManager
                 Value<DateTime> datePrevue = const Value.absent(),
                 Value<String?> heureDebut = const Value.absent(),
                 Value<String?> heureFin = const Value.absent(),
-                Value<String> statut = const Value.absent(),
+                Value<bool> estTerminee = const Value.absent(),
                 Value<int> gadgetsPrevus = const Value.absent(),
                 Value<int> gadgetsDistribues = const Value.absent(),
                 Value<double> totalLogistique = const Value.absent(),
@@ -5346,7 +5356,7 @@ class $$SeancesTableTableTableManager
                 datePrevue: datePrevue,
                 heureDebut: heureDebut,
                 heureFin: heureFin,
-                statut: statut,
+                estTerminee: estTerminee,
                 gadgetsPrevus: gadgetsPrevus,
                 gadgetsDistribues: gadgetsDistribues,
                 totalLogistique: totalLogistique,
@@ -5364,7 +5374,7 @@ class $$SeancesTableTableTableManager
                 required DateTime datePrevue,
                 Value<String?> heureDebut = const Value.absent(),
                 Value<String?> heureFin = const Value.absent(),
-                required String statut,
+                Value<bool> estTerminee = const Value.absent(),
                 Value<int> gadgetsPrevus = const Value.absent(),
                 Value<int> gadgetsDistribues = const Value.absent(),
                 Value<double> totalLogistique = const Value.absent(),
@@ -5380,7 +5390,7 @@ class $$SeancesTableTableTableManager
                 datePrevue: datePrevue,
                 heureDebut: heureDebut,
                 heureFin: heureFin,
-                statut: statut,
+                estTerminee: estTerminee,
                 gadgetsPrevus: gadgetsPrevus,
                 gadgetsDistribues: gadgetsDistribues,
                 totalLogistique: totalLogistique,

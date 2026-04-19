@@ -1,3 +1,5 @@
+import 'package:cie_services/models/seance_statut.dart';
+
 class GadgetModel {
   final int id;
   final int? serverId;
@@ -6,6 +8,8 @@ class GadgetModel {
   final int gadgetsPrevus;
   final int gadgetsDistribues;
   final double? totalLogistique;
+  final SeanceStatut statut;
+
 
 
   GadgetModel({
@@ -14,7 +18,7 @@ class GadgetModel {
     required this.seanceNom,
     required this.zone,
     required this.gadgetsPrevus,
-    required this.gadgetsDistribues, this.totalLogistique,
+    required this.gadgetsDistribues, this.totalLogistique, required this.statut,
   });
 
   int get restants => gadgetsPrevus - gadgetsDistribues;

@@ -5,17 +5,16 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../core/database/local_db.dart';
+import '../../../models/seance_statut.dart';
 
 class DataManagementView extends StatelessWidget {
   const DataManagementView({super.key});
 
-  // LOGIQUE D'EXPORTATION CSV ---
   Future<void> _exportToCsv(BuildContext context, String tableType) async {
     List<List<dynamic>> rows = [];
     String fileName = "";
 
     try {
-      // 1. Préparation des données selon la table
       if (tableType == 'participants') {
         final data = await localDb.getAllParticipants();
         rows.add([
@@ -40,7 +39,7 @@ class DataManagementView extends StatelessWidget {
           ]);
         }
         fileName =
-            "rapport_participants_${DateFormat('dd_MM_yyyy_HHmm').format(DateTime.now())}.csv";
+        "rapport_participants_${DateFormat('dd_MM_yyyy_HHmm').format(DateTime.now())}.csv";
       } else if (tableType == 'seances') {
         final data = await localDb.getAllSeances();
         rows.add([
@@ -54,31 +53,33 @@ class DataManagementView extends StatelessWidget {
         ]);
 
         for (var s in data) {
+          final statut = calculerStatut(        // ← statut calculé
+            datePrevue: s.datePrevue,
+            estTerminee: s.estTerminee,
+          );
           rows.add([
             s.serverId ?? 'Local',
             s.nom,
             s.zone,
             s.objectifParticipants,
             s.gadgetsDistribues,
-            s.statut,
+            statut.label,                       // ← "Planifiée" / "En cours" / "Terminée"
             DateFormat('dd/MM/yyyy').format(s.datePrevue),
           ]);
         }
         fileName =
-            "rapport_seances_${DateFormat('dd_MM_yyyy_HHmm').format(DateTime.now())}.csv";
+        "rapport_seances_${DateFormat('dd_MM_yyyy_HHmm').format(DateTime.now())}.csv";
       }
 
-      // 2. Conversion et écriture du fichier
       String csvData = const csv_lib.ListToCsvConverter().convert(rows);
       final dir = await getTemporaryDirectory();
       final file = File("${dir.path}/$fileName");
       await file.writeAsString(csvData);
 
-      // 3. Partage du fichier
       await Share.shareXFiles(
         [XFile(file.path)],
         text:
-            'Rapport d\'activité DLF - Généré le ${DateFormat('dd/MM/yyyy').format(DateTime.now())}',
+        'Rapport d\'activité DLF - Généré le ${DateFormat('dd/MM/yyyy').format(DateTime.now())}',
       );
     } catch (e) {
       debugPrint('❌ Erreur Export : $e');
@@ -157,10 +158,7 @@ class DataManagementView extends StatelessWidget {
             },
             child: const Text(
               "Confirmer",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -185,7 +183,6 @@ class DataManagementView extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
         children: [
-          // Section Maintenance
           _buildSectionHeader("MAINTENANCE"),
           const SizedBox(height: 16),
           _buildCard(
@@ -194,12 +191,11 @@ class DataManagementView extends StatelessWidget {
             "Effacer les données locales stockées",
             Icons.delete_sweep_outlined,
             Colors.red,
-            () => _confirmClear(context),
+                () => _confirmClear(context),
           ),
 
           const SizedBox(height: 32),
 
-          // Section Export
           _buildSectionHeader("GÉNÉRER DES RAPPORTS EXCEL"),
           const SizedBox(height: 16),
           _buildCard(
@@ -208,7 +204,7 @@ class DataManagementView extends StatelessWidget {
             "Exporter tous les inscrits (CSV)",
             Icons.people_alt_outlined,
             const Color(0xFF21951D),
-            () => _exportToCsv(context, 'participants'),
+                () => _exportToCsv(context, 'participants'),
           ),
           const SizedBox(height: 16),
           _buildCard(
@@ -217,7 +213,7 @@ class DataManagementView extends StatelessWidget {
             "Rapport des sensibilisations réalisées",
             Icons.assignment_outlined,
             const Color(0xFFFF8000),
-            () => _exportToCsv(context, 'seances'),
+                () => _exportToCsv(context, 'seances'),
           ),
 
           const SizedBox(height: 40),
@@ -249,13 +245,13 @@ class DataManagementView extends StatelessWidget {
   }
 
   Widget _buildCard(
-    BuildContext context,
-    String title,
-    String sub,
-    IconData icon,
-    Color col,
-    VoidCallback onTap,
-  ) {
+      BuildContext context,
+      String title,
+      String sub,
+      IconData icon,
+      Color col,
+      VoidCallback onTap,
+      ) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(24),

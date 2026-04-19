@@ -158,7 +158,7 @@ class HomeProvider extends ChangeNotifier {
               datePrevue: drift.Value(s.datePrevue),
               heureDebut: drift.Value(s.heureDebut),
               heureFin: drift.Value(s.heureFin),
-              statut: drift.Value(s.statut),
+              estTerminee: drift.Value(s.estTerminee),
               gadgetsPrevus: drift.Value(s.gadgetsPrevus ?? 0),
               gadgetsDistribues: drift.Value(s.gadgetsDistribues ?? 0),
               totalLogistique: drift.Value(s.totalLogistique ?? 0.0),

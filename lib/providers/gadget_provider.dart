@@ -6,6 +6,7 @@ import '../core/api_client.dart';
 import 'package:dlf_backend_client/dlf_backend_client.dart' as sp;
 import '../core/database/local_db.dart';
 import '../models/gadget_model.dart';
+import '../models/seance_statut.dart';
 
 class GadgetProvider extends ChangeNotifier {
   bool _isLoading = false;
@@ -63,7 +64,7 @@ class GadgetProvider extends ChangeNotifier {
                 datePrevue: s.datePrevue,
                 heureDebut: drift.Value(s.heureDebut),
                 heureFin: drift.Value(s.heureFin),
-                statut: s.statut,
+                estTerminee: drift.Value(s.estTerminee),
                 gadgetsPrevus: drift.Value(s.gadgetsPrevus ?? 0),
                 gadgetsDistribues: drift.Value(s.gadgetsDistribues ?? 0),
                 totalLogistique: drift.Value(s.totalLogistique ?? 0.0),
@@ -101,6 +102,10 @@ class GadgetProvider extends ChangeNotifier {
           gadgetsPrevus: row.gadgetsPrevus,
           gadgetsDistribues: row.gadgetsDistribues,
           totalLogistique: row.totalLogistique,
+            statut: calculerStatut(           // ← calculé dynamiquement
+              datePrevue: row.datePrevue,
+              estTerminee: row.estTerminee,
+            )
 
         );
       }).toList();
@@ -160,7 +165,7 @@ class GadgetProvider extends ChangeNotifier {
             datePrevue: existingSeance.datePrevue,
             heureDebut: existingSeance.heureDebut,
             heureFin: existingSeance.heureFin,
-            statut: existingSeance.statut,
+            estTerminee: existingSeance.estTerminee,
             gadgetsPrevus: existingSeance.gadgetsPrevus,
             gadgetsDistribues: newDistributed,
             totalLogistique: existingSeance.totalLogistique,

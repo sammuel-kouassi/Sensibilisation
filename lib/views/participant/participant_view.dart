@@ -1,3 +1,4 @@
+import 'package:cie_services/views/participant/widgets/participant_seance_filter.dart';
 import 'package:cie_services/views/participant/widgets/participants_history_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -111,6 +112,21 @@ class _ParticipantViewState extends State<ParticipantView> {
                               child: ParticipantSearchBar(
                                 controller: _searchController,
                                 onChanged: provider.filterParticipants,
+                              ),
+                            ),
+
+                            AnimatedSection(
+                              delayMs: 200,
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: ParticipantSeanceFilter(
+                                  seances: provider.seances,
+                                  selectedSeanceId: provider.selectedSeanceId,
+                                  onSelected: (id) {
+                                    _searchController.clear();
+                                    provider.filterBySeance(id);
+                                  },
+                                ),
                               ),
                             ),
 

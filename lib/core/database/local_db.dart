@@ -93,7 +93,7 @@ class SeancesTable extends Table {
   DateTimeColumn get datePrevue => dateTime()();
   TextColumn get heureDebut => text().nullable()();
   TextColumn get heureFin => text().nullable()();
-  TextColumn get statut => text()();
+  BoolColumn get estTerminee => boolean().withDefault(const Constant(false))();
 
   // --- LOGISTIQUE ---
   IntColumn get gadgetsPrevus => integer().withDefault(const Constant(0))();
@@ -121,7 +121,18 @@ class AppDatabase extends _$AppDatabase {
   void notifyDataChanged() => _changeController.add(null);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onUpgrade: (migrator, from, to) async {
+      if (from < 2) {
+        // Ajoute la colonne estTerminee, supprime statut
+        await migrator.addColumn(seancesTable, seancesTable.estTerminee);
+        await migrator.dropColumn(seancesTable, 'statut');
+      }
+    },
+  );
 
   // --- REQUÊTES PARTICIPANTS ---
   Future<List<ParticipantsTableData>> getAllParticipants() =>

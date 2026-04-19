@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../../../models/participant_model.dart';
 import '../../../core/database/local_db.dart';
 
+import '../../../models/seance_statut.dart';
 import 'widgets/custom_text_field.dart';
 import 'widgets/custom_dropdown.dart';
 
@@ -82,18 +83,31 @@ class _ParticipantFormState extends State<ParticipantForm> {
     try {
       final seances = await localDb.getAllSeances();
 
+      // ✅ On filtre : on n'affiche que planifiées et en cours
+      final seancesActives = seances.where((s) {
+        final statut = calculerStatut(
+          datePrevue: s.datePrevue,
+          estTerminee: s.estTerminee,
+        );
+        return statut == SeanceStatut.planifiee || statut == SeanceStatut.enCours;
+      }).toList();
+
       if (mounted) {
         setState(() {
-          _seancesList = seances;
-          _seancesNoms = seances.map((s) => '${s.nom} (${s.statut})').toList();
+          _seancesList = seancesActives;
+          _seancesNoms = seancesActives.map((s) {
+            final statut = calculerStatut(
+              datePrevue: s.datePrevue,
+              estTerminee: s.estTerminee,
+            );
+            return '${s.nom} · ${statut.label}'; // Ex: "Séance Abobo · En cours"
+          }).toList();
           _isLoadingSeances = false;
 
           if (widget.participant != null) {
-            final int savedSessionId = widget.participant!.sessionId;
             final matchIndex = _seancesList.indexWhere(
-              (s) => s.id == savedSessionId,
+                  (s) => s.id == widget.participant!.sessionId,
             );
-
             if (matchIndex != -1) {
               _seanceSelectionnee = _seancesNoms[matchIndex];
             }
@@ -102,9 +116,7 @@ class _ParticipantFormState extends State<ParticipantForm> {
       }
     } catch (e) {
       debugPrint('❌ Erreur chargement des séances: $e');
-      if (mounted) {
-        setState(() => _isLoadingSeances = false);
-      }
+      if (mounted) setState(() => _isLoadingSeances = false);
     }
   }
 
