@@ -84,7 +84,7 @@ class _ParticipantListItemState extends State<ParticipantListItem>
             padding: const EdgeInsets.symmetric(
               horizontal: 24,
               vertical: 16,
-            ), // Padding ajusté sans icône
+            ),
             child: Row(
               children: [
                 Expanded(

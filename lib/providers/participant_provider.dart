@@ -21,8 +21,6 @@ class ParticipantProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   List<ParticipantModel> get filteredParticipants => _filteredParticipants;
 
-
-
   ParticipantProvider() {
     loadParticipants();
 
@@ -120,7 +118,7 @@ class ParticipantProvider extends ChangeNotifier {
       debugPrint('❌ ERREUR lecture SQLite : $e');
     }
 
-    _filteredParticipants = List.from(_allParticipants);
+    _applyFilters(query: '');
     _isLoading = false;
     notifyListeners();
   }
@@ -133,7 +131,6 @@ class ParticipantProvider extends ChangeNotifier {
   void filterBySeance(int? seanceId) {
     _selectedSeanceId = seanceId;
     _applyFilters(query: ''); // reset texte
-    notifyListeners();
   }
 
   void _applyFilters({required String query}) {

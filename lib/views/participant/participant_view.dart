@@ -112,21 +112,12 @@ class _ParticipantViewState extends State<ParticipantView> {
                               child: ParticipantSearchBar(
                                 controller: _searchController,
                                 onChanged: provider.filterParticipants,
-                              ),
-                            ),
-
-                            AnimatedSection(
-                              delayMs: 200,
-                              child: Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: ParticipantSeanceFilter(
-                                  seances: provider.seances,
-                                  selectedSeanceId: provider.selectedSeanceId,
-                                  onSelected: (id) {
-                                    _searchController.clear();
-                                    provider.filterBySeance(id);
-                                  },
-                                ),
+                                seances: provider.seances,
+                                selectedSeanceId: provider.selectedSeanceId,
+                                onSeanceSelected: (id) {
+                                  _searchController.clear();
+                                  provider.filterBySeance(id);
+                                },
                               ),
                             ),
 

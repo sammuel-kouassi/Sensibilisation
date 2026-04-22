@@ -50,9 +50,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFFF9500)),
       ),
       home: const SplashView(),
-      routes: {
-        LoginView.routeName: (context) => const LoginView(),
-      },
+      routes: {LoginView.routeName: (context) => const LoginView()},
     );
   }
 }

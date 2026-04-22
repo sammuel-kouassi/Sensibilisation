@@ -23,7 +23,7 @@ class ParticipantSeanceFilter extends StatelessWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 24),
-        itemCount: seances.length + 1, // +1 pour le chip "Tous"
+        itemCount: seances.length + 1,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           // --- Chip "Tous" ---

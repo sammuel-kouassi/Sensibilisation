@@ -83,25 +83,19 @@ class _ParticipantFormState extends State<ParticipantForm> {
     try {
       final seances = await localDb.getAllSeances();
 
-      // ✅ On filtre : on n'affiche que planifiées et en cours
-      final seancesActives = seances.where((s) {
+      // ✅ Uniquement les séances EN COURS (le jour J)
+      final seancesEnCours = seances.where((s) {
         final statut = calculerStatut(
           datePrevue: s.datePrevue,
           estTerminee: s.estTerminee,
         );
-        return statut == SeanceStatut.planifiee || statut == SeanceStatut.enCours;
+        return statut == SeanceStatut.enCours;
       }).toList();
 
       if (mounted) {
         setState(() {
-          _seancesList = seancesActives;
-          _seancesNoms = seancesActives.map((s) {
-            final statut = calculerStatut(
-              datePrevue: s.datePrevue,
-              estTerminee: s.estTerminee,
-            );
-            return '${s.nom} · ${statut.label}'; // Ex: "Séance Abobo · En cours"
-          }).toList();
+          _seancesList = seancesEnCours;
+          _seancesNoms = seancesEnCours.map((s) => s.nom).toList(); // ← plus besoin du label statut
           _isLoadingSeances = false;
 
           if (widget.participant != null) {
@@ -294,11 +288,16 @@ class _ParticipantFormState extends State<ParticipantForm> {
               CustomDropdown(
                 label: 'Séance',
                 hint: _isLoadingSeances
-                    ? 'Chargement des séances...'
+                    ? 'Chargement...'
+                    : _seancesList.isEmpty
+                    ? 'Aucune séance en cours aujourd\'hui'
                     : 'Sélectionner la séance...',
                 value: _seanceSelectionnee,
                 items: _isLoadingSeances ? [] : _seancesNoms,
-                onChanged: (v) => setState(() => _seanceSelectionnee = v),
+                onChanged: (v) {
+                  if (_seancesList.isEmpty) return;
+                  setState(() => _seanceSelectionnee = v);
+                },
                 isRequired: true,
               ),
               const SizedBox(height: 32),
