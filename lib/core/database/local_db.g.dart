@@ -2813,12 +2813,30 @@ class $SeancesTableTable extends SeancesTable
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _objectifsMeta = const VerificationMeta(
-    'objectifs',
+  static const VerificationMeta _motifsMeta = const VerificationMeta('motifs');
+  @override
+  late final GeneratedColumn<String> motifs = GeneratedColumn<String>(
+    'motifs',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _typeSeanceMeta = const VerificationMeta(
+    'typeSeance',
   );
   @override
-  late final GeneratedColumn<String> objectifs = GeneratedColumn<String>(
-    'objectifs',
+  late final GeneratedColumn<String> typeSeance = GeneratedColumn<String>(
+    'type_seance',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _cibleMeta = const VerificationMeta('cible');
+  @override
+  late final GeneratedColumn<String> cible = GeneratedColumn<String>(
+    'cible',
     aliasedName,
     true,
     type: DriftSqlType.string,
@@ -2829,9 +2847,29 @@ class $SeancesTableTable extends SeancesTable
   late final GeneratedColumn<String> zone = GeneratedColumn<String>(
     'zone',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _villeMeta = const VerificationMeta('ville');
+  @override
+  late final GeneratedColumn<String> ville = GeneratedColumn<String>(
+    'ville',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _quartierMeta = const VerificationMeta(
+    'quartier',
+  );
+  @override
+  late final GeneratedColumn<String> quartier = GeneratedColumn<String>(
+    'quartier',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _objectifParticipantsMeta =
       const VerificationMeta('objectifParticipants');
@@ -2854,6 +2892,26 @@ class $SeancesTableTable extends SeancesTable
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _presentateurMeta = const VerificationMeta(
+    'presentateur',
+  );
+  @override
+  late final GeneratedColumn<String> presentateur = GeneratedColumn<String>(
+    'presentateur',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>?, String>
+  assistants = GeneratedColumn<String>(
+    'assistants',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  ).withConverter<List<String>?>($SeancesTableTable.$converterassistants);
   static const VerificationMeta _datePrevueMeta = const VerificationMeta(
     'datePrevue',
   );
@@ -2938,6 +2996,30 @@ class $SeancesTableTable extends SeancesTable
     requiredDuringInsert: false,
     defaultValue: const Constant(0.0),
   );
+  static const VerificationMeta _nbParticipantsEstimeMeta =
+      const VerificationMeta('nbParticipantsEstime');
+  @override
+  late final GeneratedColumn<int> nbParticipantsEstime = GeneratedColumn<int>(
+    'nb_participants_estime',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _evaluationMeta = const VerificationMeta(
+    'evaluation',
+  );
+  @override
+  late final GeneratedColumn<bool> evaluation = GeneratedColumn<bool>(
+    'evaluation',
+    aliasedName,
+    true,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("evaluation" IN (0, 1))',
+    ),
+  );
   static const VerificationMeta _isSyncedMeta = const VerificationMeta(
     'isSynced',
   );
@@ -2958,10 +3040,16 @@ class $SeancesTableTable extends SeancesTable
     id,
     serverId,
     nom,
-    objectifs,
+    motifs,
+    typeSeance,
+    cible,
     zone,
+    ville,
+    quartier,
     objectifParticipants,
     organisateur,
+    presentateur,
+    assistants,
     datePrevue,
     heureDebut,
     heureFin,
@@ -2969,6 +3057,8 @@ class $SeancesTableTable extends SeancesTable
     gadgetsPrevus,
     gadgetsDistribues,
     totalLogistique,
+    nbParticipantsEstime,
+    evaluation,
     isSynced,
   ];
   @override
@@ -3000,10 +3090,22 @@ class $SeancesTableTable extends SeancesTable
     } else if (isInserting) {
       context.missing(_nomMeta);
     }
-    if (data.containsKey('objectifs')) {
+    if (data.containsKey('motifs')) {
       context.handle(
-        _objectifsMeta,
-        objectifs.isAcceptableOrUnknown(data['objectifs']!, _objectifsMeta),
+        _motifsMeta,
+        motifs.isAcceptableOrUnknown(data['motifs']!, _motifsMeta),
+      );
+    }
+    if (data.containsKey('type_seance')) {
+      context.handle(
+        _typeSeanceMeta,
+        typeSeance.isAcceptableOrUnknown(data['type_seance']!, _typeSeanceMeta),
+      );
+    }
+    if (data.containsKey('cible')) {
+      context.handle(
+        _cibleMeta,
+        cible.isAcceptableOrUnknown(data['cible']!, _cibleMeta),
       );
     }
     if (data.containsKey('zone')) {
@@ -3011,8 +3113,18 @@ class $SeancesTableTable extends SeancesTable
         _zoneMeta,
         zone.isAcceptableOrUnknown(data['zone']!, _zoneMeta),
       );
-    } else if (isInserting) {
-      context.missing(_zoneMeta);
+    }
+    if (data.containsKey('ville')) {
+      context.handle(
+        _villeMeta,
+        ville.isAcceptableOrUnknown(data['ville']!, _villeMeta),
+      );
+    }
+    if (data.containsKey('quartier')) {
+      context.handle(
+        _quartierMeta,
+        quartier.isAcceptableOrUnknown(data['quartier']!, _quartierMeta),
+      );
     }
     if (data.containsKey('objectif_participants')) {
       context.handle(
@@ -3035,6 +3147,15 @@ class $SeancesTableTable extends SeancesTable
       );
     } else if (isInserting) {
       context.missing(_organisateurMeta);
+    }
+    if (data.containsKey('presentateur')) {
+      context.handle(
+        _presentateurMeta,
+        presentateur.isAcceptableOrUnknown(
+          data['presentateur']!,
+          _presentateurMeta,
+        ),
+      );
     }
     if (data.containsKey('date_prevue')) {
       context.handle(
@@ -3092,6 +3213,21 @@ class $SeancesTableTable extends SeancesTable
         ),
       );
     }
+    if (data.containsKey('nb_participants_estime')) {
+      context.handle(
+        _nbParticipantsEstimeMeta,
+        nbParticipantsEstime.isAcceptableOrUnknown(
+          data['nb_participants_estime']!,
+          _nbParticipantsEstimeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('evaluation')) {
+      context.handle(
+        _evaluationMeta,
+        evaluation.isAcceptableOrUnknown(data['evaluation']!, _evaluationMeta),
+      );
+    }
     if (data.containsKey('is_synced')) {
       context.handle(
         _isSyncedMeta,
@@ -3119,14 +3255,30 @@ class $SeancesTableTable extends SeancesTable
         DriftSqlType.string,
         data['${effectivePrefix}nom'],
       )!,
-      objectifs: attachedDatabase.typeMapping.read(
+      motifs: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}objectifs'],
+        data['${effectivePrefix}motifs'],
+      ),
+      typeSeance: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type_seance'],
+      ),
+      cible: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cible'],
       ),
       zone: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}zone'],
-      )!,
+      ),
+      ville: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ville'],
+      ),
+      quartier: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}quartier'],
+      ),
       objectifParticipants: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}objectif_participants'],
@@ -3135,6 +3287,16 @@ class $SeancesTableTable extends SeancesTable
         DriftSqlType.string,
         data['${effectivePrefix}organisateur'],
       )!,
+      presentateur: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}presentateur'],
+      ),
+      assistants: $SeancesTableTable.$converterassistants.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}assistants'],
+        ),
+      ),
       datePrevue: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}date_prevue'],
@@ -3163,6 +3325,14 @@ class $SeancesTableTable extends SeancesTable
         DriftSqlType.double,
         data['${effectivePrefix}total_logistique'],
       )!,
+      nbParticipantsEstime: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}nb_participants_estime'],
+      ),
+      evaluation: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}evaluation'],
+      ),
       isSynced: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_synced'],
@@ -3174,6 +3344,9 @@ class $SeancesTableTable extends SeancesTable
   $SeancesTableTable createAlias(String alias) {
     return $SeancesTableTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<List<String>?, String?> $converterassistants =
+      const NullableStringListConverter();
 }
 
 class SeancesTableData extends DataClass
@@ -3181,10 +3354,16 @@ class SeancesTableData extends DataClass
   final int id;
   final int? serverId;
   final String nom;
-  final String? objectifs;
-  final String zone;
+  final String? motifs;
+  final String? typeSeance;
+  final String? cible;
+  final String? zone;
+  final String? ville;
+  final String? quartier;
   final int objectifParticipants;
   final String organisateur;
+  final String? presentateur;
+  final List<String>? assistants;
   final DateTime datePrevue;
   final String? heureDebut;
   final String? heureFin;
@@ -3192,15 +3371,23 @@ class SeancesTableData extends DataClass
   final int gadgetsPrevus;
   final int gadgetsDistribues;
   final double totalLogistique;
+  final int? nbParticipantsEstime;
+  final bool? evaluation;
   final bool isSynced;
   const SeancesTableData({
     required this.id,
     this.serverId,
     required this.nom,
-    this.objectifs,
-    required this.zone,
+    this.motifs,
+    this.typeSeance,
+    this.cible,
+    this.zone,
+    this.ville,
+    this.quartier,
     required this.objectifParticipants,
     required this.organisateur,
+    this.presentateur,
+    this.assistants,
     required this.datePrevue,
     this.heureDebut,
     this.heureFin,
@@ -3208,6 +3395,8 @@ class SeancesTableData extends DataClass
     required this.gadgetsPrevus,
     required this.gadgetsDistribues,
     required this.totalLogistique,
+    this.nbParticipantsEstime,
+    this.evaluation,
     required this.isSynced,
   });
   @override
@@ -3218,12 +3407,34 @@ class SeancesTableData extends DataClass
       map['server_id'] = Variable<int>(serverId);
     }
     map['nom'] = Variable<String>(nom);
-    if (!nullToAbsent || objectifs != null) {
-      map['objectifs'] = Variable<String>(objectifs);
+    if (!nullToAbsent || motifs != null) {
+      map['motifs'] = Variable<String>(motifs);
     }
-    map['zone'] = Variable<String>(zone);
+    if (!nullToAbsent || typeSeance != null) {
+      map['type_seance'] = Variable<String>(typeSeance);
+    }
+    if (!nullToAbsent || cible != null) {
+      map['cible'] = Variable<String>(cible);
+    }
+    if (!nullToAbsent || zone != null) {
+      map['zone'] = Variable<String>(zone);
+    }
+    if (!nullToAbsent || ville != null) {
+      map['ville'] = Variable<String>(ville);
+    }
+    if (!nullToAbsent || quartier != null) {
+      map['quartier'] = Variable<String>(quartier);
+    }
     map['objectif_participants'] = Variable<int>(objectifParticipants);
     map['organisateur'] = Variable<String>(organisateur);
+    if (!nullToAbsent || presentateur != null) {
+      map['presentateur'] = Variable<String>(presentateur);
+    }
+    if (!nullToAbsent || assistants != null) {
+      map['assistants'] = Variable<String>(
+        $SeancesTableTable.$converterassistants.toSql(assistants),
+      );
+    }
     map['date_prevue'] = Variable<DateTime>(datePrevue);
     if (!nullToAbsent || heureDebut != null) {
       map['heure_debut'] = Variable<String>(heureDebut);
@@ -3235,6 +3446,12 @@ class SeancesTableData extends DataClass
     map['gadgets_prevus'] = Variable<int>(gadgetsPrevus);
     map['gadgets_distribues'] = Variable<int>(gadgetsDistribues);
     map['total_logistique'] = Variable<double>(totalLogistique);
+    if (!nullToAbsent || nbParticipantsEstime != null) {
+      map['nb_participants_estime'] = Variable<int>(nbParticipantsEstime);
+    }
+    if (!nullToAbsent || evaluation != null) {
+      map['evaluation'] = Variable<bool>(evaluation);
+    }
     map['is_synced'] = Variable<bool>(isSynced);
     return map;
   }
@@ -3246,12 +3463,30 @@ class SeancesTableData extends DataClass
           ? const Value.absent()
           : Value(serverId),
       nom: Value(nom),
-      objectifs: objectifs == null && nullToAbsent
+      motifs: motifs == null && nullToAbsent
           ? const Value.absent()
-          : Value(objectifs),
-      zone: Value(zone),
+          : Value(motifs),
+      typeSeance: typeSeance == null && nullToAbsent
+          ? const Value.absent()
+          : Value(typeSeance),
+      cible: cible == null && nullToAbsent
+          ? const Value.absent()
+          : Value(cible),
+      zone: zone == null && nullToAbsent ? const Value.absent() : Value(zone),
+      ville: ville == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ville),
+      quartier: quartier == null && nullToAbsent
+          ? const Value.absent()
+          : Value(quartier),
       objectifParticipants: Value(objectifParticipants),
       organisateur: Value(organisateur),
+      presentateur: presentateur == null && nullToAbsent
+          ? const Value.absent()
+          : Value(presentateur),
+      assistants: assistants == null && nullToAbsent
+          ? const Value.absent()
+          : Value(assistants),
       datePrevue: Value(datePrevue),
       heureDebut: heureDebut == null && nullToAbsent
           ? const Value.absent()
@@ -3263,6 +3498,12 @@ class SeancesTableData extends DataClass
       gadgetsPrevus: Value(gadgetsPrevus),
       gadgetsDistribues: Value(gadgetsDistribues),
       totalLogistique: Value(totalLogistique),
+      nbParticipantsEstime: nbParticipantsEstime == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nbParticipantsEstime),
+      evaluation: evaluation == null && nullToAbsent
+          ? const Value.absent()
+          : Value(evaluation),
       isSynced: Value(isSynced),
     );
   }
@@ -3276,12 +3517,18 @@ class SeancesTableData extends DataClass
       id: serializer.fromJson<int>(json['id']),
       serverId: serializer.fromJson<int?>(json['serverId']),
       nom: serializer.fromJson<String>(json['nom']),
-      objectifs: serializer.fromJson<String?>(json['objectifs']),
-      zone: serializer.fromJson<String>(json['zone']),
+      motifs: serializer.fromJson<String?>(json['motifs']),
+      typeSeance: serializer.fromJson<String?>(json['typeSeance']),
+      cible: serializer.fromJson<String?>(json['cible']),
+      zone: serializer.fromJson<String?>(json['zone']),
+      ville: serializer.fromJson<String?>(json['ville']),
+      quartier: serializer.fromJson<String?>(json['quartier']),
       objectifParticipants: serializer.fromJson<int>(
         json['objectifParticipants'],
       ),
       organisateur: serializer.fromJson<String>(json['organisateur']),
+      presentateur: serializer.fromJson<String?>(json['presentateur']),
+      assistants: serializer.fromJson<List<String>?>(json['assistants']),
       datePrevue: serializer.fromJson<DateTime>(json['datePrevue']),
       heureDebut: serializer.fromJson<String?>(json['heureDebut']),
       heureFin: serializer.fromJson<String?>(json['heureFin']),
@@ -3289,6 +3536,10 @@ class SeancesTableData extends DataClass
       gadgetsPrevus: serializer.fromJson<int>(json['gadgetsPrevus']),
       gadgetsDistribues: serializer.fromJson<int>(json['gadgetsDistribues']),
       totalLogistique: serializer.fromJson<double>(json['totalLogistique']),
+      nbParticipantsEstime: serializer.fromJson<int?>(
+        json['nbParticipantsEstime'],
+      ),
+      evaluation: serializer.fromJson<bool?>(json['evaluation']),
       isSynced: serializer.fromJson<bool>(json['isSynced']),
     );
   }
@@ -3299,10 +3550,16 @@ class SeancesTableData extends DataClass
       'id': serializer.toJson<int>(id),
       'serverId': serializer.toJson<int?>(serverId),
       'nom': serializer.toJson<String>(nom),
-      'objectifs': serializer.toJson<String?>(objectifs),
-      'zone': serializer.toJson<String>(zone),
+      'motifs': serializer.toJson<String?>(motifs),
+      'typeSeance': serializer.toJson<String?>(typeSeance),
+      'cible': serializer.toJson<String?>(cible),
+      'zone': serializer.toJson<String?>(zone),
+      'ville': serializer.toJson<String?>(ville),
+      'quartier': serializer.toJson<String?>(quartier),
       'objectifParticipants': serializer.toJson<int>(objectifParticipants),
       'organisateur': serializer.toJson<String>(organisateur),
+      'presentateur': serializer.toJson<String?>(presentateur),
+      'assistants': serializer.toJson<List<String>?>(assistants),
       'datePrevue': serializer.toJson<DateTime>(datePrevue),
       'heureDebut': serializer.toJson<String?>(heureDebut),
       'heureFin': serializer.toJson<String?>(heureFin),
@@ -3310,6 +3567,8 @@ class SeancesTableData extends DataClass
       'gadgetsPrevus': serializer.toJson<int>(gadgetsPrevus),
       'gadgetsDistribues': serializer.toJson<int>(gadgetsDistribues),
       'totalLogistique': serializer.toJson<double>(totalLogistique),
+      'nbParticipantsEstime': serializer.toJson<int?>(nbParticipantsEstime),
+      'evaluation': serializer.toJson<bool?>(evaluation),
       'isSynced': serializer.toJson<bool>(isSynced),
     };
   }
@@ -3318,10 +3577,16 @@ class SeancesTableData extends DataClass
     int? id,
     Value<int?> serverId = const Value.absent(),
     String? nom,
-    Value<String?> objectifs = const Value.absent(),
-    String? zone,
+    Value<String?> motifs = const Value.absent(),
+    Value<String?> typeSeance = const Value.absent(),
+    Value<String?> cible = const Value.absent(),
+    Value<String?> zone = const Value.absent(),
+    Value<String?> ville = const Value.absent(),
+    Value<String?> quartier = const Value.absent(),
     int? objectifParticipants,
     String? organisateur,
+    Value<String?> presentateur = const Value.absent(),
+    Value<List<String>?> assistants = const Value.absent(),
     DateTime? datePrevue,
     Value<String?> heureDebut = const Value.absent(),
     Value<String?> heureFin = const Value.absent(),
@@ -3329,15 +3594,23 @@ class SeancesTableData extends DataClass
     int? gadgetsPrevus,
     int? gadgetsDistribues,
     double? totalLogistique,
+    Value<int?> nbParticipantsEstime = const Value.absent(),
+    Value<bool?> evaluation = const Value.absent(),
     bool? isSynced,
   }) => SeancesTableData(
     id: id ?? this.id,
     serverId: serverId.present ? serverId.value : this.serverId,
     nom: nom ?? this.nom,
-    objectifs: objectifs.present ? objectifs.value : this.objectifs,
-    zone: zone ?? this.zone,
+    motifs: motifs.present ? motifs.value : this.motifs,
+    typeSeance: typeSeance.present ? typeSeance.value : this.typeSeance,
+    cible: cible.present ? cible.value : this.cible,
+    zone: zone.present ? zone.value : this.zone,
+    ville: ville.present ? ville.value : this.ville,
+    quartier: quartier.present ? quartier.value : this.quartier,
     objectifParticipants: objectifParticipants ?? this.objectifParticipants,
     organisateur: organisateur ?? this.organisateur,
+    presentateur: presentateur.present ? presentateur.value : this.presentateur,
+    assistants: assistants.present ? assistants.value : this.assistants,
     datePrevue: datePrevue ?? this.datePrevue,
     heureDebut: heureDebut.present ? heureDebut.value : this.heureDebut,
     heureFin: heureFin.present ? heureFin.value : this.heureFin,
@@ -3345,6 +3618,10 @@ class SeancesTableData extends DataClass
     gadgetsPrevus: gadgetsPrevus ?? this.gadgetsPrevus,
     gadgetsDistribues: gadgetsDistribues ?? this.gadgetsDistribues,
     totalLogistique: totalLogistique ?? this.totalLogistique,
+    nbParticipantsEstime: nbParticipantsEstime.present
+        ? nbParticipantsEstime.value
+        : this.nbParticipantsEstime,
+    evaluation: evaluation.present ? evaluation.value : this.evaluation,
     isSynced: isSynced ?? this.isSynced,
   );
   SeancesTableData copyWithCompanion(SeancesTableCompanion data) {
@@ -3352,14 +3629,26 @@ class SeancesTableData extends DataClass
       id: data.id.present ? data.id.value : this.id,
       serverId: data.serverId.present ? data.serverId.value : this.serverId,
       nom: data.nom.present ? data.nom.value : this.nom,
-      objectifs: data.objectifs.present ? data.objectifs.value : this.objectifs,
+      motifs: data.motifs.present ? data.motifs.value : this.motifs,
+      typeSeance: data.typeSeance.present
+          ? data.typeSeance.value
+          : this.typeSeance,
+      cible: data.cible.present ? data.cible.value : this.cible,
       zone: data.zone.present ? data.zone.value : this.zone,
+      ville: data.ville.present ? data.ville.value : this.ville,
+      quartier: data.quartier.present ? data.quartier.value : this.quartier,
       objectifParticipants: data.objectifParticipants.present
           ? data.objectifParticipants.value
           : this.objectifParticipants,
       organisateur: data.organisateur.present
           ? data.organisateur.value
           : this.organisateur,
+      presentateur: data.presentateur.present
+          ? data.presentateur.value
+          : this.presentateur,
+      assistants: data.assistants.present
+          ? data.assistants.value
+          : this.assistants,
       datePrevue: data.datePrevue.present
           ? data.datePrevue.value
           : this.datePrevue,
@@ -3379,6 +3668,12 @@ class SeancesTableData extends DataClass
       totalLogistique: data.totalLogistique.present
           ? data.totalLogistique.value
           : this.totalLogistique,
+      nbParticipantsEstime: data.nbParticipantsEstime.present
+          ? data.nbParticipantsEstime.value
+          : this.nbParticipantsEstime,
+      evaluation: data.evaluation.present
+          ? data.evaluation.value
+          : this.evaluation,
       isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
     );
   }
@@ -3389,10 +3684,16 @@ class SeancesTableData extends DataClass
           ..write('id: $id, ')
           ..write('serverId: $serverId, ')
           ..write('nom: $nom, ')
-          ..write('objectifs: $objectifs, ')
+          ..write('motifs: $motifs, ')
+          ..write('typeSeance: $typeSeance, ')
+          ..write('cible: $cible, ')
           ..write('zone: $zone, ')
+          ..write('ville: $ville, ')
+          ..write('quartier: $quartier, ')
           ..write('objectifParticipants: $objectifParticipants, ')
           ..write('organisateur: $organisateur, ')
+          ..write('presentateur: $presentateur, ')
+          ..write('assistants: $assistants, ')
           ..write('datePrevue: $datePrevue, ')
           ..write('heureDebut: $heureDebut, ')
           ..write('heureFin: $heureFin, ')
@@ -3400,20 +3701,28 @@ class SeancesTableData extends DataClass
           ..write('gadgetsPrevus: $gadgetsPrevus, ')
           ..write('gadgetsDistribues: $gadgetsDistribues, ')
           ..write('totalLogistique: $totalLogistique, ')
+          ..write('nbParticipantsEstime: $nbParticipantsEstime, ')
+          ..write('evaluation: $evaluation, ')
           ..write('isSynced: $isSynced')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     serverId,
     nom,
-    objectifs,
+    motifs,
+    typeSeance,
+    cible,
     zone,
+    ville,
+    quartier,
     objectifParticipants,
     organisateur,
+    presentateur,
+    assistants,
     datePrevue,
     heureDebut,
     heureFin,
@@ -3421,8 +3730,10 @@ class SeancesTableData extends DataClass
     gadgetsPrevus,
     gadgetsDistribues,
     totalLogistique,
+    nbParticipantsEstime,
+    evaluation,
     isSynced,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3430,10 +3741,16 @@ class SeancesTableData extends DataClass
           other.id == this.id &&
           other.serverId == this.serverId &&
           other.nom == this.nom &&
-          other.objectifs == this.objectifs &&
+          other.motifs == this.motifs &&
+          other.typeSeance == this.typeSeance &&
+          other.cible == this.cible &&
           other.zone == this.zone &&
+          other.ville == this.ville &&
+          other.quartier == this.quartier &&
           other.objectifParticipants == this.objectifParticipants &&
           other.organisateur == this.organisateur &&
+          other.presentateur == this.presentateur &&
+          other.assistants == this.assistants &&
           other.datePrevue == this.datePrevue &&
           other.heureDebut == this.heureDebut &&
           other.heureFin == this.heureFin &&
@@ -3441,6 +3758,8 @@ class SeancesTableData extends DataClass
           other.gadgetsPrevus == this.gadgetsPrevus &&
           other.gadgetsDistribues == this.gadgetsDistribues &&
           other.totalLogistique == this.totalLogistique &&
+          other.nbParticipantsEstime == this.nbParticipantsEstime &&
+          other.evaluation == this.evaluation &&
           other.isSynced == this.isSynced);
 }
 
@@ -3448,10 +3767,16 @@ class SeancesTableCompanion extends UpdateCompanion<SeancesTableData> {
   final Value<int> id;
   final Value<int?> serverId;
   final Value<String> nom;
-  final Value<String?> objectifs;
-  final Value<String> zone;
+  final Value<String?> motifs;
+  final Value<String?> typeSeance;
+  final Value<String?> cible;
+  final Value<String?> zone;
+  final Value<String?> ville;
+  final Value<String?> quartier;
   final Value<int> objectifParticipants;
   final Value<String> organisateur;
+  final Value<String?> presentateur;
+  final Value<List<String>?> assistants;
   final Value<DateTime> datePrevue;
   final Value<String?> heureDebut;
   final Value<String?> heureFin;
@@ -3459,15 +3784,23 @@ class SeancesTableCompanion extends UpdateCompanion<SeancesTableData> {
   final Value<int> gadgetsPrevus;
   final Value<int> gadgetsDistribues;
   final Value<double> totalLogistique;
+  final Value<int?> nbParticipantsEstime;
+  final Value<bool?> evaluation;
   final Value<bool> isSynced;
   const SeancesTableCompanion({
     this.id = const Value.absent(),
     this.serverId = const Value.absent(),
     this.nom = const Value.absent(),
-    this.objectifs = const Value.absent(),
+    this.motifs = const Value.absent(),
+    this.typeSeance = const Value.absent(),
+    this.cible = const Value.absent(),
     this.zone = const Value.absent(),
+    this.ville = const Value.absent(),
+    this.quartier = const Value.absent(),
     this.objectifParticipants = const Value.absent(),
     this.organisateur = const Value.absent(),
+    this.presentateur = const Value.absent(),
+    this.assistants = const Value.absent(),
     this.datePrevue = const Value.absent(),
     this.heureDebut = const Value.absent(),
     this.heureFin = const Value.absent(),
@@ -3475,16 +3808,24 @@ class SeancesTableCompanion extends UpdateCompanion<SeancesTableData> {
     this.gadgetsPrevus = const Value.absent(),
     this.gadgetsDistribues = const Value.absent(),
     this.totalLogistique = const Value.absent(),
+    this.nbParticipantsEstime = const Value.absent(),
+    this.evaluation = const Value.absent(),
     this.isSynced = const Value.absent(),
   });
   SeancesTableCompanion.insert({
     this.id = const Value.absent(),
     this.serverId = const Value.absent(),
     required String nom,
-    this.objectifs = const Value.absent(),
-    required String zone,
+    this.motifs = const Value.absent(),
+    this.typeSeance = const Value.absent(),
+    this.cible = const Value.absent(),
+    this.zone = const Value.absent(),
+    this.ville = const Value.absent(),
+    this.quartier = const Value.absent(),
     required int objectifParticipants,
     required String organisateur,
+    this.presentateur = const Value.absent(),
+    this.assistants = const Value.absent(),
     required DateTime datePrevue,
     this.heureDebut = const Value.absent(),
     this.heureFin = const Value.absent(),
@@ -3492,9 +3833,10 @@ class SeancesTableCompanion extends UpdateCompanion<SeancesTableData> {
     this.gadgetsPrevus = const Value.absent(),
     this.gadgetsDistribues = const Value.absent(),
     this.totalLogistique = const Value.absent(),
+    this.nbParticipantsEstime = const Value.absent(),
+    this.evaluation = const Value.absent(),
     this.isSynced = const Value.absent(),
   }) : nom = Value(nom),
-       zone = Value(zone),
        objectifParticipants = Value(objectifParticipants),
        organisateur = Value(organisateur),
        datePrevue = Value(datePrevue);
@@ -3502,10 +3844,16 @@ class SeancesTableCompanion extends UpdateCompanion<SeancesTableData> {
     Expression<int>? id,
     Expression<int>? serverId,
     Expression<String>? nom,
-    Expression<String>? objectifs,
+    Expression<String>? motifs,
+    Expression<String>? typeSeance,
+    Expression<String>? cible,
     Expression<String>? zone,
+    Expression<String>? ville,
+    Expression<String>? quartier,
     Expression<int>? objectifParticipants,
     Expression<String>? organisateur,
+    Expression<String>? presentateur,
+    Expression<String>? assistants,
     Expression<DateTime>? datePrevue,
     Expression<String>? heureDebut,
     Expression<String>? heureFin,
@@ -3513,17 +3861,25 @@ class SeancesTableCompanion extends UpdateCompanion<SeancesTableData> {
     Expression<int>? gadgetsPrevus,
     Expression<int>? gadgetsDistribues,
     Expression<double>? totalLogistique,
+    Expression<int>? nbParticipantsEstime,
+    Expression<bool>? evaluation,
     Expression<bool>? isSynced,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (serverId != null) 'server_id': serverId,
       if (nom != null) 'nom': nom,
-      if (objectifs != null) 'objectifs': objectifs,
+      if (motifs != null) 'motifs': motifs,
+      if (typeSeance != null) 'type_seance': typeSeance,
+      if (cible != null) 'cible': cible,
       if (zone != null) 'zone': zone,
+      if (ville != null) 'ville': ville,
+      if (quartier != null) 'quartier': quartier,
       if (objectifParticipants != null)
         'objectif_participants': objectifParticipants,
       if (organisateur != null) 'organisateur': organisateur,
+      if (presentateur != null) 'presentateur': presentateur,
+      if (assistants != null) 'assistants': assistants,
       if (datePrevue != null) 'date_prevue': datePrevue,
       if (heureDebut != null) 'heure_debut': heureDebut,
       if (heureFin != null) 'heure_fin': heureFin,
@@ -3531,6 +3887,9 @@ class SeancesTableCompanion extends UpdateCompanion<SeancesTableData> {
       if (gadgetsPrevus != null) 'gadgets_prevus': gadgetsPrevus,
       if (gadgetsDistribues != null) 'gadgets_distribues': gadgetsDistribues,
       if (totalLogistique != null) 'total_logistique': totalLogistique,
+      if (nbParticipantsEstime != null)
+        'nb_participants_estime': nbParticipantsEstime,
+      if (evaluation != null) 'evaluation': evaluation,
       if (isSynced != null) 'is_synced': isSynced,
     });
   }
@@ -3539,10 +3898,16 @@ class SeancesTableCompanion extends UpdateCompanion<SeancesTableData> {
     Value<int>? id,
     Value<int?>? serverId,
     Value<String>? nom,
-    Value<String?>? objectifs,
-    Value<String>? zone,
+    Value<String?>? motifs,
+    Value<String?>? typeSeance,
+    Value<String?>? cible,
+    Value<String?>? zone,
+    Value<String?>? ville,
+    Value<String?>? quartier,
     Value<int>? objectifParticipants,
     Value<String>? organisateur,
+    Value<String?>? presentateur,
+    Value<List<String>?>? assistants,
     Value<DateTime>? datePrevue,
     Value<String?>? heureDebut,
     Value<String?>? heureFin,
@@ -3550,16 +3915,24 @@ class SeancesTableCompanion extends UpdateCompanion<SeancesTableData> {
     Value<int>? gadgetsPrevus,
     Value<int>? gadgetsDistribues,
     Value<double>? totalLogistique,
+    Value<int?>? nbParticipantsEstime,
+    Value<bool?>? evaluation,
     Value<bool>? isSynced,
   }) {
     return SeancesTableCompanion(
       id: id ?? this.id,
       serverId: serverId ?? this.serverId,
       nom: nom ?? this.nom,
-      objectifs: objectifs ?? this.objectifs,
+      motifs: motifs ?? this.motifs,
+      typeSeance: typeSeance ?? this.typeSeance,
+      cible: cible ?? this.cible,
       zone: zone ?? this.zone,
+      ville: ville ?? this.ville,
+      quartier: quartier ?? this.quartier,
       objectifParticipants: objectifParticipants ?? this.objectifParticipants,
       organisateur: organisateur ?? this.organisateur,
+      presentateur: presentateur ?? this.presentateur,
+      assistants: assistants ?? this.assistants,
       datePrevue: datePrevue ?? this.datePrevue,
       heureDebut: heureDebut ?? this.heureDebut,
       heureFin: heureFin ?? this.heureFin,
@@ -3567,6 +3940,8 @@ class SeancesTableCompanion extends UpdateCompanion<SeancesTableData> {
       gadgetsPrevus: gadgetsPrevus ?? this.gadgetsPrevus,
       gadgetsDistribues: gadgetsDistribues ?? this.gadgetsDistribues,
       totalLogistique: totalLogistique ?? this.totalLogistique,
+      nbParticipantsEstime: nbParticipantsEstime ?? this.nbParticipantsEstime,
+      evaluation: evaluation ?? this.evaluation,
       isSynced: isSynced ?? this.isSynced,
     );
   }
@@ -3583,17 +3958,37 @@ class SeancesTableCompanion extends UpdateCompanion<SeancesTableData> {
     if (nom.present) {
       map['nom'] = Variable<String>(nom.value);
     }
-    if (objectifs.present) {
-      map['objectifs'] = Variable<String>(objectifs.value);
+    if (motifs.present) {
+      map['motifs'] = Variable<String>(motifs.value);
+    }
+    if (typeSeance.present) {
+      map['type_seance'] = Variable<String>(typeSeance.value);
+    }
+    if (cible.present) {
+      map['cible'] = Variable<String>(cible.value);
     }
     if (zone.present) {
       map['zone'] = Variable<String>(zone.value);
+    }
+    if (ville.present) {
+      map['ville'] = Variable<String>(ville.value);
+    }
+    if (quartier.present) {
+      map['quartier'] = Variable<String>(quartier.value);
     }
     if (objectifParticipants.present) {
       map['objectif_participants'] = Variable<int>(objectifParticipants.value);
     }
     if (organisateur.present) {
       map['organisateur'] = Variable<String>(organisateur.value);
+    }
+    if (presentateur.present) {
+      map['presentateur'] = Variable<String>(presentateur.value);
+    }
+    if (assistants.present) {
+      map['assistants'] = Variable<String>(
+        $SeancesTableTable.$converterassistants.toSql(assistants.value),
+      );
     }
     if (datePrevue.present) {
       map['date_prevue'] = Variable<DateTime>(datePrevue.value);
@@ -3616,6 +4011,12 @@ class SeancesTableCompanion extends UpdateCompanion<SeancesTableData> {
     if (totalLogistique.present) {
       map['total_logistique'] = Variable<double>(totalLogistique.value);
     }
+    if (nbParticipantsEstime.present) {
+      map['nb_participants_estime'] = Variable<int>(nbParticipantsEstime.value);
+    }
+    if (evaluation.present) {
+      map['evaluation'] = Variable<bool>(evaluation.value);
+    }
     if (isSynced.present) {
       map['is_synced'] = Variable<bool>(isSynced.value);
     }
@@ -3628,10 +4029,16 @@ class SeancesTableCompanion extends UpdateCompanion<SeancesTableData> {
           ..write('id: $id, ')
           ..write('serverId: $serverId, ')
           ..write('nom: $nom, ')
-          ..write('objectifs: $objectifs, ')
+          ..write('motifs: $motifs, ')
+          ..write('typeSeance: $typeSeance, ')
+          ..write('cible: $cible, ')
           ..write('zone: $zone, ')
+          ..write('ville: $ville, ')
+          ..write('quartier: $quartier, ')
           ..write('objectifParticipants: $objectifParticipants, ')
           ..write('organisateur: $organisateur, ')
+          ..write('presentateur: $presentateur, ')
+          ..write('assistants: $assistants, ')
           ..write('datePrevue: $datePrevue, ')
           ..write('heureDebut: $heureDebut, ')
           ..write('heureFin: $heureFin, ')
@@ -3639,6 +4046,459 @@ class SeancesTableCompanion extends UpdateCompanion<SeancesTableData> {
           ..write('gadgetsPrevus: $gadgetsPrevus, ')
           ..write('gadgetsDistribues: $gadgetsDistribues, ')
           ..write('totalLogistique: $totalLogistique, ')
+          ..write('nbParticipantsEstime: $nbParticipantsEstime, ')
+          ..write('evaluation: $evaluation, ')
+          ..write('isSynced: $isSynced')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SeanceImagesTableTable extends SeanceImagesTable
+    with TableInfo<$SeanceImagesTableTable, SeanceImagesTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SeanceImagesTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _serverIdMeta = const VerificationMeta(
+    'serverId',
+  );
+  @override
+  late final GeneratedColumn<int> serverId = GeneratedColumn<int>(
+    'server_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _seanceIdMeta = const VerificationMeta(
+    'seanceId',
+  );
+  @override
+  late final GeneratedColumn<int> seanceId = GeneratedColumn<int>(
+    'seance_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>, String> urls =
+      GeneratedColumn<String>(
+        'urls',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<List<String>>($SeanceImagesTableTable.$converterurls);
+  static const VerificationMeta _legendeMeta = const VerificationMeta(
+    'legende',
+  );
+  @override
+  late final GeneratedColumn<String> legende = GeneratedColumn<String>(
+    'legende',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<DateTime> date = GeneratedColumn<DateTime>(
+    'date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isSyncedMeta = const VerificationMeta(
+    'isSynced',
+  );
+  @override
+  late final GeneratedColumn<bool> isSynced = GeneratedColumn<bool>(
+    'is_synced',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_synced" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    serverId,
+    seanceId,
+    urls,
+    legende,
+    date,
+    isSynced,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'seance_images_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SeanceImagesTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('server_id')) {
+      context.handle(
+        _serverIdMeta,
+        serverId.isAcceptableOrUnknown(data['server_id']!, _serverIdMeta),
+      );
+    }
+    if (data.containsKey('seance_id')) {
+      context.handle(
+        _seanceIdMeta,
+        seanceId.isAcceptableOrUnknown(data['seance_id']!, _seanceIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_seanceIdMeta);
+    }
+    if (data.containsKey('legende')) {
+      context.handle(
+        _legendeMeta,
+        legende.isAcceptableOrUnknown(data['legende']!, _legendeMeta),
+      );
+    }
+    if (data.containsKey('date')) {
+      context.handle(
+        _dateMeta,
+        date.isAcceptableOrUnknown(data['date']!, _dateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dateMeta);
+    }
+    if (data.containsKey('is_synced')) {
+      context.handle(
+        _isSyncedMeta,
+        isSynced.isAcceptableOrUnknown(data['is_synced']!, _isSyncedMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SeanceImagesTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SeanceImagesTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      serverId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}server_id'],
+      ),
+      seanceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}seance_id'],
+      )!,
+      urls: $SeanceImagesTableTable.$converterurls.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}urls'],
+        )!,
+      ),
+      legende: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}legende'],
+      ),
+      date: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}date'],
+      )!,
+      isSynced: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_synced'],
+      )!,
+    );
+  }
+
+  @override
+  $SeanceImagesTableTable createAlias(String alias) {
+    return $SeanceImagesTableTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<List<String>, String> $converterurls =
+      const StringListConverter();
+}
+
+class SeanceImagesTableData extends DataClass
+    implements Insertable<SeanceImagesTableData> {
+  final int id;
+  final int? serverId;
+  final int seanceId;
+  final List<String> urls;
+  final String? legende;
+  final DateTime date;
+  final bool isSynced;
+  const SeanceImagesTableData({
+    required this.id,
+    this.serverId,
+    required this.seanceId,
+    required this.urls,
+    this.legende,
+    required this.date,
+    required this.isSynced,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    if (!nullToAbsent || serverId != null) {
+      map['server_id'] = Variable<int>(serverId);
+    }
+    map['seance_id'] = Variable<int>(seanceId);
+    {
+      map['urls'] = Variable<String>(
+        $SeanceImagesTableTable.$converterurls.toSql(urls),
+      );
+    }
+    if (!nullToAbsent || legende != null) {
+      map['legende'] = Variable<String>(legende);
+    }
+    map['date'] = Variable<DateTime>(date);
+    map['is_synced'] = Variable<bool>(isSynced);
+    return map;
+  }
+
+  SeanceImagesTableCompanion toCompanion(bool nullToAbsent) {
+    return SeanceImagesTableCompanion(
+      id: Value(id),
+      serverId: serverId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(serverId),
+      seanceId: Value(seanceId),
+      urls: Value(urls),
+      legende: legende == null && nullToAbsent
+          ? const Value.absent()
+          : Value(legende),
+      date: Value(date),
+      isSynced: Value(isSynced),
+    );
+  }
+
+  factory SeanceImagesTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SeanceImagesTableData(
+      id: serializer.fromJson<int>(json['id']),
+      serverId: serializer.fromJson<int?>(json['serverId']),
+      seanceId: serializer.fromJson<int>(json['seanceId']),
+      urls: serializer.fromJson<List<String>>(json['urls']),
+      legende: serializer.fromJson<String?>(json['legende']),
+      date: serializer.fromJson<DateTime>(json['date']),
+      isSynced: serializer.fromJson<bool>(json['isSynced']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'serverId': serializer.toJson<int?>(serverId),
+      'seanceId': serializer.toJson<int>(seanceId),
+      'urls': serializer.toJson<List<String>>(urls),
+      'legende': serializer.toJson<String?>(legende),
+      'date': serializer.toJson<DateTime>(date),
+      'isSynced': serializer.toJson<bool>(isSynced),
+    };
+  }
+
+  SeanceImagesTableData copyWith({
+    int? id,
+    Value<int?> serverId = const Value.absent(),
+    int? seanceId,
+    List<String>? urls,
+    Value<String?> legende = const Value.absent(),
+    DateTime? date,
+    bool? isSynced,
+  }) => SeanceImagesTableData(
+    id: id ?? this.id,
+    serverId: serverId.present ? serverId.value : this.serverId,
+    seanceId: seanceId ?? this.seanceId,
+    urls: urls ?? this.urls,
+    legende: legende.present ? legende.value : this.legende,
+    date: date ?? this.date,
+    isSynced: isSynced ?? this.isSynced,
+  );
+  SeanceImagesTableData copyWithCompanion(SeanceImagesTableCompanion data) {
+    return SeanceImagesTableData(
+      id: data.id.present ? data.id.value : this.id,
+      serverId: data.serverId.present ? data.serverId.value : this.serverId,
+      seanceId: data.seanceId.present ? data.seanceId.value : this.seanceId,
+      urls: data.urls.present ? data.urls.value : this.urls,
+      legende: data.legende.present ? data.legende.value : this.legende,
+      date: data.date.present ? data.date.value : this.date,
+      isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SeanceImagesTableData(')
+          ..write('id: $id, ')
+          ..write('serverId: $serverId, ')
+          ..write('seanceId: $seanceId, ')
+          ..write('urls: $urls, ')
+          ..write('legende: $legende, ')
+          ..write('date: $date, ')
+          ..write('isSynced: $isSynced')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, serverId, seanceId, urls, legende, date, isSynced);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SeanceImagesTableData &&
+          other.id == this.id &&
+          other.serverId == this.serverId &&
+          other.seanceId == this.seanceId &&
+          other.urls == this.urls &&
+          other.legende == this.legende &&
+          other.date == this.date &&
+          other.isSynced == this.isSynced);
+}
+
+class SeanceImagesTableCompanion
+    extends UpdateCompanion<SeanceImagesTableData> {
+  final Value<int> id;
+  final Value<int?> serverId;
+  final Value<int> seanceId;
+  final Value<List<String>> urls;
+  final Value<String?> legende;
+  final Value<DateTime> date;
+  final Value<bool> isSynced;
+  const SeanceImagesTableCompanion({
+    this.id = const Value.absent(),
+    this.serverId = const Value.absent(),
+    this.seanceId = const Value.absent(),
+    this.urls = const Value.absent(),
+    this.legende = const Value.absent(),
+    this.date = const Value.absent(),
+    this.isSynced = const Value.absent(),
+  });
+  SeanceImagesTableCompanion.insert({
+    this.id = const Value.absent(),
+    this.serverId = const Value.absent(),
+    required int seanceId,
+    required List<String> urls,
+    this.legende = const Value.absent(),
+    required DateTime date,
+    this.isSynced = const Value.absent(),
+  }) : seanceId = Value(seanceId),
+       urls = Value(urls),
+       date = Value(date);
+  static Insertable<SeanceImagesTableData> custom({
+    Expression<int>? id,
+    Expression<int>? serverId,
+    Expression<int>? seanceId,
+    Expression<String>? urls,
+    Expression<String>? legende,
+    Expression<DateTime>? date,
+    Expression<bool>? isSynced,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (serverId != null) 'server_id': serverId,
+      if (seanceId != null) 'seance_id': seanceId,
+      if (urls != null) 'urls': urls,
+      if (legende != null) 'legende': legende,
+      if (date != null) 'date': date,
+      if (isSynced != null) 'is_synced': isSynced,
+    });
+  }
+
+  SeanceImagesTableCompanion copyWith({
+    Value<int>? id,
+    Value<int?>? serverId,
+    Value<int>? seanceId,
+    Value<List<String>>? urls,
+    Value<String?>? legende,
+    Value<DateTime>? date,
+    Value<bool>? isSynced,
+  }) {
+    return SeanceImagesTableCompanion(
+      id: id ?? this.id,
+      serverId: serverId ?? this.serverId,
+      seanceId: seanceId ?? this.seanceId,
+      urls: urls ?? this.urls,
+      legende: legende ?? this.legende,
+      date: date ?? this.date,
+      isSynced: isSynced ?? this.isSynced,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (serverId.present) {
+      map['server_id'] = Variable<int>(serverId.value);
+    }
+    if (seanceId.present) {
+      map['seance_id'] = Variable<int>(seanceId.value);
+    }
+    if (urls.present) {
+      map['urls'] = Variable<String>(
+        $SeanceImagesTableTable.$converterurls.toSql(urls.value),
+      );
+    }
+    if (legende.present) {
+      map['legende'] = Variable<String>(legende.value);
+    }
+    if (date.present) {
+      map['date'] = Variable<DateTime>(date.value);
+    }
+    if (isSynced.present) {
+      map['is_synced'] = Variable<bool>(isSynced.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SeanceImagesTableCompanion(')
+          ..write('id: $id, ')
+          ..write('serverId: $serverId, ')
+          ..write('seanceId: $seanceId, ')
+          ..write('urls: $urls, ')
+          ..write('legende: $legende, ')
+          ..write('date: $date, ')
           ..write('isSynced: $isSynced')
           ..write(')'))
         .toString();
@@ -3657,6 +4517,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $PriseContactsTableTable(this);
   late final $RdvsTableTable rdvsTable = $RdvsTableTable(this);
   late final $SeancesTableTable seancesTable = $SeancesTableTable(this);
+  late final $SeanceImagesTableTable seanceImagesTable =
+      $SeanceImagesTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3667,6 +4529,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     priseContactsTable,
     rdvsTable,
     seancesTable,
+    seanceImagesTable,
   ];
 }
 
@@ -5026,10 +5889,16 @@ typedef $$SeancesTableTableCreateCompanionBuilder =
       Value<int> id,
       Value<int?> serverId,
       required String nom,
-      Value<String?> objectifs,
-      required String zone,
+      Value<String?> motifs,
+      Value<String?> typeSeance,
+      Value<String?> cible,
+      Value<String?> zone,
+      Value<String?> ville,
+      Value<String?> quartier,
       required int objectifParticipants,
       required String organisateur,
+      Value<String?> presentateur,
+      Value<List<String>?> assistants,
       required DateTime datePrevue,
       Value<String?> heureDebut,
       Value<String?> heureFin,
@@ -5037,6 +5906,8 @@ typedef $$SeancesTableTableCreateCompanionBuilder =
       Value<int> gadgetsPrevus,
       Value<int> gadgetsDistribues,
       Value<double> totalLogistique,
+      Value<int?> nbParticipantsEstime,
+      Value<bool?> evaluation,
       Value<bool> isSynced,
     });
 typedef $$SeancesTableTableUpdateCompanionBuilder =
@@ -5044,10 +5915,16 @@ typedef $$SeancesTableTableUpdateCompanionBuilder =
       Value<int> id,
       Value<int?> serverId,
       Value<String> nom,
-      Value<String?> objectifs,
-      Value<String> zone,
+      Value<String?> motifs,
+      Value<String?> typeSeance,
+      Value<String?> cible,
+      Value<String?> zone,
+      Value<String?> ville,
+      Value<String?> quartier,
       Value<int> objectifParticipants,
       Value<String> organisateur,
+      Value<String?> presentateur,
+      Value<List<String>?> assistants,
       Value<DateTime> datePrevue,
       Value<String?> heureDebut,
       Value<String?> heureFin,
@@ -5055,6 +5932,8 @@ typedef $$SeancesTableTableUpdateCompanionBuilder =
       Value<int> gadgetsPrevus,
       Value<int> gadgetsDistribues,
       Value<double> totalLogistique,
+      Value<int?> nbParticipantsEstime,
+      Value<bool?> evaluation,
       Value<bool> isSynced,
     });
 
@@ -5082,13 +5961,33 @@ class $$SeancesTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get objectifs => $composableBuilder(
-    column: $table.objectifs,
+  ColumnFilters<String> get motifs => $composableBuilder(
+    column: $table.motifs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get typeSeance => $composableBuilder(
+    column: $table.typeSeance,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get cible => $composableBuilder(
+    column: $table.cible,
     builder: (column) => ColumnFilters(column),
   );
 
   ColumnFilters<String> get zone => $composableBuilder(
     column: $table.zone,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ville => $composableBuilder(
+    column: $table.ville,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get quartier => $composableBuilder(
+    column: $table.quartier,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5100,6 +5999,17 @@ class $$SeancesTableTableFilterComposer
   ColumnFilters<String> get organisateur => $composableBuilder(
     column: $table.organisateur,
     builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get presentateur => $composableBuilder(
+    column: $table.presentateur,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
+  get assistants => $composableBuilder(
+    column: $table.assistants,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
   ColumnFilters<DateTime> get datePrevue => $composableBuilder(
@@ -5137,6 +6047,16 @@ class $$SeancesTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get nbParticipantsEstime => $composableBuilder(
+    column: $table.nbParticipantsEstime,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get evaluation => $composableBuilder(
+    column: $table.evaluation,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<bool> get isSynced => $composableBuilder(
     column: $table.isSynced,
     builder: (column) => ColumnFilters(column),
@@ -5167,13 +6087,33 @@ class $$SeancesTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get objectifs => $composableBuilder(
-    column: $table.objectifs,
+  ColumnOrderings<String> get motifs => $composableBuilder(
+    column: $table.motifs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get typeSeance => $composableBuilder(
+    column: $table.typeSeance,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get cible => $composableBuilder(
+    column: $table.cible,
     builder: (column) => ColumnOrderings(column),
   );
 
   ColumnOrderings<String> get zone => $composableBuilder(
     column: $table.zone,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ville => $composableBuilder(
+    column: $table.ville,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get quartier => $composableBuilder(
+    column: $table.quartier,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -5184,6 +6124,16 @@ class $$SeancesTableTableOrderingComposer
 
   ColumnOrderings<String> get organisateur => $composableBuilder(
     column: $table.organisateur,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get presentateur => $composableBuilder(
+    column: $table.presentateur,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get assistants => $composableBuilder(
+    column: $table.assistants,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -5222,6 +6172,16 @@ class $$SeancesTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get nbParticipantsEstime => $composableBuilder(
+    column: $table.nbParticipantsEstime,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get evaluation => $composableBuilder(
+    column: $table.evaluation,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get isSynced => $composableBuilder(
     column: $table.isSynced,
     builder: (column) => ColumnOrderings(column),
@@ -5246,11 +6206,25 @@ class $$SeancesTableTableAnnotationComposer
   GeneratedColumn<String> get nom =>
       $composableBuilder(column: $table.nom, builder: (column) => column);
 
-  GeneratedColumn<String> get objectifs =>
-      $composableBuilder(column: $table.objectifs, builder: (column) => column);
+  GeneratedColumn<String> get motifs =>
+      $composableBuilder(column: $table.motifs, builder: (column) => column);
+
+  GeneratedColumn<String> get typeSeance => $composableBuilder(
+    column: $table.typeSeance,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get cible =>
+      $composableBuilder(column: $table.cible, builder: (column) => column);
 
   GeneratedColumn<String> get zone =>
       $composableBuilder(column: $table.zone, builder: (column) => column);
+
+  GeneratedColumn<String> get ville =>
+      $composableBuilder(column: $table.ville, builder: (column) => column);
+
+  GeneratedColumn<String> get quartier =>
+      $composableBuilder(column: $table.quartier, builder: (column) => column);
 
   GeneratedColumn<int> get objectifParticipants => $composableBuilder(
     column: $table.objectifParticipants,
@@ -5261,6 +6235,17 @@ class $$SeancesTableTableAnnotationComposer
     column: $table.organisateur,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get presentateur => $composableBuilder(
+    column: $table.presentateur,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<List<String>?, String> get assistants =>
+      $composableBuilder(
+        column: $table.assistants,
+        builder: (column) => column,
+      );
 
   GeneratedColumn<DateTime> get datePrevue => $composableBuilder(
     column: $table.datePrevue,
@@ -5292,6 +6277,16 @@ class $$SeancesTableTableAnnotationComposer
 
   GeneratedColumn<double> get totalLogistique => $composableBuilder(
     column: $table.totalLogistique,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get nbParticipantsEstime => $composableBuilder(
+    column: $table.nbParticipantsEstime,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get evaluation => $composableBuilder(
+    column: $table.evaluation,
     builder: (column) => column,
   );
 
@@ -5333,10 +6328,16 @@ class $$SeancesTableTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<int?> serverId = const Value.absent(),
                 Value<String> nom = const Value.absent(),
-                Value<String?> objectifs = const Value.absent(),
-                Value<String> zone = const Value.absent(),
+                Value<String?> motifs = const Value.absent(),
+                Value<String?> typeSeance = const Value.absent(),
+                Value<String?> cible = const Value.absent(),
+                Value<String?> zone = const Value.absent(),
+                Value<String?> ville = const Value.absent(),
+                Value<String?> quartier = const Value.absent(),
                 Value<int> objectifParticipants = const Value.absent(),
                 Value<String> organisateur = const Value.absent(),
+                Value<String?> presentateur = const Value.absent(),
+                Value<List<String>?> assistants = const Value.absent(),
                 Value<DateTime> datePrevue = const Value.absent(),
                 Value<String?> heureDebut = const Value.absent(),
                 Value<String?> heureFin = const Value.absent(),
@@ -5344,15 +6345,23 @@ class $$SeancesTableTableTableManager
                 Value<int> gadgetsPrevus = const Value.absent(),
                 Value<int> gadgetsDistribues = const Value.absent(),
                 Value<double> totalLogistique = const Value.absent(),
+                Value<int?> nbParticipantsEstime = const Value.absent(),
+                Value<bool?> evaluation = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
               }) => SeancesTableCompanion(
                 id: id,
                 serverId: serverId,
                 nom: nom,
-                objectifs: objectifs,
+                motifs: motifs,
+                typeSeance: typeSeance,
+                cible: cible,
                 zone: zone,
+                ville: ville,
+                quartier: quartier,
                 objectifParticipants: objectifParticipants,
                 organisateur: organisateur,
+                presentateur: presentateur,
+                assistants: assistants,
                 datePrevue: datePrevue,
                 heureDebut: heureDebut,
                 heureFin: heureFin,
@@ -5360,6 +6369,8 @@ class $$SeancesTableTableTableManager
                 gadgetsPrevus: gadgetsPrevus,
                 gadgetsDistribues: gadgetsDistribues,
                 totalLogistique: totalLogistique,
+                nbParticipantsEstime: nbParticipantsEstime,
+                evaluation: evaluation,
                 isSynced: isSynced,
               ),
           createCompanionCallback:
@@ -5367,10 +6378,16 @@ class $$SeancesTableTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<int?> serverId = const Value.absent(),
                 required String nom,
-                Value<String?> objectifs = const Value.absent(),
-                required String zone,
+                Value<String?> motifs = const Value.absent(),
+                Value<String?> typeSeance = const Value.absent(),
+                Value<String?> cible = const Value.absent(),
+                Value<String?> zone = const Value.absent(),
+                Value<String?> ville = const Value.absent(),
+                Value<String?> quartier = const Value.absent(),
                 required int objectifParticipants,
                 required String organisateur,
+                Value<String?> presentateur = const Value.absent(),
+                Value<List<String>?> assistants = const Value.absent(),
                 required DateTime datePrevue,
                 Value<String?> heureDebut = const Value.absent(),
                 Value<String?> heureFin = const Value.absent(),
@@ -5378,15 +6395,23 @@ class $$SeancesTableTableTableManager
                 Value<int> gadgetsPrevus = const Value.absent(),
                 Value<int> gadgetsDistribues = const Value.absent(),
                 Value<double> totalLogistique = const Value.absent(),
+                Value<int?> nbParticipantsEstime = const Value.absent(),
+                Value<bool?> evaluation = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
               }) => SeancesTableCompanion.insert(
                 id: id,
                 serverId: serverId,
                 nom: nom,
-                objectifs: objectifs,
+                motifs: motifs,
+                typeSeance: typeSeance,
+                cible: cible,
                 zone: zone,
+                ville: ville,
+                quartier: quartier,
                 objectifParticipants: objectifParticipants,
                 organisateur: organisateur,
+                presentateur: presentateur,
+                assistants: assistants,
                 datePrevue: datePrevue,
                 heureDebut: heureDebut,
                 heureFin: heureFin,
@@ -5394,6 +6419,8 @@ class $$SeancesTableTableTableManager
                 gadgetsPrevus: gadgetsPrevus,
                 gadgetsDistribues: gadgetsDistribues,
                 totalLogistique: totalLogistique,
+                nbParticipantsEstime: nbParticipantsEstime,
+                evaluation: evaluation,
                 isSynced: isSynced,
               ),
           withReferenceMapper: (p0) => p0
@@ -5421,6 +6448,252 @@ typedef $$SeancesTableTableProcessedTableManager =
       SeancesTableData,
       PrefetchHooks Function()
     >;
+typedef $$SeanceImagesTableTableCreateCompanionBuilder =
+    SeanceImagesTableCompanion Function({
+      Value<int> id,
+      Value<int?> serverId,
+      required int seanceId,
+      required List<String> urls,
+      Value<String?> legende,
+      required DateTime date,
+      Value<bool> isSynced,
+    });
+typedef $$SeanceImagesTableTableUpdateCompanionBuilder =
+    SeanceImagesTableCompanion Function({
+      Value<int> id,
+      Value<int?> serverId,
+      Value<int> seanceId,
+      Value<List<String>> urls,
+      Value<String?> legende,
+      Value<DateTime> date,
+      Value<bool> isSynced,
+    });
+
+class $$SeanceImagesTableTableFilterComposer
+    extends Composer<_$AppDatabase, $SeanceImagesTableTable> {
+  $$SeanceImagesTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get serverId => $composableBuilder(
+    column: $table.serverId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get seanceId => $composableBuilder(
+    column: $table.seanceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String> get urls =>
+      $composableBuilder(
+        column: $table.urls,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get legende => $composableBuilder(
+    column: $table.legende,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SeanceImagesTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $SeanceImagesTableTable> {
+  $$SeanceImagesTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get serverId => $composableBuilder(
+    column: $table.serverId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get seanceId => $composableBuilder(
+    column: $table.seanceId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get urls => $composableBuilder(
+    column: $table.urls,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get legende => $composableBuilder(
+    column: $table.legende,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SeanceImagesTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SeanceImagesTableTable> {
+  $$SeanceImagesTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get serverId =>
+      $composableBuilder(column: $table.serverId, builder: (column) => column);
+
+  GeneratedColumn<int> get seanceId =>
+      $composableBuilder(column: $table.seanceId, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<String>, String> get urls =>
+      $composableBuilder(column: $table.urls, builder: (column) => column);
+
+  GeneratedColumn<String> get legende =>
+      $composableBuilder(column: $table.legende, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<bool> get isSynced =>
+      $composableBuilder(column: $table.isSynced, builder: (column) => column);
+}
+
+class $$SeanceImagesTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SeanceImagesTableTable,
+          SeanceImagesTableData,
+          $$SeanceImagesTableTableFilterComposer,
+          $$SeanceImagesTableTableOrderingComposer,
+          $$SeanceImagesTableTableAnnotationComposer,
+          $$SeanceImagesTableTableCreateCompanionBuilder,
+          $$SeanceImagesTableTableUpdateCompanionBuilder,
+          (
+            SeanceImagesTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $SeanceImagesTableTable,
+              SeanceImagesTableData
+            >,
+          ),
+          SeanceImagesTableData,
+          PrefetchHooks Function()
+        > {
+  $$SeanceImagesTableTableTableManager(
+    _$AppDatabase db,
+    $SeanceImagesTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SeanceImagesTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SeanceImagesTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SeanceImagesTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int?> serverId = const Value.absent(),
+                Value<int> seanceId = const Value.absent(),
+                Value<List<String>> urls = const Value.absent(),
+                Value<String?> legende = const Value.absent(),
+                Value<DateTime> date = const Value.absent(),
+                Value<bool> isSynced = const Value.absent(),
+              }) => SeanceImagesTableCompanion(
+                id: id,
+                serverId: serverId,
+                seanceId: seanceId,
+                urls: urls,
+                legende: legende,
+                date: date,
+                isSynced: isSynced,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int?> serverId = const Value.absent(),
+                required int seanceId,
+                required List<String> urls,
+                Value<String?> legende = const Value.absent(),
+                required DateTime date,
+                Value<bool> isSynced = const Value.absent(),
+              }) => SeanceImagesTableCompanion.insert(
+                id: id,
+                serverId: serverId,
+                seanceId: seanceId,
+                urls: urls,
+                legende: legende,
+                date: date,
+                isSynced: isSynced,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SeanceImagesTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SeanceImagesTableTable,
+      SeanceImagesTableData,
+      $$SeanceImagesTableTableFilterComposer,
+      $$SeanceImagesTableTableOrderingComposer,
+      $$SeanceImagesTableTableAnnotationComposer,
+      $$SeanceImagesTableTableCreateCompanionBuilder,
+      $$SeanceImagesTableTableUpdateCompanionBuilder,
+      (
+        SeanceImagesTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $SeanceImagesTableTable,
+          SeanceImagesTableData
+        >,
+      ),
+      SeanceImagesTableData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -5435,4 +6708,6 @@ class $AppDatabaseManager {
       $$RdvsTableTableTableManager(_db, _db.rdvsTable);
   $$SeancesTableTableTableManager get seancesTable =>
       $$SeancesTableTableTableManager(_db, _db.seancesTable);
+  $$SeanceImagesTableTableTableManager get seanceImagesTable =>
+      $$SeanceImagesTableTableTableManager(_db, _db.seanceImagesTable);
 }

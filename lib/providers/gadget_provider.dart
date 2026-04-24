@@ -57,8 +57,8 @@ class GadgetProvider extends ChangeNotifier {
               SeancesTableCompanion.insert(
                 serverId: drift.Value(s.id),
                 nom: s.nom,
-                objectifs: drift.Value(s.objectifs),
-                zone: s.zone,
+                motifs: drift.Value(s.motifs),
+                zone: drift.Value(s.zone),
                 objectifParticipants: s.objectifParticipants,
                 organisateur: s.organisateur,
                 datePrevue: s.datePrevue,
@@ -73,20 +73,23 @@ class GadgetProvider extends ChangeNotifier {
             );
           }
 
-          debugPrint('✅ Gadgets synchronisés depuis le serveur (${serverSeances.length} séances).');
+          debugPrint(
+            '✅ Gadgets synchronisés depuis le serveur (${serverSeances.length} séances).',
+          );
         } catch (e) {
-          debugPrint('⚠️ Hors-ligne : Impossible de télécharger les séances pour Gadgets.');
+          debugPrint(
+            '⚠️ Hors-ligne : Impossible de télécharger les séances pour Gadgets.',
+          );
 
-          // 3. Si premier lancement ET hors-ligne → on informe l'utilisateur
           if (isFirstInstall) {
-            _errorMessage = 'Aucune donnée locale. Veuillez vous connecter à Internet pour charger les gadgets.';
+            _errorMessage =
+                'Aucune donnée locale. Veuillez vous connecter à Internet pour charger les gadgets.';
             _allGadgets = [];
             _filteredGadgets = [];
             _isLoading = false;
             notifyListeners();
             return;
           }
-          // Sinon on continue avec les données locales existantes
         }
       }
 
@@ -98,15 +101,14 @@ class GadgetProvider extends ChangeNotifier {
           id: row.id,
           serverId: row.serverId,
           seanceNom: row.nom,
-          zone: row.zone,
+          zone: row.zone ?? '',
           gadgetsPrevus: row.gadgetsPrevus,
           gadgetsDistribues: row.gadgetsDistribues,
           totalLogistique: row.totalLogistique,
-            statut: calculerStatut(           // ← calculé dynamiquement
-              datePrevue: row.datePrevue,
-              estTerminee: row.estTerminee,
-            )
-
+          statut: calculerStatut(
+            datePrevue: row.datePrevue,
+            estTerminee: row.estTerminee,
+          ),
         );
       }).toList();
 
@@ -158,7 +160,7 @@ class GadgetProvider extends ChangeNotifier {
           final serverSeance = sp.Seance(
             id: existingSeance.serverId,
             nom: existingSeance.nom,
-            objectifs: existingSeance.objectifs,
+            motifs: existingSeance.motifs,
             zone: existingSeance.zone,
             objectifParticipants: existingSeance.objectifParticipants,
             organisateur: existingSeance.organisateur,
@@ -169,13 +171,16 @@ class GadgetProvider extends ChangeNotifier {
             gadgetsPrevus: existingSeance.gadgetsPrevus,
             gadgetsDistribues: newDistributed,
             totalLogistique: existingSeance.totalLogistique,
+            evaluation: existingSeance.evaluation ?? false,
           );
 
           await apiClient.seance.updateSeance(serverSeance);
           await localDb.updateSeance(updatedData.copyWith(isSynced: true));
           localDb.notifyDataChanged();
         } catch (e) {
-          debugPrint('⚠️ Serveur inaccessible. Distribution gardée en file d\'attente.');
+          debugPrint(
+            '⚠️ Serveur inaccessible. Distribution gardée en file d\'attente.',
+          );
         }
       }
     } catch (e) {

@@ -80,7 +80,6 @@ class StatisticsProvider extends ChangeNotifier {
     return DateTime(now.year, 1, 1);
   }
 
-
   Future<void> _fetchAndMergeFromServer() async {
     try {
       // --- Séances ---
@@ -103,7 +102,7 @@ class StatisticsProvider extends ChangeNotifier {
                 SeancesTableCompanion(
                   serverId: drift.Value(s.id),
                   nom: drift.Value(s.nom),
-                  objectifs: drift.Value(s.objectifs),
+                  motifs: drift.Value(s.motifs),
                   zone: drift.Value(s.zone),
                   objectifParticipants: drift.Value(s.objectifParticipants),
                   organisateur: drift.Value(s.organisateur),

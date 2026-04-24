@@ -45,7 +45,7 @@ class HomeProvider extends ChangeNotifier {
     final result = await Connectivity().checkConnectivity();
     _updateConnectionState(result);
     _connectivitySubscription = Connectivity().onConnectivityChanged.listen(
-          (result) => _updateConnectionState(result),
+      (result) => _updateConnectionState(result),
     );
   }
 
@@ -70,9 +70,9 @@ class HomeProvider extends ChangeNotifier {
   }
 
   Future<void> loadHomeData(
-      BuildContext context, {
-        bool isRefresh = false,
-      }) async {
+    BuildContext context, {
+    bool isRefresh = false,
+  }) async {
     if (_isFetching) return;
 
     if (!isRefresh) {
@@ -83,12 +83,10 @@ class HomeProvider extends ChangeNotifier {
     try {
       _isFetching = true;
 
-      // Stratégie serveur-first : si en ligne, on merge TOUT depuis PostgreSQL
       if (_isOnline) {
         await _fetchAndMergeAll();
       }
 
-      // Lecture depuis le local (toujours à jour après le merge)
       final participants = await localDb.getAllParticipants();
       final seances = await localDb.getAllSeances();
 
@@ -99,9 +97,9 @@ class HomeProvider extends ChangeNotifier {
 
       _pendingSyncOperations =
           unsyncedParts.length +
-              unsyncedContacts.length +
-              unsyncedRdvs.length +
-              unsyncedSeances.length;
+          unsyncedContacts.length +
+          unsyncedRdvs.length +
+          unsyncedSeances.length;
 
       _quickAccess = HomeData.getQuickAccess(context, _pendingSyncOperations);
 
@@ -123,8 +121,6 @@ class HomeProvider extends ChangeNotifier {
     }
   }
 
-  /// Merge complet depuis PostgreSQL → local (séances + participants).
-  /// ✅ Vérification stricte : n'insère que si l'enregistrement n'existe pas déjà
   Future<void> _fetchAndMergeAll() async {
     await _mergeSeances();
     await _mergeParticipants();
@@ -148,29 +144,25 @@ class HomeProvider extends ChangeNotifier {
           await localDb
               .into(localDb.seancesTable)
               .insert(
-            SeancesTableCompanion(
-              serverId: drift.Value(s.id),
-              nom: drift.Value(s.nom),
-              objectifs: drift.Value(s.objectifs),
-              zone: drift.Value(s.zone),
-              objectifParticipants: drift.Value(s.objectifParticipants),
-              organisateur: drift.Value(s.organisateur),
-              datePrevue: drift.Value(s.datePrevue),
-              heureDebut: drift.Value(s.heureDebut),
-              heureFin: drift.Value(s.heureFin),
-              estTerminee: drift.Value(s.estTerminee),
-              gadgetsPrevus: drift.Value(s.gadgetsPrevus ?? 0),
-              gadgetsDistribues: drift.Value(s.gadgetsDistribues ?? 0),
-              totalLogistique: drift.Value(s.totalLogistique ?? 0.0),
-              isSynced: const drift.Value(true),
-            ),
-          );
+                SeancesTableCompanion(
+                  serverId: drift.Value(s.id),
+                  nom: drift.Value(s.nom),
+                  motifs: drift.Value(s.motifs),
+                  zone: drift.Value(s.zone),
+                  objectifParticipants: drift.Value(s.objectifParticipants),
+                  organisateur: drift.Value(s.organisateur),
+                  datePrevue: drift.Value(s.datePrevue),
+                  heureDebut: drift.Value(s.heureDebut),
+                  heureFin: drift.Value(s.heureFin),
+                  estTerminee: drift.Value(s.estTerminee),
+                  gadgetsPrevus: drift.Value(s.gadgetsPrevus ?? 0),
+                  gadgetsDistribues: drift.Value(s.gadgetsDistribues ?? 0),
+                  totalLogistique: drift.Value(s.totalLogistique ?? 0.0),
+                  isSynced: const drift.Value(true),
+                ),
+              );
           newCount++;
-        } else {
-          // ⚠️ Optionnel : mettre à jour si les données ont changé
-          // (décommenter si nécessaire)
-          // await _updateSeanceIfChanged(s, localSeances);
-        }
+        } else {}
       }
 
       if (newCount > 0) {
@@ -185,10 +177,10 @@ class HomeProvider extends ChangeNotifier {
 
   Future<void> _mergeParticipants() async {
     try {
-      final serverParticipants = await apiClient.participant.getAllParticipants();
+      final serverParticipants = await apiClient.participant
+          .getAllParticipants();
       final localParticipants = await localDb.getAllParticipants();
 
-      // ✅ Créer une clé unique combinée : serverId (pas de doublons par serverId)
       final localServerIds = localParticipants
           .where((p) => p.serverId != null)
           .map((p) => p.serverId)
@@ -196,36 +188,31 @@ class HomeProvider extends ChangeNotifier {
 
       int newCount = 0;
       for (var p in serverParticipants) {
-        // ✅ Vérifier STRICTEMENT que ce serverId n'existe pas en local
         if (!localServerIds.contains(p.id)) {
           await localDb
               .into(localDb.participantsTable)
               .insert(
-            ParticipantsTableCompanion(
-              serverId: drift.Value(p.id),
-              seanceId: drift.Value(p.seanceId),
-              nom: drift.Value(p.nom),
-              prenom: drift.Value(p.prenom),
-              telephone: drift.Value(p.telephone),
-              profession: drift.Value(p.profession),
-              statutLogement: drift.Value(p.statutLogement),
-              lieu: drift.Value(p.lieu),
-              localite: drift.Value(p.localite),
-              quartier: drift.Value(p.quartier),
-              besoinsExprimes: drift.Value(p.besoinsExprimes),
-              ressenti: drift.Value(p.ressenti),
-              consentement: drift.Value(p.consentement),
-              statut: drift.Value(p.statut),
-              dateInscription: drift.Value(p.dateInscription),
-              isSynced: const drift.Value(true),
-            ),
-          );
+                ParticipantsTableCompanion(
+                  serverId: drift.Value(p.id),
+                  seanceId: drift.Value(p.seanceId),
+                  nom: drift.Value(p.nom),
+                  prenom: drift.Value(p.prenom),
+                  telephone: drift.Value(p.telephone),
+                  profession: drift.Value(p.profession),
+                  statutLogement: drift.Value(p.statutLogement),
+                  lieu: drift.Value(p.lieu),
+                  localite: drift.Value(p.localite),
+                  quartier: drift.Value(p.quartier),
+                  besoinsExprimes: drift.Value(p.besoinsExprimes),
+                  ressenti: drift.Value(p.ressenti),
+                  consentement: drift.Value(p.consentement),
+                  statut: drift.Value(p.statut),
+                  dateInscription: drift.Value(p.dateInscription),
+                  isSynced: const drift.Value(true),
+                ),
+              );
           newCount++;
-        } else {
-          // ⚠️ Optionnel : mettre à jour si les données ont changé
-          // (décommenter si nécessaire)
-          // await _updateParticipantIfChanged(p, localParticipants);
-        }
+        } else {}
       }
 
       if (newCount > 0) {
@@ -239,13 +226,23 @@ class HomeProvider extends ChangeNotifier {
   }
 
   List<BarchartModel> _generateChartData(
-      List<ParticipantsTableData> participants,
-      ) {
+    List<ParticipantsTableData> participants,
+  ) {
     List<BarchartModel> chartData = [];
     final now = DateTime.now();
     final monthNames = [
-      'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin',
-      'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc',
+      'Jan',
+      'Fév',
+      'Mar',
+      'Avr',
+      'Mai',
+      'Juin',
+      'Juil',
+      'Aoû',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Déc',
     ];
 
     int maxCount = 0;
@@ -256,9 +253,9 @@ class HomeProvider extends ChangeNotifier {
       int count = participants
           .where(
             (p) =>
-        p.dateInscription.month == targetDate.month &&
-            p.dateInscription.year == targetDate.year,
-      )
+                p.dateInscription.month == targetDate.month &&
+                p.dateInscription.year == targetDate.year,
+          )
           .length;
       counts[5 - i] = count;
       if (count > maxCount) maxCount = count;

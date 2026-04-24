@@ -16,6 +16,23 @@ class StringListConverter extends TypeConverter<List<String>, String> {
   String toSql(List<String> value) => json.encode(value);
 }
 
+class NullableStringListConverter
+    extends TypeConverter<List<String>?, String?> {
+  const NullableStringListConverter();
+
+  @override
+  List<String>? fromSql(String? fromDb) {
+    if (fromDb == null) return null;
+    return List<String>.from(json.decode(fromDb));
+  }
+
+  @override
+  String? toSql(List<String>? value) {
+    if (value == null) return null;
+    return json.encode(value);
+  }
+}
+
 // --- TABLE DES PARTICIPANTS ---
 class ParticipantsTable extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -85,11 +102,25 @@ class RdvsTable extends Table {
 class SeancesTable extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get serverId => integer().nullable().unique()();
+
+  // --- INFOS GÉNÉRALES ---
   TextColumn get nom => text()();
-  TextColumn get objectifs => text().nullable()();
-  TextColumn get zone => text()();
+  TextColumn get motifs => text().nullable()();
+  TextColumn get typeSeance => text().nullable()();
+  TextColumn get cible => text().nullable()();
+
+  // --- LOCALISATION ---
+  TextColumn get zone => text().nullable()();
+  TextColumn get ville => text().nullable()();
+  TextColumn get quartier => text().nullable()();
+
+  // --- ORGANISATION ---
   IntColumn get objectifParticipants => integer()();
   TextColumn get organisateur => text()();
+  TextColumn get presentateur => text().nullable()();
+  TextColumn get assistants =>
+      text().nullable().map(const NullableStringListConverter())();
+  // --- PLANNING ---
   DateTimeColumn get datePrevue => dateTime()();
   TextColumn get heureDebut => text().nullable()();
   TextColumn get heureFin => text().nullable()();
@@ -100,7 +131,22 @@ class SeancesTable extends Table {
   IntColumn get gadgetsDistribues => integer().withDefault(const Constant(0))();
   RealColumn get totalLogistique => real().withDefault(const Constant(0.0))();
 
+  // --- BILAN ---
+  IntColumn get nbParticipantsEstime => integer().nullable()();
+  BoolColumn get evaluation => boolean().nullable()();
+
   BoolColumn get isSynced => boolean().withDefault(const Constant(true))();
+}
+
+// --- TABLE DES IMAGES DE SÉANCE ---
+class SeanceImagesTable extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get serverId => integer().nullable()();
+  IntColumn get seanceId => integer()();
+  TextColumn get urls => text().map(const StringListConverter())();
+  TextColumn get legende => text().nullable()();
+  DateTimeColumn get date => dateTime()();
+  BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
 }
 
 @DriftDatabase(
@@ -110,6 +156,7 @@ class SeancesTable extends Table {
     PriseContactsTable,
     RdvsTable,
     SeancesTable,
+    SeanceImagesTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -121,15 +168,25 @@ class AppDatabase extends _$AppDatabase {
   void notifyDataChanged() => _changeController.add(null);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onUpgrade: (migrator, from, to) async {
-      if (from < 2) {
-        // Ajoute la colonne estTerminee, supprime statut
-        await migrator.addColumn(seancesTable, seancesTable.estTerminee);
-        await migrator.dropColumn(seancesTable, 'statut');
+      if (from < 3) {
+        await migrator.addColumn(seancesTable, seancesTable.motifs);
+        await migrator.addColumn(seancesTable, seancesTable.typeSeance);
+        await migrator.addColumn(seancesTable, seancesTable.cible);
+        await migrator.addColumn(seancesTable, seancesTable.ville);
+        await migrator.addColumn(seancesTable, seancesTable.quartier);
+        await migrator.addColumn(seancesTable, seancesTable.presentateur);
+        await migrator.addColumn(seancesTable, seancesTable.assistants);
+        await migrator.addColumn(
+          seancesTable,
+          seancesTable.nbParticipantsEstime,
+        );
+        await migrator.addColumn(seancesTable, seancesTable.evaluation);
+        await migrator.createTable(seanceImagesTable);
       }
     },
   );
@@ -191,6 +248,25 @@ class AppDatabase extends _$AppDatabase {
   Future<void> clearParticipants() => delete(participantsTable).go();
   Future<void> clearRdvs() => delete(rdvsTable).go();
   Future<void> clearPriseContacts() => delete(priseContactsTable).go();
+
+  // --- REQUÊTES IMAGES ---
+  Future<List<SeanceImagesTableData>> getImagesBySeance(int seanceId) =>
+      (select(
+        seanceImagesTable,
+      )..where((t) => t.seanceId.equals(seanceId))).get();
+
+  Future<int> addImage(SeanceImagesTableCompanion entry) =>
+      into(seanceImagesTable).insert(entry);
+
+  Future<bool> updateImage(SeanceImagesTableData entry) =>
+      update(seanceImagesTable).replace(entry);
+
+  Future deleteImage(int id) =>
+      (delete(seanceImagesTable)..where((t) => t.id.equals(id))).go();
+
+  Future<void> clearImagesBySeance(int seanceId) => (delete(
+    seanceImagesTable,
+  )..where((t) => t.seanceId.equals(seanceId))).go();
 }
 
 LazyDatabase _openConnection() {

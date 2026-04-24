@@ -21,8 +21,14 @@ class ParticipantSearchBar extends StatelessWidget {
   List<SeancesTableData> _getSortedSeances() {
     final sorted = List<SeancesTableData>.from(seances);
     sorted.sort((a, b) {
-      final sa = calculerStatut(datePrevue: a.datePrevue, estTerminee: a.estTerminee);
-      final sb = calculerStatut(datePrevue: b.datePrevue, estTerminee: b.estTerminee);
+      final sa = calculerStatut(
+        datePrevue: a.datePrevue,
+        estTerminee: a.estTerminee,
+      );
+      final sb = calculerStatut(
+        datePrevue: b.datePrevue,
+        estTerminee: b.estTerminee,
+      );
       return _statutOrder(sa).compareTo(_statutOrder(sb));
     });
     return sorted;
@@ -30,9 +36,12 @@ class ParticipantSearchBar extends StatelessWidget {
 
   int _statutOrder(SeanceStatut s) {
     switch (s) {
-      case SeanceStatut.enCours:   return 0;
-      case SeanceStatut.planifiee: return 1;
-      case SeanceStatut.terminee:  return 2;
+      case SeanceStatut.enCours:
+        return 0;
+      case SeanceStatut.planifiee:
+        return 1;
+      case SeanceStatut.terminee:
+        return 2;
     }
   }
 
@@ -251,10 +260,7 @@ class _SeanceTag extends StatelessWidget {
         decoration: BoxDecoration(
           color: statut.color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: statut.color.withOpacity(0.25),
-            width: 1,
-          ),
+          border: Border.all(color: statut.color.withOpacity(0.25), width: 1),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -299,9 +305,36 @@ class _SeanceFilterSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enCours   = seances.where((s) => calculerStatut(datePrevue: s.datePrevue, estTerminee: s.estTerminee) == SeanceStatut.enCours).toList();
-    final planifies = seances.where((s) => calculerStatut(datePrevue: s.datePrevue, estTerminee: s.estTerminee) == SeanceStatut.planifiee).toList();
-    final termines  = seances.where((s) => calculerStatut(datePrevue: s.datePrevue, estTerminee: s.estTerminee) == SeanceStatut.terminee).toList();
+    final enCours = seances
+        .where(
+          (s) =>
+              calculerStatut(
+                datePrevue: s.datePrevue,
+                estTerminee: s.estTerminee,
+              ) ==
+              SeanceStatut.enCours,
+        )
+        .toList();
+    final planifies = seances
+        .where(
+          (s) =>
+              calculerStatut(
+                datePrevue: s.datePrevue,
+                estTerminee: s.estTerminee,
+              ) ==
+              SeanceStatut.planifiee,
+        )
+        .toList();
+    final termines = seances
+        .where(
+          (s) =>
+              calculerStatut(
+                datePrevue: s.datePrevue,
+                estTerminee: s.estTerminee,
+              ) ==
+              SeanceStatut.terminee,
+        )
+        .toList();
 
     return Container(
       decoration: const BoxDecoration(
@@ -315,7 +348,8 @@ class _SeanceFilterSheet extends StatelessWidget {
         children: [
           Center(
             child: Container(
-              width: 40, height: 4,
+              width: 40,
+              height: 4,
               decoration: BoxDecoration(
                 color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(2),
@@ -325,7 +359,11 @@ class _SeanceFilterSheet extends StatelessWidget {
           const SizedBox(height: 20),
           const Text(
             'Filtrer par séance',
-            style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black87),
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
           ),
           const SizedBox(height: 16),
 
@@ -343,11 +381,17 @@ class _SeanceFilterSheet extends StatelessWidget {
             ...enCours.map((s) => _buildItem(s)),
           ],
           if (planifies.isNotEmpty) ...[
-            _SectionLabel(label: 'Planifiées', color: SeanceStatut.planifiee.color),
+            _SectionLabel(
+              label: 'Planifiées',
+              color: SeanceStatut.planifiee.color,
+            ),
             ...planifies.map((s) => _buildItem(s)),
           ],
           if (termines.isNotEmpty) ...[
-            _SectionLabel(label: 'Terminées', color: SeanceStatut.terminee.color),
+            _SectionLabel(
+              label: 'Terminées',
+              color: SeanceStatut.terminee.color,
+            ),
             ...termines.map((s) => _buildItem(s)),
           ],
         ],
@@ -365,7 +409,7 @@ class _SeanceFilterSheet extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 6),
       child: _SheetItem(
         label: seance.nom,
-        subtitle: seance.zone,
+        subtitle: seance.zone ?? '',
         isSelected: isSelected,
         color: statut.color,
         icon: Icons.event_outlined,
@@ -387,7 +431,8 @@ class _SectionLabel extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 6, height: 6,
+            width: 6,
+            height: 6,
             decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
           const SizedBox(width: 8),
@@ -441,7 +486,8 @@ class _SheetItem extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 36, height: 36,
+              width: 36,
+              height: 36,
               decoration: BoxDecoration(
                 color: color.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(10),
@@ -457,7 +503,9 @@ class _SheetItem extends StatelessWidget {
                     label,
                     style: TextStyle(
                       fontSize: 14,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.w500,
                       color: Colors.black87,
                     ),
                   ),

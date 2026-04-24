@@ -35,7 +35,6 @@ class ParticipantProvider extends ChangeNotifier {
     super.dispose();
   }
 
-  // Ajouter cette méthode dans ParticipantProvider
   Future<void> syncFromServer() async {
     _isLoading = true;
     notifyListeners();

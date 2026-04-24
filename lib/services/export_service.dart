@@ -17,20 +17,40 @@ class ExportService {
     try {
       if (tableType == 'participants') {
         final data = await localDb.getAllParticipants();
-        rows.add(["ID", "Nom", "Prénom", "Téléphone", "Localité", "Quartier", "Date"]);
+        rows.add([
+          "ID",
+          "Nom",
+          "Prénom",
+          "Téléphone",
+          "Localité",
+          "Quartier",
+          "Date",
+        ]);
         for (var p in data) {
           rows.add([
-            p.id, p.nom, p.prenom, p.telephone,
-            p.localite, p.quartier ?? '',
+            p.id,
+            p.nom,
+            p.prenom,
+            p.telephone,
+            p.localite,
+            p.quartier ?? '',
             DateFormat('dd/MM/yyyy HH:mm').format(p.dateInscription),
           ]);
         }
         fileName = "export_participants_${_getDateStamp()}.csv";
       } else {
         final data = await localDb.getAllSeances();
-        rows.add(["ID", "Nom", "Zone", "Objectif", "Réalisé", "Statut", "Date"]);
+        rows.add([
+          "ID",
+          "Nom",
+          "Zone",
+          "Objectif",
+          "Réalisé",
+          "Statut",
+          "Date",
+        ]);
         for (var s in data) {
-          final statut = calculerStatut(          // ← corrigé
+          final statut = calculerStatut(
             datePrevue: s.datePrevue,
             estTerminee: s.estTerminee,
           );
@@ -40,7 +60,7 @@ class ExportService {
             s.zone,
             s.objectifParticipants,
             s.gadgetsDistribues,
-            statut.label,                         // ← corrigé
+            statut.label,
             DateFormat('dd/MM/yyyy').format(s.datePrevue),
           ]);
         }
@@ -68,7 +88,10 @@ class ExportService {
         tableData.add(["Nom", "Prénom", "Contact", "Localité", "Date"]);
         for (var p in data) {
           tableData.add([
-            p.nom, p.prenom, p.telephone, p.localite,
+            p.nom,
+            p.prenom,
+            p.telephone,
+            p.localite,
             DateFormat('dd/MM/yyyy').format(p.dateInscription),
           ]);
         }
@@ -76,16 +99,16 @@ class ExportService {
         final data = await localDb.getAllSeances();
         tableData.add(["Séance", "Zone", "Obj.", "Réal.", "Statut"]);
         for (var s in data) {
-          final statut = calculerStatut(          // ← corrigé
+          final statut = calculerStatut(
             datePrevue: s.datePrevue,
             estTerminee: s.estTerminee,
           );
           tableData.add([
             s.nom,
-            s.zone,
+            s.zone ?? '',
             s.objectifParticipants.toString(),
             s.gadgetsDistribues.toString(),
-            statut.label,                         // ← corrigé
+            statut.label,
           ]);
         }
       }
@@ -98,7 +121,10 @@ class ExportService {
               level: 0,
               child: pw.Text(
                 title,
-                style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
+                style: pw.TextStyle(
+                  fontSize: 20,
+                  fontWeight: pw.FontWeight.bold,
+                ),
               ),
             ),
             pw.SizedBox(height: 20),
@@ -106,7 +132,9 @@ class ExportService {
               headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
               data: tableData,
               border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey300),
-              headerDecoration: const pw.BoxDecoration(color: PdfColors.grey100),
+              headerDecoration: const pw.BoxDecoration(
+                color: PdfColors.grey100,
+              ),
             ),
           ],
         ),
@@ -127,10 +155,10 @@ class ExportService {
       DateFormat('dd_MM_yyyy').format(DateTime.now());
 
   static Future<void> _saveAndShare(
-      dynamic data,
-      String fileName, {
-        required bool isBytes,
-      }) async {
+    dynamic data,
+    String fileName, {
+    required bool isBytes,
+  }) async {
     final directory = await getTemporaryDirectory();
     final file = File("${directory.path}/$fileName");
 

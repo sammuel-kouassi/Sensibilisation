@@ -6,6 +6,7 @@ import '../models/quick_access_model.dart';
 import '../models/participant_model.dart';
 import '../providers/participant_provider.dart';
 
+import '../views/widgets/extras/extras_view.dart';
 import '../views/widgets/forms/participant_form.dart';
 import '../views/widgets/gadgets/gadgets_view.dart';
 import '../views/widgets/rdv/rdv_view.dart';
@@ -103,6 +104,19 @@ class HomeData {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const PriseContactView()),
+          );
+        },
+      ),
+
+      QuickAccessModel(
+        icon: Icons.campaign,
+        iconColor: const Color(0xFFE91E63),
+        backgroundColor: const Color(0xFFE91E63).withOpacity(0.1),
+        label: 'Seances',
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ExtrasView()),
           );
         },
       ),

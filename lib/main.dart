@@ -13,7 +13,7 @@ import 'providers/participant_provider.dart';
 import 'providers/sync_provider.dart';
 import 'providers/prise_contact_provider.dart';
 import 'providers/rdv_provider.dart';
-import 'views/login/login_views.dart'; // Import crucial pour LoginView.routeName
+import 'views/login/login_views.dart';
 import 'views/splash/splash_view.dart';
 
 Future<void> main() async {
