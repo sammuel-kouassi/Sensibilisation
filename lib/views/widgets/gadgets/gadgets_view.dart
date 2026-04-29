@@ -170,7 +170,6 @@ class _GadgetsViewState extends State<GadgetsView> {
                             ),
                           )
 
-                        // Liste vide (filtre sans résultat)
                         else if (provider.filteredGadgets.isEmpty)
                             const Padding(
                               padding: EdgeInsets.only(top: 50.0),

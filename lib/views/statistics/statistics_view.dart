@@ -1,3 +1,4 @@
+import 'package:cie_services/views/statistics/widgets/trimestre_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -45,6 +46,16 @@ class StatisticsView extends StatelessWidget {
                               ],
                               onPeriodChanged: (newPeriod) {
                                 provider.updatePeriod(newPeriod);
+                              },
+                            ),
+                          ),
+
+                          AnimatedSection(
+                            delayMs: 200,
+                            child: TrimestreSelector(
+                              selectedPeriod: provider.selectedPeriod,
+                              onSelected: (trimestre) {
+                                provider.updatePeriod(trimestre);
                               },
                             ),
                           ),

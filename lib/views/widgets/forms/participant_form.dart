@@ -234,11 +234,19 @@ class _ParticipantFormState extends State<ParticipantForm> {
               const SizedBox(height: 16),
               CustomTextField(
                 label: 'Téléphone',
-                hint: '+225 07 12 34 56',
+                hint: '07 12 34 56 78',
                 controller: _telephoneController,
                 isRequired: true,
                 keyboardType: TextInputType.phone,
-                validator: (v) => v!.isEmpty ? 'Requis' : null,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(10),
+                ],
+                validator: (v) {
+                  if (v == null || v.isEmpty) return 'Requis';
+                  if (v.length != 10) return 'Le numéro doit contenir exactement 10 chiffres';
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
               CustomTextField(

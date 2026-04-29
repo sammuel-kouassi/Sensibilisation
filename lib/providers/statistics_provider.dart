@@ -71,13 +71,28 @@ class StatisticsProvider extends ChangeNotifier {
     super.dispose();
   }
 
+  // Remplacer _getStartDate() par cette version :
   DateTime _getStartDate() {
     final now = DateTime.now();
     if (_selectedPeriod == '7 derniers jours')
       return now.subtract(const Duration(days: 7));
     if (_selectedPeriod == '30 derniers jours')
       return now.subtract(const Duration(days: 30));
-    return DateTime(now.year, 1, 1);
+    if (_selectedPeriod == 'T1') return DateTime(now.year, 1, 1);
+    if (_selectedPeriod == 'T2') return DateTime(now.year, 4, 1);
+    if (_selectedPeriod == 'T3') return DateTime(now.year, 7, 1);
+    if (_selectedPeriod == 'T4') return DateTime(now.year, 10, 1);
+    return DateTime(now.year, 1, 1); // Cette année
+  }
+
+// Ajouter cette méthode pour la date de fin
+  DateTime _getEndDate() {
+    final now = DateTime.now();
+    if (_selectedPeriod == 'T1') return DateTime(now.year, 3, 31, 23, 59);
+    if (_selectedPeriod == 'T2') return DateTime(now.year, 6, 30, 23, 59);
+    if (_selectedPeriod == 'T3') return DateTime(now.year, 9, 30, 23, 59);
+    if (_selectedPeriod == 'T4') return DateTime(now.year, 12, 31, 23, 59);
+    return now; // Pour les autres périodes, jusqu'à maintenant
   }
 
   Future<void> _fetchAndMergeFromServer() async {
@@ -195,15 +210,19 @@ class StatisticsProvider extends ChangeNotifier {
       }
 
       final startDate = _getStartDate();
+      final endDate = _getEndDate();
       final allParticipants = await localDb.getAllParticipants();
       final allSeances = await localDb.getAllSeances();
 
-      final filteredParts = allParticipants
-          .where((p) => p.dateInscription.isAfter(startDate))
-          .toList();
-      final filteredSeances = allSeances
-          .where((s) => s.datePrevue.isAfter(startDate))
-          .toList();
+      final filteredParts = allParticipants.where((p) {
+        return p.dateInscription.isAfter(startDate) &&
+            p.dateInscription.isBefore(endDate);
+      }).toList();
+
+      final filteredSeances = allSeances.where((s) {
+        return s.datePrevue.isAfter(startDate) &&
+            s.datePrevue.isBefore(endDate);
+      }).toList();
 
       int totalGadgets = filteredSeances.fold(
         0,

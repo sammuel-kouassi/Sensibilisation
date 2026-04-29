@@ -61,6 +61,7 @@ dependencies:
   # ✅ Le package est bien ici dans les dépendances
   flutter_native_splash: ^2.4.7
   image_picker: ^1.2.1
+  http: ^1.6.0
 
 dev_dependencies:
   flutter_test:

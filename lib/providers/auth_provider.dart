@@ -19,15 +19,19 @@ class AuthProvider extends ChangeNotifier {
   static const String _keyPasswordHash = 'auth_password_hash';
   static const String _keyHasSavedCredentials = 'auth_has_credentials';
 
+
   String get name => _name;
   String get email => _email;
   String get role => _role;
   bool get isAuthenticated => _isAuthenticated;
   bool get isLoading => _isLoading;
   bool get isOfflineMode => _isOfflineMode;
-  bool get isAdmin => _role.toLowerCase() == 'admin';
 
-  /// Vérifie si une connexion réseau est disponible
+  bool get isAdmin => _role.toLowerCase() == 'administrateur';
+
+  bool get isUtilisateur => _role.toLowerCase() == 'utilisateur';
+
+
   Future<bool> _hasInternetConnection() async {
     try {
       final results = await Connectivity().checkConnectivity();
@@ -38,7 +42,7 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  /// Hash simple du mot de passe pour stockage local (non transmis)
+  ///Mot de passe ashé pour le local
   String _hashPassword(String password) {
     int hash = 0;
     for (int i = 0; i < password.length; i++) {
@@ -47,7 +51,6 @@ class AuthProvider extends ChangeNotifier {
     return hash.toString();
   }
 
-  /// Sauvegarde les credentials localement après une connexion online réussie
   Future<void> _saveCredentialsLocally(
       String email,
       String password,
@@ -62,7 +65,6 @@ class AuthProvider extends ChangeNotifier {
     await prefs.setBool(_keyHasSavedCredentials, true);
   }
 
-  /// Vérifie les credentials sauvegardés localement
   Future<bool> _checkLocalCredentials(String email, String password) async {
     final prefs = await SharedPreferences.getInstance();
     final hasCreds = prefs.getBool(_keyHasSavedCredentials) ?? false;
@@ -74,58 +76,71 @@ class AuthProvider extends ChangeNotifier {
     return savedEmail == email && savedHash == _hashPassword(password);
   }
 
-  /// Charge le profil local sauvegardé
   Future<void> _loadLocalProfile() async {
     final prefs = await SharedPreferences.getInstance();
     _name = prefs.getString(_keyName) ?? 'Utilisateur';
     _email = prefs.getString(_keyEmail) ?? '';
-    _role = prefs.getString(_keyRole) ?? 'agent';
+    _role = prefs.getString(_keyRole) ?? 'utilisateur';
   }
 
-  /// Vérifie s'il y a des credentials sauvegardés (pour afficher l'option offline)
   Future<bool> hasSavedCredentials() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_keyHasSavedCredentials) ?? false;
   }
 
-  /// Connexion principale — tente online, bascule offline si nécessaire
+
   Future<String?> login(String email, String password) async {
+    _isLoading = true;
+    notifyListeners();
+
+    String? result;
     final isConnected = await _hasInternetConnection();
 
     if (isConnected) {
-      return await _loginOnline(email, password);
+      result = await _loginOnline(email, password);
     } else {
-      return await _loginOffline(email, password);
+      result = await _loginOffline(email, password);
     }
+
+    _isLoading = false;
+    notifyListeners();
+    return result;
   }
 
-  /// Connexion online via l'API
   Future<String?> _loginOnline(String email, String password) async {
     try {
+      debugPrint('🌐 Tentative de connexion online pour : $email');
+
       final user = await apiClient.auth.login(email, password);
+
       if (user != null) {
+        debugPrint('✅ Connexion réussie : ${user.email} (rôle: ${user.role})');
+
         _name = user.nom;
         _email = user.email;
         _role = user.role;
         _isAuthenticated = true;
         _isOfflineMode = false;
 
-        // ✅ On sauvegarde les credentials pour les futures connexions offline
+        // Sauvegarde pour futures connexions offline
         await _saveCredentialsLocally(email, password, user.nom, user.role);
 
         notifyListeners();
         return null;
       } else {
+        debugPrint('❌ Serveur a retourné null pour $email');
         return 'Email ou mot de passe incorrect.';
       }
     } catch (e) {
-      // Le serveur est injoignable malgré la connexion — on tente offline
+      debugPrint('❌ Exception lors du login online : $e');
+      // Le serveur est injoignable → tentative offline
       return await _loginOffline(email, password);
     }
   }
 
-  /// Connexion offline avec les credentials sauvegardés
   Future<String?> _loginOffline(String email, String password) async {
+    debugPrint('📴 Tentative de connexion offline pour : $email');
+
     final isValid = await _checkLocalCredentials(email, password);
 
     if (isValid) {
@@ -133,21 +148,21 @@ class AuthProvider extends ChangeNotifier {
       _isAuthenticated = true;
       _isOfflineMode = true;
       notifyListeners();
+      debugPrint('✅ Connexion offline réussie pour $email');
       return null;
     } else {
       final hasCreds = await hasSavedCredentials();
       if (!hasCreds) {
-        return 'Aucune session sauvegardée. Une connexion internet est requise pour la première connexion.';
+        return 'Première connexion impossible hors ligne.\n'
+            'Veuillez vous connecter au moins une fois avec internet.';
       }
       return 'Email ou mot de passe incorrect.';
     }
   }
 
-  /// ✅ Mise à jour du profil avec vérification de la connectivité
   Future<bool> updateProfile(String newName, String newRole) async {
-    // 1. Empêcher la modification si on est sciemment en mode hors ligne
     if (_isOfflineMode) {
-      debugPrint('❌ Impossible de mettre à jour le profil en mode hors ligne.');
+      debugPrint('❌ Mise à jour impossible en mode hors ligne.');
       return false;
     }
 
@@ -155,49 +170,45 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 2. Double vérification du réseau avant l'appel Serverpod
       final isConnected = await _hasInternetConnection();
       if (!isConnected) {
+        debugPrint('❌ Pas de connexion pour mettre à jour le profil.');
         _isLoading = false;
         notifyListeners();
         return false;
       }
 
-      // 3. Appel au backend
-      // Si ta méthode est dans UtilisateurEndpoint au lieu de AuthEndpoint,
-      // remplace apiClient.auth.updateUser par apiClient.utilisateur.updateUser
       final success = await apiClient.auth.updateUser(
         sp.Utilisateur(
           nom: newName,
           role: newRole,
           email: _email,
-          motDePasse: '', // Requis par le modèle, mais ignoré par la mise à jour
+          motDePasse: '',
         ),
       );
 
       if (success) {
-        // 4. Mise à jour de l'état local
         _name = newName;
         _role = newRole;
 
-        // 5. Mise à jour des SharedPreferences (pour le prochain login offline)
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString(_keyName, newName);
         await prefs.setString(_keyRole, newRole);
 
+        debugPrint('✅ Profil mis à jour : $newName / $newRole');
         _isLoading = false;
         notifyListeners();
         return true;
       }
     } catch (e) {
-      debugPrint('❌ Erreur update : $e');
+      debugPrint('❌ Erreur update profil : $e');
     }
 
-    // En cas d'échec ou d'exception
     _isLoading = false;
     notifyListeners();
     return false;
   }
+
 
   void logout() {
     _name = '';
