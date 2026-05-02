@@ -7,7 +7,7 @@ class RdvModel {
   final String heure;
   final String lieu;
   final String statut;
-  final DateTime dateInscription; // ✅ Nouveau champ
+  final DateTime dateInscription;
 
   RdvModel({
     this.id,
@@ -18,8 +18,8 @@ class RdvModel {
     required this.heure,
     required this.lieu,
     required this.statut,
-    DateTime? dateInscription, // ✅ Optionnel à la création
-  }) : dateInscription = dateInscription ?? DateTime.now(); // ✅ Défaut = maintenant
+    DateTime? dateInscription,
+  }) : dateInscription = dateInscription ?? DateTime.now();
 
   bool get isPlanifie => statut == 'Planifié';
 }

@@ -75,13 +75,13 @@ class _ExtrasContent extends StatelessWidget {
                   child: Row(
                     children: const [
                       Icon(
-                        Icons.lock_outline_rounded,
+                        Icons.camera_alt_outlined,
                         size: 13,
                         color: Color(0xFF3887E0),
                       ),
                       SizedBox(width: 5),
                       Text(
-                        'Clore',
+                        'Photos',
                         style: TextStyle(
                           color: Color(0xFF3887E0),
                           fontWeight: FontWeight.w600,
@@ -105,56 +105,56 @@ class _ExtrasContent extends StatelessWidget {
       ),
       body: provider.isLoading
           ? const Center(
-              child: CircularProgressIndicator(color: Color(0xFFFF9500)),
-            )
+        child: CircularProgressIndicator(color: Color(0xFFFF9500)),
+      )
           : provider.seances.isEmpty
           ? const Center(
-              child: Text(
-                'Aucune séance.',
-                style: TextStyle(color: Colors.grey, fontSize: 14),
-              ),
-            )
+        child: Text(
+          'Aucune séance.',
+          style: TextStyle(color: Colors.grey, fontSize: 14),
+        ),
+      )
           : RefreshIndicator(
-              color: const Color(0xFFFF9500),
-              onRefresh: provider.loadSeances,
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 48),
-                children: [
-                  if (provider.selectedSeance != null)
-                    _SelectedBanner(seance: provider.selectedSeance!),
+        color: const Color(0xFFFF9500),
+        onRefresh: provider.loadSeances,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 48),
+          children: [
+            if (provider.selectedSeance != null)
+              _SelectedBanner(seance: provider.selectedSeance!),
 
-                  if (provider.seancesEnCours.isNotEmpty) ...[
-                    _SectionHeader(
-                      label: 'En cours',
-                      color: SeanceStatut.enCours.color,
-                    ),
-                    ...provider.seancesEnCours.map(
-                      (s) => _SeanceCard(seance: s),
-                    ),
-                  ],
-
-                  if (provider.seancesPlanifiees.isNotEmpty) ...[
-                    _SectionHeader(
-                      label: 'Planifiées',
-                      color: SeanceStatut.planifiee.color,
-                    ),
-                    ...provider.seancesPlanifiees.map(
-                      (s) => _SeanceCard(seance: s),
-                    ),
-                  ],
-
-                  if (provider.seancesTerminees.isNotEmpty) ...[
-                    _SectionHeader(
-                      label: 'Terminées',
-                      color: SeanceStatut.terminee.color,
-                    ),
-                    ...provider.seancesTerminees.map(
-                      (s) => _SeanceCard(seance: s),
-                    ),
-                  ],
-                ],
+            if (provider.seancesEnCours.isNotEmpty) ...[
+              _SectionHeader(
+                label: 'En cours',
+                color: SeanceStatut.enCours.color,
               ),
-            ),
+              ...provider.seancesEnCours.map(
+                    (s) => _SeanceCard(seance: s),
+              ),
+            ],
+
+            if (provider.seancesPlanifiees.isNotEmpty) ...[
+              _SectionHeader(
+                label: 'Planifiées',
+                color: SeanceStatut.planifiee.color,
+              ),
+              ...provider.seancesPlanifiees.map(
+                    (s) => _SeanceCard(seance: s),
+              ),
+            ],
+
+            if (provider.seancesTerminees.isNotEmpty) ...[
+              _SectionHeader(
+                label: 'Terminées',
+                color: SeanceStatut.terminee.color,
+              ),
+              ...provider.seancesTerminees.map(
+                    (s) => _SeanceCard(seance: s),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }
@@ -228,7 +228,7 @@ class _SelectedBanner extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   const TextSpan(
-                    text: ' sélectionnée — appuyez sur Clore en haut à droite.',
+                    text: ' sélectionnée — appuyez sur Photos en haut à droite.',
                   ),
                 ],
               ),
@@ -482,7 +482,7 @@ class _SeanceCard extends StatelessWidget {
             else if (isSelected)
               Icon(Icons.check_circle_rounded, size: 20, color: statut.color)
             else
-              Icon(Icons.lock_open_rounded, size: 17, color: Colors.grey[300]),
+              Icon(Icons.camera_alt_outlined, size: 17, color: Colors.grey[300]),
           ],
         ),
       ),

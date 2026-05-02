@@ -249,6 +249,12 @@ class AppDatabase extends _$AppDatabase {
   Future<void> clearRdvs() => delete(rdvsTable).go();
   Future<void> clearPriseContacts() => delete(priseContactsTable).go();
 
+  // Récupérer une séance locale par son ID serveur
+  Future<SeancesTableData?> getSeanceByServerId(int serverId) {
+    return (select(seancesTable)..where((t) => t.serverId.equals(serverId)))
+        .getSingleOrNull();
+  }
+
   // --- REQUÊTES IMAGES ---
   Future<List<SeanceImagesTableData>> getImagesBySeance(int seanceId) =>
       (select(

@@ -1,5 +1,7 @@
+// lib/core/api_client.dart
 import 'package:serverpod_flutter/serverpod_flutter.dart';
 import 'package:dlf_backend_client/dlf_backend_client.dart';
+import 'app_config.dart'; // ← toutes les URLs viennent d'ici
 
 class ApiClient {
   static final ApiClient _instance = ApiClient._internal();
@@ -8,10 +10,8 @@ class ApiClient {
 
   late Client client;
 
-  //http://192.168.1.6:8070
   void init() {
-    client = Client('http://10.38.97.212:8070')
-
+    client = Client(AppConfig.serverpodUrl)
       ..connectivityMonitor = FlutterConnectivityMonitor();
   }
 }

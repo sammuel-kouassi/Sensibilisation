@@ -19,10 +19,33 @@ class _ImageCloseFlowState extends State<ImageCloseFlow> {
   List<File> _images = [];
 
   @override
+  void initState() {
+    super.initState();
+    // Fix écran blanc Android : récupère l'image si l'activity
+    // a été détruite pendant l'ouverture de la caméra
+    _retrieveLostData();
+  }
+
+  @override
   void dispose() {
     _nbController.dispose();
     _legendeController.dispose();
     super.dispose();
+  }
+
+  Future<void> _retrieveLostData() async {
+    try {
+      final response = await _picker.retrieveLostData();
+      if (response.isEmpty || !mounted) return;
+
+      if (response.file != null) {
+        setState(() => _images.add(File(response.file!.path)));
+      } else if (response.files != null && response.files!.isNotEmpty) {
+        setState(() => _images.addAll(response.files!.map((f) => File(f.path))));
+      }
+    } catch (e) {
+      debugPrint('retrieveLostData erreur : $e');
+    }
   }
 
   Future<void> _pickCamera() async {
@@ -32,8 +55,11 @@ class _ImageCloseFlowState extends State<ImageCloseFlow> {
         imageQuality: 75,
         preferredCameraDevice: CameraDevice.rear,
       );
+
       if (picked != null && mounted) {
         setState(() => _images.add(File(picked.path)));
+      } else if (picked == null && mounted) {
+        await _retrieveLostData();
       }
     } catch (e) {
       debugPrint('Erreur caméra : $e');
@@ -54,7 +80,7 @@ class _ImageCloseFlowState extends State<ImageCloseFlow> {
 
   Future<void> _save() async {
     if (_images.isEmpty) {
-      _showSnack('Ajoutez au moins une image avant de clore.', Colors.red);
+      _showSnack('Ajoutez au moins une image.', Colors.red);
       return;
     }
     if (_nbController.text.isEmpty) {
@@ -77,22 +103,28 @@ class _ImageCloseFlowState extends State<ImageCloseFlow> {
                   Container(
                     width: 36,
                     height: 36,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE8F5E9),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFE8F5E9),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.lock_outline_rounded, color: Color(0xFF19A015), size: 18),
+                    child: const Icon(
+                      Icons.camera_alt_outlined,
+                      color: Color(0xFF19A015),
+                      size: 18,
+                    ),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
-                    'Clore la séance ?',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  const Expanded(
+                    child: Text(
+                      'Enregistrer les photos et le nombre estimé de participants ?',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
               const Text(
-                'Cette action est irréversible. La séance sera marquée comme terminée et ne pourra plus être modifiée.',
+                'Les photos seront envoyées au serveur.',
                 style: TextStyle(fontSize: 13.5, color: Colors.black54, height: 1.55),
               ),
               const SizedBox(height: 24),
@@ -110,7 +142,11 @@ class _ImageCloseFlowState extends State<ImageCloseFlow> {
                         child: const Center(
                           child: Text(
                             'Annuler',
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black54),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black54,
+                            ),
                           ),
                         ),
                       ),
@@ -128,8 +164,12 @@ class _ImageCloseFlowState extends State<ImageCloseFlow> {
                         ),
                         child: const Center(
                           child: Text(
-                            'Oui, clore',
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+                            'Enregistrer',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
@@ -146,7 +186,7 @@ class _ImageCloseFlowState extends State<ImageCloseFlow> {
     if (confirmed != true) return;
 
     final provider = context.read<ExtrasProvider>();
-    final success = await provider.saveImagesAndClose(
+    final success = await provider.saveImagesAndParticipants(
       imagePaths: _images.map((f) => f.path).toList(),
       legende: _legendeController.text,
       nbParticipants: int.tryParse(_nbController.text) ?? 0,
@@ -154,11 +194,14 @@ class _ImageCloseFlowState extends State<ImageCloseFlow> {
 
     if (mounted) {
       if (success) {
-        _showSnack('Séance clôturée avec succès !', const Color(0xFF19A015));
+        _showSnack(
+          'Photos et participants enregistrés avec succès !',
+          const Color(0xFF19A015),
+        );
         Navigator.pop(context);
         Navigator.pop(context);
       } else {
-        _showSnack('Erreur lors de la clôture.', Colors.red);
+        _showSnack('Erreur lors de l\'enregistrement.', Colors.red);
       }
     }
   }
@@ -199,7 +242,11 @@ class _ImageCloseFlowState extends State<ImageCloseFlow> {
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.grey.withOpacity(0.18)),
                 ),
-                child: const Icon(Icons.chevron_left_rounded, size: 20, color: Colors.black87),
+                child: const Icon(
+                  Icons.chevron_left_rounded,
+                  size: 20,
+                  color: Colors.black87,
+                ),
               ),
             ),
           ),
@@ -210,8 +257,12 @@ class _ImageCloseFlowState extends State<ImageCloseFlow> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Clôture de séance',
-              style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w400),
+              'Photos & participants',
+              style: TextStyle(
+                fontSize: 11,
+                color: Colors.grey,
+                fontWeight: FontWeight.w400,
+              ),
             ),
             Text(
               seance.nom,
@@ -226,7 +277,11 @@ class _ImageCloseFlowState extends State<ImageCloseFlow> {
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(0.5),
-          child: Divider(height: 0.5, thickness: 0.5, color: Colors.grey.withOpacity(0.2)),
+          child: Divider(
+            height: 0.5,
+            thickness: 0.5,
+            color: Colors.grey.withOpacity(0.2),
+          ),
         ),
       ),
       body: SingleChildScrollView(
@@ -235,11 +290,10 @@ class _ImageCloseFlowState extends State<ImageCloseFlow> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
-            // ── ÉTAPE 1 ──
-            _StepHeader(
+            const _StepHeader(
               number: '1',
               title: 'Photos de la liste de présence',
-              color: const Color(0xFF3887E0),
+              color: Color(0xFF3887E0),
             ),
             const SizedBox(height: 14),
 
@@ -263,10 +317,13 @@ class _ImageCloseFlowState extends State<ImageCloseFlow> {
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
                             color: Colors.grey.withOpacity(0.25),
-                            style: BorderStyle.solid,
                           ),
                         ),
-                        child: const Icon(Icons.add_rounded, color: Colors.grey, size: 24),
+                        child: const Icon(
+                          Icons.add_rounded,
+                          color: Colors.grey,
+                          size: 24,
+                        ),
                       ),
                     );
                   }
@@ -289,7 +346,11 @@ class _ImageCloseFlowState extends State<ImageCloseFlow> {
                               color: Color(0xFFE24B4A),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.close_rounded, size: 12, color: Colors.white),
+                            child: const Icon(
+                              Icons.close_rounded,
+                              size: 12,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
@@ -300,50 +361,28 @@ class _ImageCloseFlowState extends State<ImageCloseFlow> {
               const SizedBox(height: 12),
             ],
 
-            if (_images.isEmpty)
-              Row(
-                children: [
-                  Expanded(
-                    child: _PhotoButton(
-                      icon: Icons.camera_alt_outlined,
-                      label: 'Caméra',
-                      onTap: _pickCamera,
-                    ),
+            Row(
+              children: [
+                Expanded(
+                  child: _PhotoButton(
+                    icon: Icons.camera_alt_outlined,
+                    label: 'Caméra',
+                    onTap: _pickCamera,
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _PhotoButton(
-                      icon: Icons.grid_view_rounded,
-                      label: 'Galerie',
-                      onTap: _pickGallery,
-                    ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _PhotoButton(
+                    icon: Icons.grid_view_rounded,
+                    label: 'Galerie',
+                    onTap: _pickGallery,
                   ),
-                ],
-              )
-            else
-              Row(
-                children: [
-                  Expanded(
-                    child: _PhotoButton(
-                      icon: Icons.camera_alt_outlined,
-                      label: 'Caméra',
-                      onTap: _pickCamera,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _PhotoButton(
-                      icon: Icons.grid_view_rounded,
-                      label: 'Galerie',
-                      onTap: _pickGallery,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
+            ),
 
             const SizedBox(height: 12),
 
-            // Champ légende
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -361,9 +400,13 @@ class _ImageCloseFlowState extends State<ImageCloseFlow> {
                       style: const TextStyle(fontSize: 14),
                       decoration: InputDecoration(
                         hintText: 'Légende (optionnel)',
-                        hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                        hintStyle: TextStyle(
+                          color: Colors.grey[400],
+                          fontSize: 14,
+                        ),
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                        contentPadding:
+                        const EdgeInsets.symmetric(vertical: 12),
                       ),
                     ),
                   ),
@@ -374,14 +417,17 @@ class _ImageCloseFlowState extends State<ImageCloseFlow> {
             // ── DIVIDER ──
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 24),
-              child: Divider(color: Colors.grey.withOpacity(0.15), thickness: 0.5),
+              child: Divider(
+                color: Colors.grey.withOpacity(0.15),
+                thickness: 0.5,
+              ),
             ),
 
             // ── ÉTAPE 2 ──
-            _StepHeader(
+            const _StepHeader(
               number: '2',
               title: 'Nombre de participants estimé',
-              color: const Color(0xFFFF9500),
+              color: Color(0xFFFF9500),
             ),
             const SizedBox(height: 14),
 
@@ -400,7 +446,9 @@ class _ImageCloseFlowState extends State<ImageCloseFlow> {
                     child: TextField(
                       controller: _nbController,
                       keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
                       style: const TextStyle(
                         fontSize: 36,
                         fontWeight: FontWeight.w600,
@@ -463,10 +511,14 @@ class _ImageCloseFlowState extends State<ImageCloseFlow> {
                     : const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.lock_outline_rounded, color: Colors.white, size: 18),
+                    Icon(
+                      Icons.cloud_upload_outlined,
+                      color: Colors.white,
+                      size: 18,
+                    ),
                     SizedBox(width: 8),
                     Text(
-                      'Clore la séance',
+                      'Enregistrer',
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
@@ -484,12 +536,16 @@ class _ImageCloseFlowState extends State<ImageCloseFlow> {
   }
 }
 
-// --- EN-TÊTE D'ÉTAPE ---
+
 class _StepHeader extends StatelessWidget {
   final String number;
   final String title;
   final Color color;
-  const _StepHeader({required this.number, required this.title, required this.color});
+  const _StepHeader({
+    required this.number,
+    required this.title,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -524,12 +580,16 @@ class _StepHeader extends StatelessWidget {
   }
 }
 
-// --- BOUTON PHOTO ---
+
 class _PhotoButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  const _PhotoButton({required this.icon, required this.label, required this.onTap});
+  const _PhotoButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {

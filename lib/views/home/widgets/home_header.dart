@@ -3,10 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
 import '../../../models/kpi_model.dart';
-import '../../../models/notification_model.dart';
 import '../../../providers/auth_provider.dart';
-import '../../../providers/rdv_provider.dart';
-import '../../../providers/sync_provider.dart';
 import '../../../providers/notification_provider.dart';
 import 'stat_home_card.dart';
 
@@ -48,7 +45,6 @@ class HomeHeader extends StatelessWidget {
                           ),
                         ),
                       ),
-                      // En-tête du panneau
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -60,41 +56,85 @@ class HomeHeader extends StatelessWidget {
                               color: Color(0xFF1E293B),
                             ),
                           ),
-                          if (notifProv.unreadCount > 0)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFF8000).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                '${notifProv.unreadCount} non lues',
-                                style: const TextStyle(
-                                  color: Color(0xFFFF8000),
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
+                          Row(
+                            children: [
+                              if (notifProv.unreadCount > 0) ...[
+                                // Bouton "Tout marquer lu"
+                                GestureDetector(
+                                  onTap: () => notifProv.markAllAsRead(),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF19A015).withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: const Text(
+                                      'Tout lire',
+                                      style: TextStyle(
+                                        color: Color(0xFF19A015),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFF8000).withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    '${notifProv.unreadCount} non lues',
+                                    style: const TextStyle(
+                                      color: Color(0xFFFF8000),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                              // Bouton refresh
+                              const SizedBox(width: 8),
+                              GestureDetector(
+                                onTap: () => notifProv.refresh(),
+                                child: Icon(
+                                  Icons.refresh_rounded,
+                                  color: Colors.grey[400],
+                                  size: 20,
                                 ),
                               ),
-                            ),
+                            ],
+                          ),
                         ],
                       ),
                       const SizedBox(height: 20),
                       // Liste dynamique
                       Expanded(
-                        child: list.isEmpty
+                        child: notifProv.isLoading && list.isEmpty
+                            ? const Center(
+                          child: CircularProgressIndicator(
+                            color: Color(0xFFFF8000),
+                          ),
+                        )
+                            : list.isEmpty
                             ? _buildEmptyState()
                             : ListView.builder(
-                                controller: scrollController,
-                                itemCount: list.length,
-                                itemBuilder: (context, index) =>
-                                    _buildNotificationItem(
-                                      context,
-                                      list[index],
-                                    ),
+                          controller: scrollController,
+                          itemCount: list.length,
+                          itemBuilder: (context, index) =>
+                              _buildNotificationItem(
+                                context,
+                                list[index],
                               ),
+                        ),
                       ),
                     ],
                   ),
@@ -107,10 +147,9 @@ class HomeHeader extends StatelessWidget {
     );
   }
 
-  // --- 📝 ITEM DE LISTE DE NOTIFICATION ---
   Widget _buildNotificationItem(BuildContext context, AppNotification notif) {
     return GestureDetector(
-      onTap: () => context.read<NotificationProvider>().markAsRead(notif.id),
+      onTap: () => context.read<NotificationProvider>().markAsRead(notif.serverId),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         margin: const EdgeInsets.only(bottom: 12),
@@ -126,12 +165,12 @@ class HomeHeader extends StatelessWidget {
           boxShadow: notif.isRead
               ? []
               : [
-                  BoxShadow(
-                    color: notif.color.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+            BoxShadow(
+              color: notif.color.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,7 +193,7 @@ class HomeHeader extends StatelessWidget {
                     children: [
                       Flexible(
                         child: Text(
-                          notif.title,
+                          notif.titre,
                           style: TextStyle(
                             fontWeight: notif.isRead
                                 ? FontWeight.w600
@@ -165,19 +204,44 @@ class HomeHeader extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        DateFormat('HH:mm').format(notif.time),
+                        DateFormat('HH:mm').format(notif.createdAt),
                         style: TextStyle(color: Colors.grey[500], fontSize: 11),
                       ),
                     ],
                   ),
                   const SizedBox(height: 6),
-                  Text(
-                    notif.body,
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 13,
-                      height: 1.4,
+                  if (notif.corps.isNotEmpty)
+                    Text(
+                      notif.corps,
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 13,
+                        height: 1.4,
+                      ),
                     ),
+                  const SizedBox(height: 4),
+                  // Badge source (web ou mobile)
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: notif.color.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          notif.source == 'web' ? '🌐 Web' : '📱 Mobile',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: notif.color,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -188,7 +252,6 @@ class HomeHeader extends StatelessWidget {
     );
   }
 
-  // --- 📭 ÉTAT VIDE (EMPTY STATE) ---
   Widget _buildEmptyState() {
     return Center(
       child: Column(
@@ -217,7 +280,7 @@ class HomeHeader extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Vos rappels de rendez-vous et vos infos\nde synchronisation s\'afficheront ici.',
+            'Les notifications du web et du mobile\ns\'afficheront ici automatiquement.',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
@@ -232,16 +295,11 @@ class HomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rdvProv = context.watch<RdvProvider>();
-    final syncProv = context.watch<SyncProvider>();
+    // ── Plus besoin de rdvProv/syncProv ni de generateNotifications ──
+    // Le NotificationProvider gère tout via polling depuis le serveur.
 
     return Consumer<NotificationProvider>(
       builder: (context, notifProv, _) {
-        // Synchronisation des données au rendu
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          notifProv.generateNotifications(rdvProv, syncProv);
-        });
-
         return Container(
           width: double.infinity,
           decoration: const BoxDecoration(
@@ -275,7 +333,7 @@ class HomeHeader extends StatelessWidget {
                       ),
                     ],
                   ),
-                  // --- CLOCHE AVEC BADGE NUMÉRIQUE ---
+                  // Cloche avec badge
                   GestureDetector(
                     onTap: () => _showNotificationsPanel(context),
                     child: Stack(
@@ -328,7 +386,7 @@ class HomeHeader extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 35),
-              // Cartes KPI (StatHomeCard)
+              // Cartes KPI
               IntrinsicHeight(
                 child: Row(
                   children: statCardList.asMap().entries.map((e) {

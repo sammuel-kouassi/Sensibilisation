@@ -131,11 +131,21 @@ class _ParticipantFormState extends State<ParticipantForm> {
     setState(() => _showConsentError = !_consentementCIE);
 
     if (_formKey.currentState!.validate() && _consentementCIE) {
+
       int finalSessionId = 1;
       if (_seanceSelectionnee != null) {
         final index = _seancesNoms.indexOf(_seanceSelectionnee!);
         if (index != -1) {
-          finalSessionId = _seancesList[index].id;
+          final seance = _seancesList[index];
+
+
+          if (seance.serverId != null) {
+            finalSessionId = seance.serverId!;
+          } else {
+
+            finalSessionId = seance.id;
+            debugPrint('⚠️ Séance sans serverId — utilisation de l\'ID local ${seance.id}');
+          }
         }
       }
 
@@ -159,15 +169,14 @@ class _ParticipantFormState extends State<ParticipantForm> {
             ? _quartierController.text.trim()
             : null,
         needs: List.from(_besoinsSelectionnes),
-        feedback:
-            _besoinsSelectionnes.contains('Autres') &&
-                _ressentiController.text.isNotEmpty
+        feedback: _besoinsSelectionnes.contains('Autres') &&
+            _ressentiController.text.isNotEmpty
             ? _ressentiController.text.trim()
             : null,
         consent: _consentementCIE,
         status: widget.participant?.status ?? 'Actif',
         registrationDate:
-            widget.participant?.registrationDate ?? DateTime.now(),
+        widget.participant?.registrationDate ?? DateTime.now(),
       );
 
       Navigator.pop(context, participantSauvegarde);

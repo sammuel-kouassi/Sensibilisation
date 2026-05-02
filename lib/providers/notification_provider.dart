@@ -1,127 +1,146 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/notification_model.dart';
-import 'rdv_provider.dart';
-import 'sync_provider.dart';
+import '../core/api_client.dart';
+import 'package:dlf_backend_client/dlf_backend_client.dart' as sp;
+
+/// Modèle d'affichage d'une notification dans l'UI Flutter
+class AppNotification {
+  final int serverId;   // ID PostgreSQL de la notification
+  final String titre;
+  final String corps;
+  final String type;    // 'rdv', 'seance', 'sync'
+  final String source;  // 'web' ou 'mobile'
+  final DateTime createdAt;
+  bool isRead;
+
+  AppNotification({
+    required this.serverId,
+    required this.titre,
+    required this.corps,
+    required this.type,
+    required this.source,
+    required this.createdAt,
+    required this.isRead,
+  });
+
+  /// Construit depuis le modèle Serverpod généré
+  factory AppNotification.fromServer(sp.Notification n) {
+    return AppNotification(
+      serverId: n.id!,
+      titre: n.titre,
+      corps: n.corps ?? '',
+      type: n.type,
+      source: n.source,
+      createdAt: n.createdAt,
+      isRead: n.isRead,
+    );
+  }
+
+  IconData get icon {
+    switch (type) {
+      case 'rdv':     return Icons.calendar_today_rounded;
+      case 'seance':  return Icons.event_rounded;
+      case 'sync':    return Icons.cloud_done_rounded;
+      default:        return Icons.notifications_rounded;
+    }
+  }
+
+  Color get color {
+    switch (type) {
+      case 'rdv':     return const Color(0xFF3887E0);
+      case 'seance':  return const Color(0xFF19A015);
+      case 'sync':    return const Color(0xFFFF9500);
+      default:        return Colors.grey;
+    }
+  }
+}
 
 class NotificationProvider extends ChangeNotifier {
   List<AppNotification> _notifications = [];
-  Set<String> _readIds = {};
+  bool _isLoading = false;
+  Timer? _pollingTimer;
 
-  static const String _prefKey = 'read_notification_ids';
+  // Intervalle de polling : 30 secondes
+  static const Duration _pollInterval = Duration(seconds: 30);
 
   List<AppNotification> get notifications => _notifications;
-  int get unreadCount => _notifications.where((n) => !n.isRead).length;
+  bool get isLoading => _isLoading;
+
+  int get unreadCount =>
+      _notifications.where((n) => !n.isRead).length;
+
+  List<AppNotification> get unreadNotifications =>
+      _notifications.where((n) => !n.isRead).toList();
 
   NotificationProvider() {
-    _loadReadIds();
+    // Chargement initial immédiat
+    fetchNotifications();
+    // Puis toutes les 30 secondes
+    _startPolling();
   }
 
-  /// Charge les IDs lus depuis le stockage local au démarrage
-  Future<void> _loadReadIds() async {
-    final prefs = await SharedPreferences.getInstance();
-    final stored = prefs.getStringList(_prefKey) ?? [];
-    _readIds = stored.toSet();
-    notifyListeners();
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
   }
 
-  /// Persiste les IDs lus dans le stockage local
-  Future<void> _saveReadIds() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(_prefKey, _readIds.toList());
+  void _startPolling() {
+    _pollingTimer?.cancel();
+    _pollingTimer = Timer.periodic(_pollInterval, (_) => fetchNotifications());
   }
 
-  void generateNotifications(RdvProvider rdvProv, SyncProvider syncProv) {
-    List<AppNotification> newList = [];
+  /// Récupère les notifications depuis Serverpod (qui lit la BD partagée)
+  Future<void> fetchNotifications() async {
+    try {
+      final serverNotifs =
+      await apiClient.notification.getMobileNotifications();
 
-    // 1. Traitement des RDV
-    for (var rdv in rdvProv.rdvs) {
-      final timeParts = rdv.heure.split(':');
-      final fullDateTime = DateTime(
-        rdv.dateRdv.year,
-        rdv.dateRdv.month,
-        rdv.dateRdv.day,
-        int.parse(timeParts[0]),
-        int.parse(timeParts[1]),
-      );
+      _notifications = serverNotifs
+          .map((n) => AppNotification.fromServer(n))
+          .toList();
 
-      final id = "rdv_${rdv.id}";
-      newList.add(
-        AppNotification(
-          id: id,
-          title: 'RDV : ${rdv.titre}',
-          body:
-          'Prévu le ${fullDateTime.day.toString().padLeft(2, '0')}/${fullDateTime.month.toString().padLeft(2, '0')}/${fullDateTime.year} à ${rdv.heure}',
-          time: fullDateTime,
-          isRead: _readIds.contains(id),
-          icon: Icons.calendar_today_rounded,
-        ),
-      );
-    }
+      // Tri : non lues en premier, puis par date décroissante
+      _notifications.sort((a, b) {
+        if (a.isRead != b.isRead) return a.isRead ? 1 : -1;
+        return b.createdAt.compareTo(a.createdAt);
+      });
 
-    // 2. Traitement Synchro — utilise sync.time réel pour un tri correct
-    for (var sync in syncProv.lastSync) {
-      final id = "sync_${sync.time}_${sync.title}";
-
-      // Résolution du DateTime réel de la synchro
-      DateTime syncTime;
-      if (sync.time is DateTime) {
-        syncTime = sync.time as DateTime;
-      } else {
-        syncTime = DateTime.tryParse(sync.time.toString()) ?? DateTime.now();
-      }
-
-      newList.add(
-        AppNotification(
-          id: id,
-          title: sync.title,
-          body: sync.status == 'success'
-              ? 'Données sécurisées sur le serveur.'
-              : 'Échec de l\'envoi.',
-          time: syncTime,
-          isRead: _readIds.contains(id),
-          icon: sync.status == 'success'
-              ? Icons.cloud_done_rounded
-              : Icons.cloud_off_rounded,
-          color: sync.status == 'success' ? Colors.green : Colors.red,
-        ),
-      );
-    }
-
-    // Tri du plus récent au plus ancien
-    newList.sort((a, b) => b.time.compareTo(a.time));
-
-    _notifications = newList;
-    notifyListeners();
-  }
-
-  /// Marque une notification comme lue et persiste l'état
-  Future<void> markAsRead(String id) async {
-    _readIds.add(id);
-    await _saveReadIds();
-
-    final index = _notifications.indexWhere((n) => n.id == id);
-    if (index != -1) {
-      _notifications[index].isRead = true;
       notifyListeners();
+    } catch (e) {
+      debugPrint('⚠️ Erreur fetch notifications : $e');
     }
   }
 
-  /// Marque toutes les notifications comme lues
+  /// Marque une notification comme lue (en base + localement)
+  Future<void> markAsRead(int serverId) async {
+    try {
+      await apiClient.notification.markAsRead(serverId);
+
+      final index = _notifications.indexWhere((n) => n.serverId == serverId);
+      if (index != -1) {
+        _notifications[index].isRead = true;
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('⚠️ Erreur markAsRead : $e');
+    }
+  }
+
+  /// Marque toutes les notifications mobiles comme lues
   Future<void> markAllAsRead() async {
-    for (final n in _notifications) {
-      _readIds.add(n.id);
-      n.isRead = true;
+    try {
+      await apiClient.notification.markAllMobileAsRead();
+      for (final n in _notifications) {
+        n.isRead = true;
+      }
+      notifyListeners();
+    } catch (e) {
+      debugPrint('⚠️ Erreur markAllAsRead : $e');
     }
-    await _saveReadIds();
-    notifyListeners();
   }
 
-  /// Réinitialise toutes les notifications (utile pour les tests)
-  Future<void> clearReadIds() async {
-    _readIds.clear();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_prefKey);
-    notifyListeners();
-  }
+  /// Force un refresh immédiat (ex: après pull-to-refresh)
+  Future<void> refresh() => fetchNotifications();
 }
