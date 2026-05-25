@@ -14,23 +14,21 @@ import '../views/widgets/synchro/synchro_view.dart';
 
 class HomeData {
   static List<QuickAccessModel> getQuickAccess(
-    BuildContext context,
-    int syncCount,
-  ) {
+      BuildContext context,
+      int syncCount,
+      ) {
     return [
+      // 🟠 Nouveau Participant
       QuickAccessModel(
         icon: Icons.person_add_outlined,
-        iconColor: const Color(0xFFFF9500),
-        backgroundColor: const Color(0xFFFF9500).withOpacity(0.1),
+        iconColor: const Color(0xFFFF8000),
+        backgroundColor: const Color(0xFFFF8000).withValues(alpha: 0.12),
         label: 'Nouveau\nParticipant',
         onTap: () async {
-          debugPrint('Accès Rapide : Nouveau Participant cliqué');
-
           final nouveauParticipant = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const ParticipantForm()),
           );
-
           if (nouveauParticipant != null &&
               nouveauParticipant is ParticipantModel) {
             if (context.mounted) {
@@ -38,7 +36,6 @@ class HomeData {
                 context,
                 listen: false,
               ).addParticipant(nouveauParticipant);
-
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Participant ajouté avec succès !'),
@@ -51,13 +48,13 @@ class HomeData {
         },
       ),
 
+      // 🟢 Gadgets
       QuickAccessModel(
         icon: Icons.card_giftcard_outlined,
-        iconColor: Colors.blue,
-        backgroundColor: Colors.blue.withOpacity(0.1),
+        iconColor: const Color(0xFF21951D),
+        backgroundColor: const Color(0xFF21951D).withValues(alpha: 0.10),
         label: 'Gadgets',
         onTap: () {
-          debugPrint('Accès Rapide : Gadgets cliqué');
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const GadgetsView()),
@@ -65,12 +62,12 @@ class HomeData {
         },
       ),
 
+      // 🔵 Synchronisation
       QuickAccessModel(
         icon: Icons.sync_outlined,
-        iconColor: const Color(0xFF21951D),
-        backgroundColor: const Color(0xFF21951D).withOpacity(0.1),
+        iconColor: const Color(0xFF1565C0),
+        backgroundColor: const Color(0xFF1565C0).withValues(alpha: 0.10),
         label: 'Synchronisation',
-        // ✅ La variable syncCount est maintenant reconnue !
         badgeCount: syncCount,
         onTap: () {
           Navigator.push(
@@ -80,13 +77,13 @@ class HomeData {
         },
       ),
 
+      // 🟣 Prendre un RDV
       QuickAccessModel(
-        icon: Icons.event_outlined,
-        iconColor: const Color(0xFF21951D),
-        backgroundColor: const Color(0xFF21951D).withOpacity(0.1),
-        label: 'Prendre un Rendez-Vous',
+        icon: Icons.calendar_today_outlined,
+        iconColor: const Color(0xFF7B1FA2),
+        backgroundColor: const Color(0xFF7B1FA2).withValues(alpha: 0.10),
+        label: 'Prendre un\nRDV',
         onTap: () {
-          debugPrint('Accès Rapide : Rdv cliqué');
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const RdvView()),
@@ -94,13 +91,13 @@ class HomeData {
         },
       ),
 
+      // 🔴 Prise de Contact
       QuickAccessModel(
-        icon: Icons.contact_phone_outlined,
-        iconColor: Colors.purple,
-        backgroundColor: Colors.purple.withOpacity(0.1),
+        icon: Icons.contact_page_outlined,
+        iconColor: const Color(0xFFE91E63),
+        backgroundColor: const Color(0xFFE91E63).withValues(alpha: 0.10),
         label: 'Prise de\nContact',
         onTap: () {
-          debugPrint('Accès Rapide : Prise de contact cliqué');
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const PriseContactView()),
@@ -108,11 +105,12 @@ class HomeData {
         },
       ),
 
+      // 🟡 Séances
       QuickAccessModel(
-        icon: Icons.campaign,
-        iconColor: const Color(0xFFE91E63),
-        backgroundColor: const Color(0xFFE91E63).withOpacity(0.1),
-        label: 'Seances',
+        icon: Icons.tv_outlined,
+        iconColor: const Color(0xFFFF8000),
+        backgroundColor: const Color(0xFFFF8000).withValues(alpha: 0.10),
+        label: 'Séances',
         onTap: () {
           Navigator.push(
             context,

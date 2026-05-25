@@ -28,10 +28,14 @@ class _ContactHistoryViewState extends State<ContactHistoryView> {
     if (itemDate == today) return 'Aujourd\'hui';
     if (itemDate == yesterday) return 'Hier';
 
-    const months = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
-      'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
-    const days = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
-
+    const months = [
+      'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+      'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre',
+    ];
+    const days = [
+      'Lundi', 'Mardi', 'Mercredi', 'Jeudi',
+      'Vendredi', 'Samedi', 'Dimanche',
+    ];
     return '${days[date.weekday - 1]} ${date.day} ${months[date.month - 1]}';
   }
 
@@ -56,7 +60,7 @@ class _ContactHistoryViewState extends State<ContactHistoryView> {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.only(bottom: 40),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       itemCount: groupLabels.length,
       itemBuilder: (context, index) {
         final label = groupLabels[index];
@@ -65,27 +69,68 @@ class _ContactHistoryViewState extends State<ContactHistoryView> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // ── Label date ──
             Padding(
-              padding: const EdgeInsets.only(left: 32, top: 16, bottom: 8),
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey[600],
-                ),
+              padding: const EdgeInsets.only(top: 20, bottom: 10, left: 4),
+              child: Row(
+                children: [
+                  Container(
+                    width: 6, height: 6,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFFF8000),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    label,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFFFF8000),
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Container(
+                      height: 1,
+                      color: const Color(0xFFFF8000).withValues(alpha: 0.15),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFF8000).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      '${items.length}',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFFFF8000),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
+
+            // ── Carte groupe ──
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                    color: const Color(0xFFEEF0F3), width: 1),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: Colors.black.withValues(alpha: 0.04),
                     blurRadius: 10,
-                    offset: const Offset(0, 2),
+                    offset: const Offset(0, 3),
                   ),
                 ],
               ),
@@ -94,7 +139,8 @@ class _ContactHistoryViewState extends State<ContactHistoryView> {
                 children: items.asMap().entries.map((entry) {
                   final i = entry.key;
                   final contact = entry.value;
-                  final uniqueId = contact.id?.toString() ?? contact.hashCode.toString();
+                  final uniqueId =
+                      contact.id?.toString() ?? contact.hashCode.toString();
 
                   return ContactListItem(
                     contact: contact,
@@ -102,8 +148,9 @@ class _ContactHistoryViewState extends State<ContactHistoryView> {
                     isLast: i == items.length - 1,
                     onToggle: () {
                       setState(() {
-                        _expandedContactId =
-                        _expandedContactId == uniqueId ? null : uniqueId;
+                        _expandedContactId = _expandedContactId == uniqueId
+                            ? null
+                            : uniqueId;
                       });
                     },
                     onEdit: () => widget.onEdit(contact),

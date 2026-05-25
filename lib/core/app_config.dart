@@ -1,7 +1,7 @@
 class AppConfig {
   AppConfig._();
 
-  static const String _host = '192.168.1.4';
+  static const String _host = '192.168.1.3';
 
   static const int _portServerpod  = 8070;
   static const int _portSpringBoot = 8081;

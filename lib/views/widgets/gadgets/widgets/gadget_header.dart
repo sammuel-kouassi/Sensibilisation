@@ -7,46 +7,42 @@ class GadgetHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          color: Colors.white,
-
-
-          padding: const EdgeInsets.fromLTRB(16, 20, 24, 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFFF8000), Color(0xFFe06b00)],
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(8, 16, 16, 20),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new,
+                color: Colors.white, size: 20),
+            onPressed: () => Navigator.pop(context),
+          ),
+          const SizedBox(width: 4),
+          const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 22),
-                    onPressed: () => Navigator.pop(context),
-                    splashRadius: 24,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Gadgets',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                      fontSize: 25,
-                    ),
-                  ),
-                ],
+              Text(
+                'Gadgets',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
-
-
+              Text(
+                'Gestion et distribution',
+                style: TextStyle(color: Colors.white70, fontSize: 12),
+              ),
             ],
           ),
-        ),
-
-        Container(
-          height: 1,
-          color: Colors.grey.withValues(alpha: 0.2),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../../../models/bar_chart_model.dart';
 
 class BarChart extends StatelessWidget {
@@ -13,22 +12,26 @@ class BarChart extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Container(
-          width: 40,
+          width: 36,
           height: barchartModels.height,
           decoration: BoxDecoration(
-            color: const Color(0xFFFF9500),
+            gradient: const LinearGradient(
+              begin: Alignment.bottomCenter,
+              end: Alignment.topCenter,
+              colors: [Color(0xFFFF8000), Color(0xFFFFB347)],
+            ),
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(8),
               topRight: Radius.circular(8),
             ),
           ),
         ),
-        const SizedBox(height: 5),
+        const SizedBox(height: 8),
         Text(
           barchartModels.label,
           style: TextStyle(
-            color: Colors.grey[600],
-            fontSize: 12,
+            color: Colors.grey[500],
+            fontSize: 11,
             fontWeight: FontWeight.w500,
           ),
         ),

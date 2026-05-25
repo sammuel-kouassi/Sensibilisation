@@ -5,10 +5,8 @@ import 'package:provider/provider.dart';
 
 import '../../models/participant_model.dart';
 import '../../providers/participant_provider.dart';
-
 import '../widgets/animated_section.dart';
 import '../widgets/forms/participant_form.dart';
-import 'widgets/participant_header.dart';
 import 'widgets/participant_search_bar.dart';
 
 class ParticipantView extends StatefulWidget {
@@ -21,6 +19,9 @@ class ParticipantView extends StatefulWidget {
 class _ParticipantViewState extends State<ParticipantView> {
   final TextEditingController _searchController = TextEditingController();
 
+  static const _orange = Color(0xFFFF8000);
+  static const _dark = Color(0xFF1E293B);
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -28,25 +29,33 @@ class _ParticipantViewState extends State<ParticipantView> {
   }
 
   Future<void> _onAddParticipantPressed(
-    BuildContext context,
-    ParticipantProvider provider,
-  ) async {
+      BuildContext context,
+      ParticipantProvider provider,
+      ) async {
     final nouveauParticipant = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const ParticipantForm()),
     );
-
-    if (nouveauParticipant != null && nouveauParticipant is ParticipantModel) {
+    if (nouveauParticipant != null &&
+        nouveauParticipant is ParticipantModel) {
       provider.addParticipant(nouveauParticipant);
-
       _searchController.clear();
       provider.filterParticipants('');
-
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Participant ajouté avec succès !'),
-            backgroundColor: Colors.green,
+          SnackBar(
+            content: const Row(
+              children: [
+                Icon(Icons.check_circle_rounded, color: Colors.white),
+                SizedBox(width: 10),
+                Text('Participant ajouté avec succès !'),
+              ],
+            ),
+            backgroundColor: Colors.green[700],
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
       }
@@ -54,25 +63,34 @@ class _ParticipantViewState extends State<ParticipantView> {
   }
 
   Future<void> _onEditParticipant(
-    BuildContext context,
-    ParticipantProvider provider,
-    ParticipantModel participant,
-  ) async {
+      BuildContext context,
+      ParticipantProvider provider,
+      ParticipantModel participant,
+      ) async {
     final updatedParticipant = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => ParticipantForm(participant: participant),
       ),
     );
-
-    if (updatedParticipant != null && updatedParticipant is ParticipantModel) {
+    if (updatedParticipant != null &&
+        updatedParticipant is ParticipantModel) {
       provider.updateParticipant(updatedParticipant);
-
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Participant modifié avec succès !'),
-            backgroundColor: Colors.blue,
+          SnackBar(
+            content: const Row(
+              children: [
+                Icon(Icons.check_circle_rounded, color: Colors.white),
+                SizedBox(width: 10),
+                Text('Participant modifié avec succès !'),
+              ],
+            ),
+            backgroundColor: Colors.blue[700],
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         );
       }
@@ -84,104 +102,298 @@ class _ParticipantViewState extends State<ParticipantView> {
     return ChangeNotifierProvider(
       create: (_) => ParticipantProvider(),
       child: Scaffold(
-        backgroundColor: Colors.grey[50],
-        body: SafeArea(
-          child: Consumer<ParticipantProvider>(
-            builder: (context, provider, child) {
-              return Column(
-                children: [
-                  AnimatedSection(
-                    delayMs: 0,
-                    child: ParticipantHeader(
-                      onAddPressed: () =>
-                          _onAddParticipantPressed(context, provider),
-                    ),
+        backgroundColor: const Color(0xFFF5F6FA),
+        body: Consumer<ParticipantProvider>(
+          builder: (context, provider, child) {
+            return CustomScrollView(
+              slivers: [
+                // ── AppBar gradient orange ──
+                SliverAppBar(
+                  expandedHeight: 120,
+                  pinned: true,
+                  backgroundColor: _orange,
+                  leading: IconButton(
+                    icon: const Icon(Icons.arrow_back_ios_new,
+                        color: Colors.white),
+                    onPressed: () => Navigator.pop(context),
                   ),
-
-                  Expanded(
-                    child: RefreshIndicator(
-                      color: const Color(0xFFFF9500),
-                      backgroundColor: Colors.white,
-                      onRefresh: () => provider.syncFromServer(),
-                      child: SingleChildScrollView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        child: Column(
+                  actions: [
+                    GestureDetector(
+                      onTap: () =>
+                          _onAddParticipantPressed(context, provider),
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 16),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: const Row(
                           children: [
-                            AnimatedSection(
-                              delayMs: 150,
-                              child: ParticipantSearchBar(
-                                controller: _searchController,
-                                onChanged: provider.filterParticipants,
-                                seances: provider.seances,
-                                selectedSeanceId: provider.selectedSeanceId,
-                                onSeanceSelected: (id) {
-                                  _searchController.clear();
-                                  provider.filterBySeance(id);
-                                },
+                            Icon(Icons.person_add_rounded,
+                                color: Colors.white, size: 16),
+                            SizedBox(width: 6),
+                            Text(
+                              'Ajouter',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
                               ),
                             ),
-
-                            AnimatedSection(
-                              delayMs: 300,
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                  24,
-                                  10,
-                                  24,
-                                  10,
-                                ),
-                                child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    '${provider.filteredParticipants.length} participant(s) trouvé(s)',
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-
-                            if (provider.isLoading)
-                              const Padding(
-                                padding: EdgeInsets.only(top: 50.0),
-                                child: CircularProgressIndicator(
-                                  color: Color(0xFFFF9500),
-                                ),
-                              )
-                            else if (provider.filteredParticipants.isEmpty)
-                              const Padding(
-                                padding: EdgeInsets.only(top: 50.0),
-                                child: Text(
-                                  'Aucun participant trouvé.',
-                                  style: TextStyle(color: Colors.grey),
-                                ),
-                              )
-                            else
-                              AnimatedSection(
-                                delayMs: 450,
-                                child: ParticipantsHistoryView(
-                                  participants: provider.filteredParticipants,
-                                  onEdit: (participant) => _onEditParticipant(
-                                    context,
-                                    provider,
-                                    participant,
-                                  ),
-                                ),
-                              ),
-
-                            const SizedBox(height: 45),
                           ],
                         ),
                       ),
                     ),
+                  ],
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: Container(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [_orange, Color(0xFFe06b00)],
+                        ),
+                      ),
+                      child: Stack(
+                        children: [
+                          Positioned(
+                            right: -20, top: -20,
+                            child: Container(
+                              width: 140, height: 140,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white.withValues(alpha: 0.07),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            left: -30, bottom: -10,
+                            child: Container(
+                              width: 100, height: 100,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white.withValues(alpha: 0.05),
+                              ),
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.bottomLeft,
+                            child: Padding(
+                              padding:
+                              const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Participants',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: -0.3,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    provider.filteredParticipants.isEmpty
+                                        ? 'Aucun participant enregistré'
+                                        : '${provider.filteredParticipants.length} participant(s)',
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ],
-              );
-            },
-          ),
+                ),
+
+                // ── Recherche + filtre ──
+                SliverToBoxAdapter(
+                  child: AnimatedSection(
+                    delayMs: 100,
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding:
+                          const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                          child: ParticipantSearchBar(
+                            controller: _searchController,
+                            onChanged: provider.filterParticipants,
+                            seances: provider.seances,
+                            selectedSeanceId: provider.selectedSeanceId,
+                            onSeanceSelected: (id) {
+                              _searchController.clear();
+                              provider.filterBySeance(id);
+                            },
+                          ),
+                        ),
+                        if (provider.seances.isNotEmpty)
+                          ParticipantSeanceFilter(
+                            seances: provider.seances,
+                            selectedSeanceId: provider.selectedSeanceId,
+                            onSelected: (id) {
+                              _searchController.clear();
+                              provider.filterBySeance(id);
+                            },
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // ── Compteur ──
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: _orange.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            '${provider.filteredParticipants.length} résultat(s)',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: _orange.withValues(alpha: 0.8),
+                            ),
+                          ),
+                        ),
+                        if (provider.selectedSeanceId != null) ...[
+                          const SizedBox(width: 8),
+                          Text(
+                            '· filtrés par séance',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[500],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+
+                // ── États ──
+                if (provider.isLoading)
+                  const SliverFillRemaining(
+                    child: Center(
+                      child: CircularProgressIndicator(color: _orange),
+                    ),
+                  )
+                else if (provider.filteredParticipants.isEmpty)
+                  SliverFillRemaining(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 80, height: 80,
+                            decoration: BoxDecoration(
+                              color: _orange.withValues(alpha: 0.08),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(Icons.people_outline_rounded,
+                                size: 40,
+                                color: _orange.withValues(alpha: 0.4)),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Aucun participant trouvé',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: _dark,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Essayez un autre terme\nou ajoutez un participant',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey[500],
+                              height: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          GestureDetector(
+                            onTap: () => _onAddParticipantPressed(
+                                context, provider),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 24, vertical: 14),
+                              decoration: BoxDecoration(
+                                color: _orange,
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: _orange.withValues(alpha: 0.3),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.person_add_rounded,
+                                      color: Colors.white, size: 18),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Ajouter un participant',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.only(top: 4, bottom: 40),
+                    sliver: SliverToBoxAdapter(
+                      child: RefreshIndicator(
+                        color: _orange,
+                        backgroundColor: Colors.white,
+                        onRefresh: () => provider.syncFromServer(),
+                        child: AnimatedSection(
+                          delayMs: 200,
+                          child: ParticipantsHistoryView(
+                            participants: provider.filteredParticipants,
+                            onEdit: (p) => _onEditParticipant(
+                                context, provider, p),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
         ),
       ),
     );

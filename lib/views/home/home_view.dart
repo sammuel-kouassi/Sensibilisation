@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/home_provider.dart';
-
 import '../widgets/animated_section.dart';
 import 'widgets/home_header.dart';
 import 'widgets/quick_access_section.dart';
 import 'widgets/participants_chart_section.dart';
 import 'widgets/sync_status_card.dart';
+
+const double kOverlap = 30.0;
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -34,13 +35,15 @@ class _HomeViewState extends State<HomeView> {
             return SingleChildScrollView(
               child: Column(
                 children: [
+                  // ── Header ──
                   AnimatedSection(
                     delayMs: 0,
                     child: HomeHeader(statCardList: provider.statCards),
                   ),
 
+
                   Transform.translate(
-                    offset: const Offset(0, -40),
+                    offset: const Offset(0, -kOverlap),
                     child: Column(
                       children: [
                         AnimatedSection(
@@ -49,19 +52,17 @@ class _HomeViewState extends State<HomeView> {
                             quickAccessList: provider.quickAccess,
                           ),
                         ),
-
+                        const SizedBox(height: 12),
                         AnimatedSection(
                           delayMs: 300,
                           child: ParticipantsChartSection(
                             barChartList: provider.barCharts,
                           ),
                         ),
-
                         const AnimatedSection(
                           delayMs: 450,
                           child: SyncStatusCard(),
                         ),
-
                         const SizedBox(height: 20),
                       ],
                     ),

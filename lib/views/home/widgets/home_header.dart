@@ -33,7 +33,6 @@ class HomeHeader extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Column(
                     children: [
-                      // Barre de drag
                       Center(
                         child: Container(
                           margin: const EdgeInsets.only(top: 12, bottom: 20),
@@ -59,7 +58,6 @@ class HomeHeader extends StatelessWidget {
                           Row(
                             children: [
                               if (notifProv.unreadCount > 0) ...[
-                                // Bouton "Tout marquer lu"
                                 GestureDetector(
                                   onTap: () => notifProv.markAllAsRead(),
                                   child: Container(
@@ -68,7 +66,8 @@ class HomeHeader extends StatelessWidget {
                                       vertical: 4,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF19A015).withOpacity(0.1),
+                                      color: const Color(0xFF19A015)
+                                          .withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: const Text(
@@ -88,7 +87,8 @@ class HomeHeader extends StatelessWidget {
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFFF8000).withOpacity(0.1),
+                                    color: const Color(0xFFFF8000)
+                                        .withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                   child: Text(
@@ -101,7 +101,6 @@ class HomeHeader extends StatelessWidget {
                                   ),
                                 ),
                               ],
-                              // Bouton refresh
                               const SizedBox(width: 8),
                               GestureDetector(
                                 onTap: () => notifProv.refresh(),
@@ -116,7 +115,6 @@ class HomeHeader extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 20),
-                      // Liste dynamique
                       Expanded(
                         child: notifProv.isLoading && list.isEmpty
                             ? const Center(
@@ -149,24 +147,27 @@ class HomeHeader extends StatelessWidget {
 
   Widget _buildNotificationItem(BuildContext context, AppNotification notif) {
     return GestureDetector(
-      onTap: () => context.read<NotificationProvider>().markAsRead(notif.serverId),
+      onTap: () =>
+          context.read<NotificationProvider>().markAsRead(notif.serverId),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: notif.isRead ? Colors.white : notif.color.withOpacity(0.06),
+          color: notif.isRead
+              ? Colors.white
+              : notif.color.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: notif.isRead
-                ? Colors.grey.withOpacity(0.1)
-                : notif.color.withOpacity(0.2),
+                ? Colors.grey.withValues(alpha: 0.1)
+                : notif.color.withValues(alpha: 0.2),
           ),
           boxShadow: notif.isRead
               ? []
               : [
             BoxShadow(
-              color: notif.color.withOpacity(0.05),
+              color: notif.color.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -178,7 +179,7 @@ class HomeHeader extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: notif.color.withOpacity(0.15),
+                color: notif.color.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: Icon(notif.icon, color: notif.color, size: 20),
@@ -205,7 +206,10 @@ class HomeHeader extends StatelessWidget {
                       ),
                       Text(
                         DateFormat('HH:mm').format(notif.createdAt),
-                        style: TextStyle(color: Colors.grey[500], fontSize: 11),
+                        style: TextStyle(
+                          color: Colors.grey[500],
+                          fontSize: 11,
+                        ),
                       ),
                     ],
                   ),
@@ -220,7 +224,6 @@ class HomeHeader extends StatelessWidget {
                       ),
                     ),
                   const SizedBox(height: 4),
-                  // Badge source (web ou mobile)
                   Row(
                     children: [
                       Container(
@@ -229,7 +232,7 @@ class HomeHeader extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: notif.color.withOpacity(0.1),
+                          color: notif.color.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
@@ -295,9 +298,6 @@ class HomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ── Plus besoin de rdvProv/syncProv ni de generateNotifications ──
-    // Le NotificationProvider gère tout via polling depuis le serveur.
-
     return Consumer<NotificationProvider>(
       builder: (context, notifProv, _) {
         return Container(
@@ -306,100 +306,145 @@ class HomeHeader extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Color(0xFFFF8000), Color(0xFF21951D)],
+              colors: [
+                Color(0xFFFF8000),
+                Color(0xFFe06b00),
+                Color(0xFF21951D),
+              ],
+              stops: [0.0, 0.45, 1.0],
             ),
           ),
-          padding: const EdgeInsets.fromLTRB(24, 60, 24, 70),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          padding: const EdgeInsets.fromLTRB(24, 60, 24, 50),
+
+          child: Stack(
+            clipBehavior: Clip.none,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Positioned(
+                top: -30,
+                right: -30,
+                child: Container(
+                  width: 180,
+                  height: 180,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.06),
+                  ),
+                ),
+              ),
+              // Cercle décoratif bas gauche
+              Positioned(
+                bottom: 10,
+                left: -40,
+                child: Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.04),
+                  ),
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Bienvenue',
-                        style: TextStyle(color: Colors.white70, fontSize: 16),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Bienvenue 👋',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            context.watch<AuthProvider>().name,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 26,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                        ],
                       ),
-                      Text(
-                        context.watch<AuthProvider>().name,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 26,
-                          fontWeight: FontWeight.w900,
+                      GestureDetector(
+                        onTap: () => _showNotificationsPanel(context),
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.18),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.25),
+                                  width: 1,
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.notifications_active_outlined,
+                                color: Colors.white,
+                                size: 26,
+                              ),
+                            ),
+                            if (notifProv.unreadCount > 0)
+                              Positioned(
+                                right: -5,
+                                top: -5,
+                                child: Container(
+                                  padding: const EdgeInsets.all(5),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: const Color(0xFFFF8000),
+                                      width: 2,
+                                    ),
+                                  ),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 22,
+                                    minHeight: 22,
+                                  ),
+                                  child: Text(
+                                    '${notifProv.unreadCount}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                  // Cloche avec badge
-                  GestureDetector(
-                    onTap: () => _showNotificationsPanel(context),
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: const Icon(
-                            Icons.notifications_active_outlined,
-                            color: Colors.white,
-                            size: 28,
-                          ),
-                        ),
-                        if (notifProv.unreadCount > 0)
-                          Positioned(
-                            right: -5,
-                            top: -5,
-                            child: Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: Colors.red,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: const Color(0xFFFF8000),
-                                  width: 2,
-                                ),
-                              ),
-                              constraints: const BoxConstraints(
-                                minWidth: 24,
-                                minHeight: 24,
-                              ),
-                              child: Text(
-                                '${notifProv.unreadCount}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
+                  const SizedBox(height: 32),
+                  // KPI Cards glassmorphism
+                  IntrinsicHeight(
+                    child: Row(
+                      children: statCardList.asMap().entries.map((e) {
+                        return Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              right: e.key == statCardList.length - 1 ? 0 : 14,
                             ),
+                            child: StatHomeCard(kpiModel: e.value),
                           ),
-                      ],
+                        );
+                      }).toList(),
                     ),
                   ),
                 ],
-              ),
-              const SizedBox(height: 35),
-              // Cartes KPI
-              IntrinsicHeight(
-                child: Row(
-                  children: statCardList.asMap().entries.map((e) {
-                    return Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                          right: e.key == statCardList.length - 1 ? 0 : 16,
-                        ),
-                        child: StatHomeCard(kpiModel: e.value),
-                      ),
-                    );
-                  }).toList(),
-                ),
               ),
             ],
           ),
