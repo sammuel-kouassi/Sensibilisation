@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../models/seance_statut.dart';
 import '../../../providers/gadget_provider.dart';
 import '../../../models/gadget_model.dart';
 import '../animated_section.dart';
@@ -31,6 +32,39 @@ class _GadgetsViewState extends State<GadgetsView> {
       GadgetModel gadget,
       GadgetProvider provider,
       ) {
+    // ✅ Séance terminée — bloqué
+    if (gadget.statut == SeanceStatut.terminee) {
+      return;
+    }
+
+    // ✅ Séance planifiée — bloqué avec message
+    if (gadget.statut == SeanceStatut.planifiee) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.lock_clock_rounded,
+                  color: Colors.white, size: 16),
+              const SizedBox(width: 10),
+              const Flexible(
+                child: Text(
+                  'Distribution disponible dès le début de la séance.',
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.blue[600],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+      return;
+    }
+    // ✅ Stock épuisé
     if (gadget.isOutOfStock) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -51,24 +85,24 @@ class _GadgetsViewState extends State<GadgetsView> {
       return;
     }
 
+    // ✅ En cours — dialog de distribution
     final TextEditingController quantityController = TextEditingController();
 
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape:
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── En-tête dialog ──
               Row(
                 children: [
                   Container(
-                    width: 42,
-                    height: 42,
+                    width: 42, height: 42,
                     decoration: BoxDecoration(
                       color: _orange.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
@@ -92,9 +126,7 @@ class _GadgetsViewState extends State<GadgetsView> {
                         Text(
                           gadget.seanceNom,
                           style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey[500],
-                          ),
+                              fontSize: 13, color: Colors.grey[500]),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],
@@ -105,7 +137,6 @@ class _GadgetsViewState extends State<GadgetsView> {
 
               const SizedBox(height: 20),
 
-              // ── Stock restant ──
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
@@ -115,13 +146,9 @@ class _GadgetsViewState extends State<GadgetsView> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Stock restant',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
-                    ),
+                    Text('Stock restant',
+                        style: TextStyle(
+                            fontSize: 14, color: Colors.grey[600])),
                     Text(
                       '${gadget.restants} gadgets',
                       style: const TextStyle(
@@ -136,17 +163,15 @@ class _GadgetsViewState extends State<GadgetsView> {
 
               const SizedBox(height: 16),
 
-              // ── Champ quantité ──
               TextField(
                 controller: quantityController,
                 keyboardType: TextInputType.number,
                 style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                    fontSize: 16, fontWeight: FontWeight.w600),
                 decoration: InputDecoration(
                   labelText: 'Quantité à distribuer',
-                  labelStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
+                  labelStyle:
+                  TextStyle(color: Colors.grey[500], fontSize: 14),
                   prefixIcon: const Icon(Icons.remove_red_eye_outlined,
                       color: _orange, size: 20),
                   filled: true,
@@ -158,7 +183,8 @@ class _GadgetsViewState extends State<GadgetsView> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(color: _orange, width: 1.5),
+                    borderSide:
+                    const BorderSide(color: _orange, width: 1.5),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16, vertical: 14),
@@ -167,7 +193,6 @@ class _GadgetsViewState extends State<GadgetsView> {
 
               const SizedBox(height: 20),
 
-              // ── Boutons ──
               Row(
                 children: [
                   Expanded(
@@ -267,7 +292,6 @@ class _GadgetsViewState extends State<GadgetsView> {
       ),
     );
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

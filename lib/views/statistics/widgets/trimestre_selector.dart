@@ -11,16 +11,18 @@ class TrimestreSelector extends StatelessWidget {
   });
 
   static const _trimestres = [
-    ('T1', 'Jan – Mar'),
-    ('T2', 'Avr – Juin'),
-    ('T3', 'Juil – Sep'),
-    ('T4', 'Oct – Déc'),
+    ('T1', 'Jan–Mar'),
+    ('T2', 'Avr–Juin'),
+    ('T3', 'Juil–Sep'),
+    ('T4', 'Oct–Déc'),
   ];
+
+  static const _orange = Color(0xFFFF8000);
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
       child: Row(
         children: _trimestres.map((t) {
           final code = t.$1;
@@ -29,29 +31,36 @@ class TrimestreSelector extends StatelessWidget {
 
           return Expanded(
             child: GestureDetector(
-              onTap: () => onSelected(isSelected ? '30 derniers jours' : code),
+              onTap: () => onSelected(
+                  isSelected ? '30 derniers jours' : code),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                margin: const EdgeInsets.only(right: 6),
+                margin: const EdgeInsets.only(right: 8),
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? const Color(0xFFFF9500)
-                      : Colors.white,
-                  borderRadius: BorderRadius.circular(12),
+                  color: isSelected ? _orange : Colors.white,
+                  borderRadius: BorderRadius.circular(14),
                   border: Border.all(
                     color: isSelected
-                        ? const Color(0xFFFF9500)
-                        : Colors.grey.withOpacity(0.2),
+                        ? _orange
+                        : const Color(0xFFEEF0F3),
                     width: 1.5,
                   ),
                   boxShadow: isSelected
-                      ? [BoxShadow(
-                    color: const Color(0xFFFF9500).withOpacity(0.25),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  )]
-                      : [],
+                      ? [
+                    BoxShadow(
+                      color: _orange.withValues(alpha: 0.25),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ]
+                      : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -59,9 +68,11 @@ class TrimestreSelector extends StatelessWidget {
                     Text(
                       code,
                       style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: isSelected ? Colors.white : Colors.black87,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: isSelected
+                            ? Colors.white
+                            : const Color(0xFF1E293B),
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -70,9 +81,9 @@ class TrimestreSelector extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 9,
                         color: isSelected
-                            ? Colors.white.withOpacity(0.85)
-                            : Colors.grey[500],
-                        fontWeight: FontWeight.w400,
+                            ? Colors.white.withValues(alpha: 0.8)
+                            : Colors.grey[400],
+                        fontWeight: FontWeight.w500,
                       ),
                       textAlign: TextAlign.center,
                     ),

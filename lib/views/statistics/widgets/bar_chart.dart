@@ -1,37 +1,150 @@
 import 'package:flutter/material.dart';
-
 import '../../../models/bar_chart_model.dart';
 
-
-class BarChart extends StatelessWidget {
+class StatBarChart extends StatefulWidget {
   final BarchartModel barchartModels;
+  final bool isActive;
 
-  const BarChart({super.key, required this.barchartModels});
+  const StatBarChart({
+    super.key,
+    required this.barchartModels,
+    this.isActive = false,
+  });
+
+  @override
+  State<StatBarChart> createState() => _StatBarChartState();
+}
+
+class _StatBarChartState extends State<StatBarChart>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _heightAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _heightAnim = Tween<double>(
+      begin: 0,
+      end: widget.barchartModels.height,
+    ).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+    );
+
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) _controller.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final color1 = widget.isActive
+        ? const Color(0xFF21951D)
+        : const Color(0xFFFF8000);
+    final color2 = widget.isActive
+        ? const Color(0xFF4ade80)
+        : const Color(0xFFFFB347);
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisSize: MainAxisSize.max,
       children: [
-        Container(
-          width: 45,
-          height: barchartModels.height,
-          decoration: const BoxDecoration(
-            color: Color(0xFFFF8000),
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(10),
-              topRight: Radius.circular(10),
+        // Valeur au-dessus
+        SizedBox(
+          height: 18,
+          child: widget.barchartModels.count > 0
+              ? Text(
+            widget.barchartModels.count.toString(),
+            style: TextStyle(
+              color: color1,
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
             ),
+            textAlign: TextAlign.center,
+          )
+              : const SizedBox.shrink(),
+        ),
+
+        const SizedBox(height: 4),
+
+        // Barre animée
+        Flexible(
+          child: AnimatedBuilder(
+            animation: _heightAnim,
+            builder: (context, _) {
+              final barH =
+              _heightAnim.value.clamp(4.0, double.infinity);
+              return Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  width: 36,
+                  height: barH,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                      colors: [color1, color2],
+                    ),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(8),
+                      topRight: Radius.circular(8),
+                    ),
+                    boxShadow: widget.isActive
+                        ? [
+                      BoxShadow(
+                        color: const Color(0xFF21951D)
+                            .withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                        : [],
+                  ),
+                ),
+              );
+            },
           ),
         ),
-        const SizedBox(height: 12),
+
+        const SizedBox(height: 6),
+
+        // Label
         Text(
-          barchartModels.label,
+          widget.barchartModels.label,
           style: TextStyle(
-            color: Colors.grey[600],
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
+            color: widget.isActive
+                ? const Color(0xFF21951D)
+                : Colors.grey[500],
+            fontSize: 10,
+            fontWeight: widget.isActive
+                ? FontWeight.w800
+                : FontWeight.w500,
           ),
+          textAlign: TextAlign.center,
+        ),
+
+        // Point indicateur mois actuel
+        const SizedBox(height: 4),
+        SizedBox(
+          height: 6,
+          child: widget.isActive
+              ? Container(
+            width: 6, height: 6,
+            decoration: const BoxDecoration(
+              color: Color(0xFF21951D),
+              shape: BoxShape.circle,
+            ),
+          )
+              : const SizedBox.shrink(),
         ),
       ],
     );

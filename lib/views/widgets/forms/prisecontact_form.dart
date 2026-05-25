@@ -79,6 +79,7 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
         }
       }
     } else {
+      // ✅ Nouveau contact : on prend DateTime.now() avec heure courante
       _contactDate = DateTime.now();
       _dateController.text = DateFormat('dd/MM/yyyy').format(_contactDate!);
       _pointsAbordables['Économie d\'énergie'] = true;
@@ -109,9 +110,18 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
       lastDate: DateTime(2100),
     );
     if (picked != null) {
+      // ✅ On conserve l'heure courante lors du changement de date
+      final now = DateTime.now();
       setState(() {
-        _contactDate = picked;
-        _dateController.text = DateFormat('dd/MM/yyyy').format(picked);
+        _contactDate = DateTime(
+          picked.year,
+          picked.month,
+          picked.day,
+          now.hour,
+          now.minute,
+          now.second,
+        );
+        _dateController.text = DateFormat('dd/MM/yyyy').format(_contactDate!);
       });
     }
   }
@@ -144,14 +154,18 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
         objetMission: _objectController.text.trim(),
         directionRegionale: _selectedDirection!,
         agence: _agencyController.text.isNotEmpty
-            ? _agencyController.text.trim() : null,
+            ? _agencyController.text.trim()
+            : null,
         quartier: _quarterController.text.isNotEmpty
-            ? _quarterController.text.trim() : null,
+            ? _quarterController.text.trim()
+            : null,
         site: _siteController.text.isNotEmpty
-            ? _siteController.text.trim() : null,
+            ? _siteController.text.trim()
+            : null,
         pointsAbordes: checkedPoints,
         observations: _observationsController.text.isNotEmpty
-            ? _observationsController.text.trim() : null,
+            ? _observationsController.text.trim()
+            : null,
         signatureBase64: base64Signature,
       );
 
@@ -282,7 +296,9 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              isEditing ? 'Modifier un contact' : 'Nouveau contact',
+                              isEditing
+                                  ? 'Modifier un contact'
+                                  : 'Nouveau contact',
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 22,
@@ -324,7 +340,10 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _sectionTitle('Informations générales', Icons.person_outline_rounded),
+                          _sectionTitle(
+                            'Informations générales',
+                            Icons.person_outline_rounded,
+                          ),
                           CustomTextField(
                             label: 'Nom complet',
                             hint: 'Nom et prénoms',
@@ -366,7 +385,10 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _sectionTitle('Localisation', Icons.location_on_outlined),
+                          _sectionTitle(
+                            'Localisation',
+                            Icons.location_on_outlined,
+                          ),
                           CustomDropdown(
                             label: 'Direction régionale',
                             hint: 'Sélectionner...',
@@ -411,7 +433,10 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _sectionTitle('Points abordés', Icons.checklist_rounded),
+                          _sectionTitle(
+                            'Points abordés',
+                            Icons.checklist_rounded,
+                          ),
                           ..._pointsAbordables.entries.map((entry) {
                             final isChecked = entry.value;
                             return GestureDetector(
@@ -437,12 +462,15 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
                                 child: Row(
                                   children: [
                                     AnimatedContainer(
-                                      duration: const Duration(milliseconds: 200),
+                                      duration:
+                                      const Duration(milliseconds: 200),
                                       width: 24, height: 24,
                                       decoration: BoxDecoration(
                                         color: isChecked
-                                            ? _vert : Colors.transparent,
-                                        borderRadius: BorderRadius.circular(7),
+                                            ? _vert
+                                            : Colors.transparent,
+                                        borderRadius:
+                                        BorderRadius.circular(7),
                                         border: Border.all(
                                           color: isChecked
                                               ? _vert
@@ -492,7 +520,8 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _sectionTitle('Signature', Icons.draw_outlined),
-                          if (isEditing && widget.contact!.signatureBase64 != null)
+                          if (isEditing &&
+                              widget.contact!.signatureBase64 != null)
                             Container(
                               margin: const EdgeInsets.only(bottom: 12),
                               padding: const EdgeInsets.all(12),
@@ -500,7 +529,8 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
                                 color: Colors.orange.withValues(alpha: 0.08),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: Colors.orange.withValues(alpha: 0.2),
+                                  color:
+                                  Colors.orange.withValues(alpha: 0.2),
                                 ),
                               ),
                               child: Row(
@@ -552,7 +582,8 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
                                   color: Colors.red.withValues(alpha: 0.08),
                                   borderRadius: BorderRadius.circular(20),
                                   border: Border.all(
-                                    color: Colors.red.withValues(alpha: 0.2),
+                                    color:
+                                    Colors.red.withValues(alpha: 0.2),
                                   ),
                                 ),
                                 child: const Row(
@@ -583,7 +614,10 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _sectionTitle('Observations', Icons.notes_rounded),
+                          _sectionTitle(
+                            'Observations',
+                            Icons.notes_rounded,
+                          ),
                           CustomTextField(
                             label: '',
                             hint: 'Notes et observations libres...',
@@ -635,6 +669,7 @@ class _PrisedeContactFormState extends State<PrisedeContactForm> {
                         ),
                       ),
                     ),
+
                     const SizedBox(height: 40),
                   ],
                 ),

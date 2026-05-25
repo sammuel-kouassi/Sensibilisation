@@ -18,35 +18,31 @@ class SettingItemLogout extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(
+            horizontal: 16, vertical: 14),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              children: [
-                Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Center(
-                    child: Icon(icon, color: Colors.red[500], size: 24),
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.red[500],
-                    fontSize: 15,
-                  ),
-                ),
-              ],
+            Container(
+              width: 42, height: 42,
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: Colors.red[500], size: 20),
             ),
-            Icon(Icons.chevron_right, color: Colors.grey[400], size: 24),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: Colors.red[500],
+                  fontSize: 14,
+                ),
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded,
+                color: Colors.grey[400], size: 20),
           ],
         ),
       ),

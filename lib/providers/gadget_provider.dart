@@ -23,7 +23,6 @@ class GadgetProvider extends ChangeNotifier {
 
   GadgetProvider() {
     loadGadgets(forceSync: true);
-
     _dbSubscription = localDb.changeStream.listen((_) {
       loadGadgets(forceSync: false);
     });
@@ -35,6 +34,18 @@ class GadgetProvider extends ChangeNotifier {
     super.dispose();
   }
 
+  // ✅ Ordre de tri : En cours → Planifiées → Terminées
+  int _statutOrder(SeanceStatut statut) {
+    switch (statut) {
+      case SeanceStatut.enCours:
+        return 0;
+      case SeanceStatut.planifiee:
+        return 1;
+      case SeanceStatut.terminee:
+        return 2;
+    }
+  }
+
   Future<void> loadGadgets({bool forceSync = false}) async {
     _isLoading = true;
     _errorMessage = null;
@@ -42,14 +53,11 @@ class GadgetProvider extends ChangeNotifier {
 
     try {
       if (forceSync) {
-        // 1. On vérifie d'abord si la BD locale est vide
         final localBeforeSync = await localDb.getAllSeances();
         final isFirstInstall = localBeforeSync.isEmpty;
 
         try {
           final serverSeances = await apiClient.seance.getAllSeances();
-
-          // 2. On remplace tout le contenu local par les données serveur
           await localDb.clearSeances();
 
           for (var s in serverSeances) {
@@ -66,24 +74,26 @@ class GadgetProvider extends ChangeNotifier {
                 heureFin: drift.Value(s.heureFin),
                 estTerminee: drift.Value(s.estTerminee),
                 gadgetsPrevus: drift.Value(s.gadgetsPrevus ?? 0),
-                gadgetsDistribues: drift.Value(s.gadgetsDistribues ?? 0),
-                totalLogistique: drift.Value(s.totalLogistique ?? 0.0),
+                gadgetsDistribues:
+                drift.Value(s.gadgetsDistribues ?? 0),
+                totalLogistique:
+                drift.Value(s.totalLogistique ?? 0.0),
                 isSynced: const drift.Value(true),
               ),
             );
           }
 
           debugPrint(
-            '✅ Gadgets synchronisés depuis le serveur (${serverSeances.length} séances).',
+            '✅ Gadgets synchronisés (${serverSeances.length} séances).',
           );
         } catch (e) {
           debugPrint(
-            '⚠️ Hors-ligne : Impossible de télécharger les séances pour Gadgets.',
+            '⚠️ Hors-ligne : Impossible de télécharger les séances.',
           );
 
           if (isFirstInstall) {
             _errorMessage =
-                'Aucune donnée locale. Veuillez vous connecter à Internet pour charger les gadgets.';
+            'Aucune donnée locale. Connectez-vous à Internet pour charger les gadgets.';
             _allGadgets = [];
             _filteredGadgets = [];
             _isLoading = false;
@@ -93,7 +103,6 @@ class GadgetProvider extends ChangeNotifier {
         }
       }
 
-      // 4. Lecture depuis la BD locale (après synchro si possible)
       final localData = await localDb.getAllSeances();
 
       _allGadgets = localData.map((row) {
@@ -112,7 +121,12 @@ class GadgetProvider extends ChangeNotifier {
         );
       }).toList();
 
-      debugPrint('📦 ${_allGadgets.length} gadgets chargés depuis le local.');
+      // ✅ Tri : En cours → Planifiées → Terminées
+      _allGadgets.sort(
+            (a, b) => _statutOrder(a.statut).compareTo(_statutOrder(b.statut)),
+      );
+
+      debugPrint('📦 ${_allGadgets.length} gadgets chargés.');
     } catch (e) {
       debugPrint('❌ ERREUR lecture SQLite Gadgets : $e');
       _errorMessage = 'Erreur lors du chargement des gadgets.';
@@ -123,7 +137,6 @@ class GadgetProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // --- RECHERCHE ET FILTRES ---
   void filterGadgets(String query) {
     if (query.isEmpty) {
       _filteredGadgets = List.from(_allGadgets);
@@ -134,10 +147,13 @@ class GadgetProvider extends ChangeNotifier {
             g.zone.toLowerCase().contains(searchLower);
       }).toList();
     }
+    // ✅ Maintien du tri après filtrage
+    _filteredGadgets.sort(
+          (a, b) => _statutOrder(a.statut).compareTo(_statutOrder(b.statut)),
+    );
     notifyListeners();
   }
 
-  // --- DISTRIBUTION ---
   Future<void> distributeGadget(GadgetModel gadget, int quantity) async {
     if (quantity <= 0 || quantity > gadget.restants) return;
 
@@ -145,7 +161,8 @@ class GadgetProvider extends ChangeNotifier {
       final newDistributed = gadget.gadgetsDistribues + quantity;
 
       final allLocal = await localDb.getAllSeances();
-      final existingSeance = allLocal.firstWhere((s) => s.id == gadget.id);
+      final existingSeance =
+      allLocal.firstWhere((s) => s.id == gadget.id);
 
       final updatedData = existingSeance.copyWith(
         gadgetsDistribues: newDistributed,
@@ -175,16 +192,17 @@ class GadgetProvider extends ChangeNotifier {
           );
 
           await apiClient.seance.updateSeance(serverSeance);
-          await localDb.updateSeance(updatedData.copyWith(isSynced: true));
+          await localDb.updateSeance(
+              updatedData.copyWith(isSynced: true));
           localDb.notifyDataChanged();
         } catch (e) {
           debugPrint(
-            '⚠️ Serveur inaccessible. Distribution gardée en file d\'attente.',
+            '⚠️ Serveur inaccessible. Distribution en file d\'attente.',
           );
         }
       }
     } catch (e) {
-      debugPrint('⚠️ Erreur lors de la distribution locale : $e');
+      debugPrint('⚠️ Erreur distribution locale : $e');
     }
   }
 }

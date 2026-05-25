@@ -23,7 +23,6 @@ class ParticipantProvider extends ChangeNotifier {
 
   ParticipantProvider() {
     loadParticipants();
-
     _dbSubscription = localDb.changeStream.listen((_) {
       loadParticipants();
     });
@@ -40,17 +39,15 @@ class ParticipantProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 1. Récupérer tous les participants depuis le serveur
-      final serverParticipants = await apiClient.participant
-          .getAllParticipants();
+      final serverParticipants =
+      await apiClient.participant.getAllParticipants();
 
-      // 2. Pour chaque participant serveur, insérer/mettre à jour en local
       for (final sp in serverParticipants) {
         final localList = await localDb.getAllParticipants();
-        final existing = localList.where((p) => p.serverId == sp.id).toList();
+        final existing =
+        localList.where((p) => p.serverId == sp.id).toList();
 
         if (existing.isEmpty) {
-          // Nouveau participant venant d'un autre téléphone → on l'insère
           await localDb.addParticipant(
             ParticipantsTableCompanion.insert(
               serverId: drift.Value(sp.id),
@@ -82,7 +79,6 @@ class ParticipantProvider extends ChangeNotifier {
     await loadParticipants();
   }
 
-  // --- 1. CHARGEMENT ---
   Future<void> loadParticipants() async {
     _isLoading = true;
     notifyListeners();
@@ -117,34 +113,47 @@ class ParticipantProvider extends ChangeNotifier {
       debugPrint('❌ ERREUR lecture SQLite : $e');
     }
 
+    // ✅ Applique les filtres existants après rechargement
     _applyFilters(query: '');
     _isLoading = false;
     notifyListeners();
   }
 
-  // --- 2. FILTRAGE ---
+  // ✅ Ne touche PAS à _selectedSeanceId
   void filterParticipants(String query) {
     _applyFilters(query: query);
   }
 
   void filterBySeance(int? seanceId) {
-    _selectedSeanceId = seanceId;
-    _applyFilters(query: ''); // reset texte
+    if (seanceId == null) {
+      _selectedSeanceId = null;
+    } else {
+      try {
+        final seance = _seances.firstWhere((s) => s.id == seanceId);
+        // ✅ Utilise serverId si disponible, sinon id local
+        _selectedSeanceId = seance.serverId ?? seanceId;
+      } catch (_) {
+        _selectedSeanceId = seanceId;
+      }
+    }
+    _applyFilters(query: '');
   }
 
   void _applyFilters({required String query}) {
     List<ParticipantModel> base = List.from(_allParticipants);
 
-    // Filtre par séance d'abord
+    // ✅ Filtre par séance TOUJOURS appliqué en premier
     if (_selectedSeanceId != null) {
-      base = base.where((p) => p.sessionId == _selectedSeanceId).toList();
+      base =
+          base.where((p) => p.sessionId == _selectedSeanceId).toList();
     }
 
-    // Puis filtre texte
+    // ✅ Puis filtre texte par-dessus
     if (query.isNotEmpty) {
       final searchLower = query.toLowerCase();
       base = base.where((p) {
-        final fullName = '${p.firstName} ${p.lastName}'.toLowerCase();
+        final fullName =
+        '${p.firstName} ${p.lastName}'.toLowerCase();
         return fullName.contains(searchLower) ||
             p.locality.toLowerCase().contains(searchLower) ||
             (p.id?.toString() ?? '').contains(searchLower);
@@ -155,7 +164,6 @@ class ParticipantProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // --- 3. AJOUT ---
   Future<void> addParticipant(ParticipantModel localParticipant) async {
     try {
       final newDbParticipant = ParticipantsTableCompanion.insert(
@@ -176,11 +184,11 @@ class ParticipantProvider extends ChangeNotifier {
         isSynced: const drift.Value(false),
       );
 
-      final generatedLocalId = await localDb.addParticipant(newDbParticipant);
+      final generatedLocalId =
+      await localDb.addParticipant(newDbParticipant);
 
       localDb.notifyDataChanged();
 
-      // Synchronisation avec le serveur
       final serverParticipant = sp.Participant(
         seanceId: localParticipant.sessionId,
         nom: localParticipant.lastName,
@@ -198,9 +206,8 @@ class ParticipantProvider extends ChangeNotifier {
         dateInscription: localParticipant.registrationDate,
       );
 
-      final savedServerParticipant = await apiClient.participant.addParticipant(
-        serverParticipant,
-      );
+      final savedServerParticipant =
+      await apiClient.participant.addParticipant(serverParticipant);
 
       await localDb.updateParticipant(
         ParticipantsTableData(
@@ -230,18 +237,15 @@ class ParticipantProvider extends ChangeNotifier {
     }
   }
 
-  // --- 4. MISE À JOUR ---
   Future<void> updateParticipant(ParticipantModel participant) async {
     if (participant.id == null) return;
 
     try {
       final localDataList = await localDb.getAllParticipants();
-      final existingData = localDataList.firstWhere(
-        (p) => p.id == participant.id,
-      );
+      final existingData =
+      localDataList.firstWhere((p) => p.id == participant.id);
       final trueServerId = existingData.serverId;
 
-      // C'est cette variable qui te manquait !
       final updatedData = ParticipantsTableData(
         id: participant.id!,
         serverId: trueServerId,
@@ -263,7 +267,6 @@ class ParticipantProvider extends ChangeNotifier {
       );
 
       await localDb.updateParticipant(updatedData);
-
       localDb.notifyDataChanged();
 
       if (trueServerId != null) {
@@ -286,8 +289,8 @@ class ParticipantProvider extends ChangeNotifier {
         );
 
         await apiClient.participant.updateParticipant(serverParticipant);
-        await localDb.updateParticipant(updatedData.copyWith(isSynced: true));
-
+        await localDb.updateParticipant(
+            updatedData.copyWith(isSynced: true));
         localDb.notifyDataChanged();
       }
     } catch (e) {

@@ -1,153 +1,173 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import '../../../models/bar_chart_model.dart';
+import '../../home/widgets/barchart_item.dart';
 
-class MonthlyChartWidget extends StatefulWidget {
+class MonthlyChartWidget extends StatelessWidget {
   final List<BarchartModel> chartData;
 
   const MonthlyChartWidget({super.key, required this.chartData});
 
-  @override
-  State<MonthlyChartWidget> createState() => _MonthlyChartWidgetState();
-}
-
-class _MonthlyChartWidgetState extends State<MonthlyChartWidget> {
-  int touchedIndex = -1;
+  static const _orange = Color(0xFFFF8000);
+  static const _vert = Color(0xFF21951D);
+  static const _dark = Color(0xFF1E293B);
 
   @override
   Widget build(BuildContext context) {
-
-    double maxY = 0;
-    for (var data in widget.chartData) {
-      // ✅ CORRECTION 1 : On cherche le max avec "data.count" (la vraie valeur)
-      if (data.count.toDouble() > maxY) maxY = data.count.toDouble();
-    }
-    // Sécurité : si on n'a aucun participant, on met un plafond à 10 pour l'esthétique
-    if (maxY == 0) {
-      maxY = 10;
-    } else {
-      maxY = maxY + (maxY * 0.2); // Ajoute 20% d'espace en haut
-    }
-
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFEEF0F3), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
-            offset: const Offset(0, 4),
+            offset: const Offset(0, 3),
           ),
         ],
       ),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Évolution mensuelle des participants',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87),
-          ),
-          const SizedBox(height: 30),
-          SizedBox(
-            height: 220,
-            child: BarChart(
-              BarChartData(
-                alignment: BarChartAlignment.spaceAround,
-                maxY: maxY,
-                barTouchData: BarTouchData(
-                  enabled: true,
-
-                  touchTooltipData: BarTouchTooltipData(
-                    getTooltipColor: (group) => Colors.white,
-                    tooltipBorder: const BorderSide(color: Colors.grey, width: 0.5),
-                    tooltipBorderRadius: BorderRadius.circular(8), // Correction pour les bords arrondis
-                    tooltipPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                    tooltipMargin: 8,
-                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                      final month = widget.chartData[groupIndex].label;
-                      final value = rod.toY.toInt(); // Récupère la vraie valeur
-
-                      return BarTooltipItem(
-                        '$month\n',
-                        const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold),
-                        children: <TextSpan>[
-                          TextSpan(
-                            text: 'participants : $value',
-                            style: const TextStyle(color: Color(0xFFFF8000), fontSize: 14, fontWeight: FontWeight.w600),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-
-                  touchCallback: (FlTouchEvent event, barTouchResponse) {
-                    setState(() {
-                      if (!event.isInterestedForInteractions || barTouchResponse == null || barTouchResponse.spot == null) {
-                        touchedIndex = -1;
-                        return;
-                      }
-                      touchedIndex = barTouchResponse.spot!.touchedBarGroupIndex;
-                    });
-                  },
-                ),
-                titlesData: FlTitlesData(
-                  show: true,
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (double value, TitleMeta meta) {
-                        final isTouched = touchedIndex == value.toInt();
-                        final style = TextStyle(
-                          color: isTouched ? const Color(0xFFFF8000) : Colors.grey[500],
-                          fontWeight: isTouched ? FontWeight.bold : FontWeight.normal,
-                          fontSize: 11,
-                        );
-                        // Sécurité pour éviter les erreurs d'index
-                        if (value.toInt() < 0 || value.toInt() >= widget.chartData.length) {
-                          return const SizedBox.shrink();
-                        }
-                        return SideTitleWidget(
-                          meta: meta,
-                          space: 10,
-                          child: Text(widget.chartData[value.toInt()].label, style: style),
-                        );
-                      },
+          // ── En-tête ──
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Participants',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      color: _dark,
+                      fontSize: 18,
                     ),
                   ),
-                  leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                ),
-                gridData: const FlGridData(show: false),
-                borderData: FlBorderData(show: false),
-                barGroups: widget.chartData.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final data = entry.value;
-                  final isTouched = index == touchedIndex;
-
-                  return BarChartGroupData(
-                    x: index,
-                    barRods: [
-                      BarChartRodData(
-                        // ✅ CORRECTION 2 : On donne la vraie valeur au graphique "toY: data.count"
-                        toY: data.count.toDouble(),
-                        color: const Color(0xFFFF8000),
-                        width: 40,
-                        borderRadius: const BorderRadius.only(topLeft: Radius.circular(6), topRight: Radius.circular(6)),
-
-                        backDrawRodData: BackgroundBarChartRodData(
-                          show: true,
-                          toY: maxY,
-                          color: isTouched ? Colors.grey.withValues(alpha: 0.2) : Colors.transparent,
-                        ),
-                      ),
-                    ],
-                  );
-                }).toList(),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Évolution mensuelle',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[400],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: _vert.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 6, height: 6,
+                      decoration: const BoxDecoration(
+                        color: _vert,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    const Text(
+                      '6 derniers mois',
+                      style: TextStyle(
+                        color: _vert,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 8),
+          Divider(color: Colors.grey[100], thickness: 1),
+          const SizedBox(height: 12),
+
+          // ── Barres ──
+          SizedBox(
+            height: 200,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: chartData.asMap().entries.map((entry) {
+                final isLast = entry.key == chartData.length - 1;
+                return Expanded(
+                  child: BarchartItem(
+                    barchartModels: entry.value,
+                    isActive: isLast,
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // ── Légende ──
+          Container(
+            padding: const EdgeInsets.symmetric(
+                horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: _orange.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 10, height: 10,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [_orange, Color(0xFFFFB347)],
+                        ),
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Mois précédents',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Container(
+                      width: 10, height: 10,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [_vert, Color(0xFF4ade80)],
+                        ),
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Mois actuel',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../models/gadget_model.dart';
+import '../../../../models/seance_statut.dart';
 
 class GadgetCard extends StatelessWidget {
   final GadgetModel gadget;
@@ -22,7 +23,10 @@ class GadgetCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ── Statut couleurs ──
+    final SeanceStatut seanceStatut = gadget.statut;
+    final bool isPlanifiee = seanceStatut == SeanceStatut.planifiee;
+    final bool isTerminee = seanceStatut == SeanceStatut.terminee;
+
     final Color statusBg = gadget.isOutOfStock
         ? const Color(0xFFFFEBEE)
         : gadget.isLowStock
@@ -44,267 +48,385 @@ class GadgetCard extends StatelessWidget {
         ? Icons.warning_amber_rounded
         : Icons.check_circle_outline_rounded;
 
-    // ── Progression ──
     final double progress = gadget.gadgetsPrevus > 0
         ? (gadget.gadgetsDistribues / gadget.gadgetsPrevus).clamp(0.0, 1.0)
         : 0.0;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0xFFEEF0F3), width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
+    return Opacity(
+      opacity: isTerminee ? 0.5 : 1.0,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isTerminee
+                  ? Colors.grey[200]!
+                  : const Color(0xFFEEF0F3),
+              width: 1,
             ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(18),
-              child: Column(
-                children: [
-                  // ── Ligne principale ──
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Icône
-                      Container(
-                        width: 50, height: 50,
-                        decoration: BoxDecoration(
-                          color: _orange.withValues(alpha: 0.10),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: const Icon(
-                          Icons.card_giftcard_rounded,
-                          color: _orange, size: 24,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      // Infos
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              gadget.seanceNom,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 15,
-                                color: _dark,
-                                letterSpacing: -0.2,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                Icon(Icons.location_on_outlined,
-                                    size: 13, color: Colors.grey[400]),
-                                const SizedBox(width: 3),
-                                Text(
-                                  gadget.zone,
-                                  style: TextStyle(
-                                    color: Colors.grey[500],
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      // Badge statut
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: statusBg,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(statusIcon, size: 12, color: statusColor),
-                            const SizedBox(width: 4),
-                            Text(
-                              statusText,
-                              style: TextStyle(
-                                color: statusColor,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // ── Barre de progression ──
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Distribution',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[500],
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          Text(
-                            '${gadget.gadgetsDistribues} / ${gadget.gadgetsPrevus}',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: _dark,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(6),
-                        child: LinearProgressIndicator(
-                          value: progress,
-                          minHeight: 8,
-                          backgroundColor: const Color(0xFFF0F1F5),
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            gadget.isOutOfStock
-                                ? Colors.red[400]!
-                                : gadget.isLowStock
-                                ? Colors.orange[400]!
-                                : Colors.green[500]!,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            '${(progress * 100).toStringAsFixed(0)}% distribué',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Colors.grey[400],
-                            ),
-                          ),
-                          Text(
-                            '${gadget.restants} restant(s)',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: gadget.isOutOfStock
-                                  ? Colors.red[400]
-                                  : gadget.isLowStock
-                                  ? Colors.orange[600]
-                                  : Colors.green[600],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
+            boxShadow: isTerminee
+                ? []
+                : [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
               ),
-            ),
-
-            // ── Budget logistique ──
-            if (gadget.totalLogistique != null &&
-                gadget.totalLogistique! > 0) ...[
-              Container(
-                height: 1,
-                color: const Color(0xFFF0F1F5),
-              ),
+            ],
+          ),
+          child: Column(
+            children: [
               Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 18, vertical: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                padding: const EdgeInsets.all(18),
+                child: Column(
                   children: [
+                    // ── Ligne principale ──
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(Icons.account_balance_wallet_outlined,
-                            size: 14, color: Colors.grey[400]),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Budget logistique',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[500],
+                        Container(
+                          width: 50, height: 50,
+                          decoration: BoxDecoration(
+                            color: isTerminee
+                                ? Colors.grey[100]
+                                : _orange.withValues(alpha: 0.10),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Icon(
+                            Icons.card_giftcard_rounded,
+                            color:
+                            isTerminee ? Colors.grey[400] : _orange,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                gadget.seanceNom,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 15,
+                                  color: isTerminee
+                                      ? Colors.grey[500]
+                                      : _dark,
+                                  letterSpacing: -0.2,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(Icons.location_on_outlined,
+                                      size: 13,
+                                      color: Colors.grey[400]),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    gadget.zone,
+                                    style: TextStyle(
+                                      color: Colors.grey[500],
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        // ── Badge statut stock ──
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: isTerminee
+                                ? Colors.grey[100]
+                                : statusBg,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                isTerminee
+                                    ? Icons.lock_rounded
+                                    : statusIcon,
+                                size: 12,
+                                color: isTerminee
+                                    ? Colors.grey[400]
+                                    : statusColor,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                isTerminee ? 'Terminée' : statusText,
+                                style: TextStyle(
+                                  color: isTerminee
+                                      ? Colors.grey[400]
+                                      : statusColor,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                    Text(
-                      _formatMontant(gadget.totalLogistique!),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
-                        color: _dark,
-                        letterSpacing: 0.2,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
 
-            // ── Footer : bouton distribuer ──
-            if (!gadget.isOutOfStock) ...[
-              Container(
-                height: 1,
-                color: const Color(0xFFF0F1F5),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(18, 12, 18, 14),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: _orange.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: _orange.withValues(alpha: 0.2),
-                          ),
-                        ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                    const SizedBox(height: 16),
+
+                    // ── Barre de progression ──
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Icon(Icons.volunteer_activism_rounded,
-                                color: _orange, size: 16),
-                            SizedBox(width: 8),
                             Text(
-                              'Distribuer des gadgets',
+                              'Distribution',
                               style: TextStyle(
-                                color: _orange,
+                                fontSize: 12,
+                                color: Colors.grey[500],
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Text(
+                              '${gadget.gadgetsDistribues} / ${gadget.gadgetsPrevus}',
+                              style: const TextStyle(
+                                fontSize: 12,
                                 fontWeight: FontWeight.w700,
-                                fontSize: 13,
+                                color: _dark,
                               ),
                             ),
                           ],
                         ),
-                      ),
+                        const SizedBox(height: 8),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(6),
+                          child: LinearProgressIndicator(
+                            value: progress,
+                            minHeight: 8,
+                            backgroundColor: const Color(0xFFF0F1F5),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              isTerminee
+                                  ? Colors.grey[300]!
+                                  : gadget.isOutOfStock
+                                  ? Colors.red[400]!
+                                  : gadget.isLowStock
+                                  ? Colors.orange[400]!
+                                  : Colors.green[500]!,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '${(progress * 100).toStringAsFixed(0)}% distribué',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey[400],
+                              ),
+                            ),
+                            Text(
+                              '${gadget.restants} restant(s)',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: isTerminee
+                                    ? Colors.grey[400]
+                                    : gadget.isOutOfStock
+                                    ? Colors.red[400]
+                                    : gadget.isLowStock
+                                    ? Colors.orange[600]
+                                    : Colors.green[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
+
+              // ── Budget logistique ──
+              if (gadget.totalLogistique != null &&
+                  gadget.totalLogistique! > 0) ...[
+                Container(height: 1, color: const Color(0xFFF0F1F5)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 18, vertical: 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.account_balance_wallet_outlined,
+                              size: 14, color: Colors.grey[400]),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Budget logistique',
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.grey[500]),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        _formatMontant(gadget.totalLogistique!),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: _dark,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+
+              // ── Footer action ──
+              Container(height: 1, color: const Color(0xFFF0F1F5)),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(18, 12, 18, 14),
+                child: isTerminee
+                // ✅ Terminée
+                    ? Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey[200]!),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.lock_rounded,
+                          color: Colors.grey[400], size: 14),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Séance terminée',
+                        style: TextStyle(
+                          color: Colors.grey[400],
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+                    : isPlanifiee
+                // ✅ Planifiée — cadenas bleu + Flexible pour éviter overflow
+                    ? Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color:
+                    Colors.blue.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.blue
+                          .withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment:
+                    MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.lock_clock_rounded,
+                          color: Colors.blue[400], size: 16),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          'Disponible dès le début de la séance',
+                          style: TextStyle(
+                            color: Colors.blue[400],
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+                // ✅ En cours + non épuisé
+                    : !gadget.isOutOfStock
+                    ? Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: _orange
+                        .withValues(alpha: 0.08),
+                    borderRadius:
+                    BorderRadius.circular(12),
+                    border: Border.all(
+                      color: _orange
+                          .withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment:
+                    MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                          Icons
+                              .volunteer_activism_rounded,
+                          color: _orange,
+                          size: 16),
+                      SizedBox(width: 8),
+                      Text(
+                        'Distribuer des gadgets',
+                        style: TextStyle(
+                          color: _orange,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+                // ✅ En cours + épuisé
+                    : Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.red
+                        .withValues(alpha: 0.06),
+                    borderRadius:
+                    BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.red
+                          .withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment:
+                    MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                          Icons
+                              .remove_circle_outline_rounded,
+                          color: Colors.red[400],
+                          size: 16),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Stock épuisé',
+                        style: TextStyle(
+                          color: Colors.red[400],
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
-          ],
+          ),
         ),
       ),
     );

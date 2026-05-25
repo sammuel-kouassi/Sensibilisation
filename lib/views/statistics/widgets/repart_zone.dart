@@ -14,84 +14,114 @@ class RepartZone extends StatefulWidget {
 class _RepartZoneState extends State<RepartZone> {
   int touchedIndex = -1;
 
+  static const _blue = Color(0xFF1565C0);
+  static const _dark = Color(0xFF1E293B);
+
   @override
   Widget build(BuildContext context) {
     if (widget.zoneData.isEmpty) return const SizedBox.shrink();
 
     final total = widget.zoneData.fold<int>(
       0,
-      (sum, z) => sum + z.valeurExacte,
+          (sum, z) => sum + z.valeurExacte,
     );
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      padding: const EdgeInsets.all(24),
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFEEF0F3), width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // --- TITRE ---
-          const Text(
-            'Répartition par zone',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
+          // ── En-tête ──
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: _blue.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.pie_chart_outline_rounded,
+                  color: _blue,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Répartition par zone',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: _dark,
+                      ),
+                    ),
+                    Text(
+                      '$total participants au total',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[400],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            '$total participants au total',
-            style: TextStyle(fontSize: 13, color: Colors.grey[500]),
-          ),
+
           const SizedBox(height: 24),
 
-          // --- DONUT + LÉGENDE ---
+          // ── Donut + légende ──
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // DONUT
+              // ── Donut ──
               SizedBox(
-                height: 180,
-                width: 180,
+                height: 160,
+                width: 160,
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
                     PieChart(
                       PieChartData(
                         pieTouchData: PieTouchData(
-                          touchCallback:
-                              (FlTouchEvent event, pieTouchResponse) {
-                                setState(() {
-                                  if (!event.isInterestedForInteractions ||
-                                      pieTouchResponse == null ||
-                                      pieTouchResponse.touchedSection == null) {
-                                    touchedIndex = -1;
-                                    return;
-                                  }
-                                  touchedIndex = pieTouchResponse
-                                      .touchedSection!
-                                      .touchedSectionIndex;
-                                });
-                              },
+                          touchCallback: (event, response) {
+                            setState(() {
+                              if (!event.isInterestedForInteractions ||
+                                  response == null ||
+                                  response.touchedSection == null) {
+                                touchedIndex = -1;
+                                return;
+                              }
+                              touchedIndex = response
+                                  .touchedSection!.touchedSectionIndex;
+                            });
+                          },
                         ),
                         borderData: FlBorderData(show: false),
-                        sectionsSpace: 3,
-                        centerSpaceRadius: 52,
+                        sectionsSpace: 2,
+                        centerSpaceRadius: 40,
                         sections: _buildSections(),
                       ),
                     ),
-                    // Centre du donut
+                    // ── Centre du donut ──
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -99,15 +129,15 @@ class _RepartZoneState extends State<RepartZone> {
                           Text(
                             '${widget.zoneData[touchedIndex].valeurExacte}',
                             style: const TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w900,
+                              color: _dark,
                             ),
                           ),
                           Text(
                             'pers.',
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 10,
                               color: Colors.grey[500],
                             ),
                           ),
@@ -115,15 +145,15 @@ class _RepartZoneState extends State<RepartZone> {
                           Text(
                             '$total',
                             style: const TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w900,
+                              color: _dark,
                             ),
                           ),
                           Text(
                             'total',
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 10,
                               color: Colors.grey[500],
                             ),
                           ),
@@ -134,16 +164,19 @@ class _RepartZoneState extends State<RepartZone> {
                 ),
               ),
 
-              const SizedBox(width: 20),
+              const SizedBox(width: 12),
 
-              // LÉGENDE SCROLLABLE
+              // ── Légende ──
               Expanded(
                 child: SizedBox(
-                  height: 180,
+                  height: 160,
                   child: SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: widget.zoneData.asMap().entries.map((entry) {
+                      children: widget.zoneData
+                          .asMap()
+                          .entries
+                          .map((entry) {
                         final i = entry.key;
                         final zone = entry.value;
                         final isSelected = touchedIndex == i;
@@ -151,16 +184,15 @@ class _RepartZoneState extends State<RepartZone> {
                         return GestureDetector(
                           onTap: () {
                             setState(() {
-                              touchedIndex = (touchedIndex == i) ? -1 : i;
+                              touchedIndex =
+                              (touchedIndex == i) ? -1 : i;
                             });
                           },
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 200),
-                            margin: const EdgeInsets.symmetric(vertical: 4),
+                            margin: const EdgeInsets.symmetric(vertical: 3),
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 7,
-                            ),
+                                horizontal: 8, vertical: 6),
                             decoration: BoxDecoration(
                               color: isSelected
                                   ? zone.color.withValues(alpha: 0.08)
@@ -174,47 +206,41 @@ class _RepartZoneState extends State<RepartZone> {
                               ),
                             ),
                             child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Carré couleur
-                              Padding(
-                                padding: const EdgeInsets.only(top: 2),
-                                child: Container(
-                                  width: 10,
-                                  height: 10,
+                              children: [
+                                Container(
+                                  width: 8,
+                                  height: 8,
                                   decoration: BoxDecoration(
                                     color: zone.color,
-                                    borderRadius: BorderRadius.circular(3),
+                                    shape: BoxShape.circle,
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 8),
-                              // Nom de la zone
-                              Expanded(                          // ← Flexible → Expanded
-                                child: Text(
-                                  zone.zoneName,
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    zone.zoneName,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: isSelected
+                                          ? FontWeight.w700
+                                          : FontWeight.w500,
+                                      color: _dark,
+                                    ),
+                                    softWrap: true,
+                                    overflow: TextOverflow.visible,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${zone.percentage.toInt()}%',
                                   style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                                    color: Colors.black87,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    color: zone.color,
                                   ),
-                                  softWrap: true,
-                                  maxLines: 2,                   // ← max 2 lignes propres
-                                  overflow: TextOverflow.ellipsis,
                                 ),
-                              ),
-                              const SizedBox(width: 6),
-                              // Pourcentage — ne rétrécit jamais
-                              Text(
-                                '${zone.percentage.toInt()}%',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: zone.color,
-                                ),
-                              ),
-                            ],
-                          ),
+                              ],
+                            ),
                           ),
                         );
                       }).toList(),
@@ -238,25 +264,26 @@ class _RepartZoneState extends State<RepartZone> {
         color: data.color,
         value: data.percentage,
         title: '',
-        radius: isTouched ? 62 : 56,
+        radius: isTouched ? 50 : 44,
         badgeWidget: isTouched
             ? Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                decoration: BoxDecoration(
-                  color: data.color,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  '${data.percentage.toInt()}%',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              )
+          padding: const EdgeInsets.symmetric(
+              horizontal: 6, vertical: 3),
+          decoration: BoxDecoration(
+            color: data.color,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Text(
+            '${data.percentage.toInt()}%',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        )
             : null,
-        badgePositionPercentageOffset: 1.25,
+        badgePositionPercentageOffset: 1.3,
       );
     });
   }

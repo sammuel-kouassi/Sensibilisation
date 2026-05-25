@@ -18,53 +18,51 @@ class SettingItemToggle extends StatelessWidget {
     this.showDivider = true,
   });
 
+  static const _dark = Color(0xFF1E293B);
+  static const _orange = Color(0xFFFF8000);
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.symmetric(
+              horizontal: 16, vertical: 14),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Container(
+                width: 42, height: 42,
+                decoration: BoxDecoration(
+                  color: value
+                      ? _orange.withValues(alpha: 0.08)
+                      : Colors.grey.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  icon,
+                  color: value ? _orange : Colors.grey[400],
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 14),
               Expanded(
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Center(
-                        child: Icon(icon, color: Colors.grey[600], size: 24),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: _dark,
+                        fontSize: 14,
                       ),
                     ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title,
-                            style: Theme.of(context).textTheme.bodyLarge
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black,
-                                  fontSize: 15,
-                                ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            subtitle,
-                            style: TextStyle(
-                              color: Colors.grey[500],
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ],
+                    const SizedBox(height: 3),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: Colors.grey[500],
+                        fontSize: 12,
                       ),
                     ),
                   ],
@@ -75,8 +73,8 @@ class SettingItemToggle extends StatelessWidget {
                 child: Switch(
                   value: value,
                   onChanged: onChanged,
-                  activeColor: const Color(0xFFFF9500),
-                  activeTrackColor: const Color(0xFFFF9500).withOpacity(0.5),
+                  activeColor: _orange,
+                  activeTrackColor: _orange.withValues(alpha: 0.3),
                   inactiveThumbColor: Colors.grey[300],
                   inactiveTrackColor: Colors.grey[200],
                 ),
@@ -85,10 +83,11 @@ class SettingItemToggle extends StatelessWidget {
           ),
         ),
         if (showDivider)
-          Container(
+          Divider(
             height: 1,
-            color: Colors.grey.withOpacity(0.15),
-            margin: const EdgeInsets.symmetric(horizontal: 20),
+            color: Colors.grey[100],
+            indent: 72,
+            endIndent: 16,
           ),
       ],
     );

@@ -6,31 +6,31 @@ class StatCard extends StatelessWidget {
 
   const StatCard({super.key, required this.kpiModel});
 
+  static const _dark = Color(0xFF1E293B);
+
   IconData get _icon {
-    final labelLower = kpiModel.label.toLowerCase();
-    if (labelLower.contains('participant')) return Icons.people_alt;
-    if (labelLower.contains('séance') || labelLower.contains('seance')) {
-      return Icons.event_note;
+    final l = kpiModel.label.toLowerCase();
+    if (l.contains('participant')) return Icons.people_alt_rounded;
+    if (l.contains('séance') || l.contains('seance')) {
+      return Icons.event_note_rounded;
     }
-    if (labelLower.contains('gadget') || labelLower.contains('stock')) {
-      return Icons.card_giftcard;
+    if (l.contains('gadget') || l.contains('stock')) {
+      return Icons.card_giftcard_rounded;
     }
-    if (labelLower.contains('taux')) return Icons.percent_rounded;
+    if (l.contains('taux')) return Icons.percent_rounded;
     return Icons.bar_chart_rounded;
   }
 
   Color get _iconColor {
-    final labelLower = kpiModel.label.toLowerCase();
-    if (labelLower.contains('participant')) {
-      return const Color(0xFFFF9500); // Orange
+    final l = kpiModel.label.toLowerCase();
+    if (l.contains('participant')) return const Color(0xFFFF8000);
+    if (l.contains('séance') || l.contains('seance')) {
+      return const Color(0xFF21951D);
     }
-    if (labelLower.contains('séance') || labelLower.contains('seance')) {
-      return const Color(0xFF21951D); // Vert
+    if (l.contains('gadget') || l.contains('stock')) {
+      return const Color(0xFF1565C0);
     }
-    if (labelLower.contains('gadget') || labelLower.contains('stock')) {
-      return Colors.blue;
-    }
-    return Colors.grey.shade700;
+    return Colors.grey.shade600;
   }
 
   @override
@@ -38,39 +38,48 @@ class StatCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withOpacity(0.15)),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFEEF0F3), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(_icon, color: _iconColor, size: 32),
-          const SizedBox(height: 12),
+          Container(
+            width: 44, height: 44,
+            decoration: BoxDecoration(
+              color: _iconColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(13),
+            ),
+            child: Icon(_icon, color: _iconColor, size: 22),
+          ),
+          const Spacer(),
           Text(
             kpiModel.value,
             style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
+              fontSize: 26,
+              fontWeight: FontWeight.w900,
+              color: _dark,
+              letterSpacing: -0.5,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Text(
             kpiModel.label,
             style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey[600],
+              fontSize: 12,
+              color: Colors.grey[500],
               fontWeight: FontWeight.w500,
+              height: 1.3,
             ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),
